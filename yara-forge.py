@@ -68,6 +68,14 @@ def write_yara_packages(yara_files):
 
 if __name__ == "__main__":
 
+
+   print(r'  __  _____    ____  ___       ______                     ');
+   print(r'  \ \/ /   |  / __ \/   |     / ____/___  _________ ____  ');
+   print(r'   \  / /| | / /_/ / /| |    / /_  / __ \/ ___/ __ `/ _ \ ');
+   print(r'   / / ___ |/ _, _/ ___ |   / __/ / /_/ / /  / /_/ /  __/ ');
+   print(r'  /_/_/  |_/_/ |_/_/  |_|  /_/    \____/_/   \__, /\___/  ');
+   print(r'                                            /____/        ');
+
    parser = argparse.ArgumentParser()
    parser.add_argument("--debug", help="enable debug output", action="store_true")
    args = parser.parse_args()
