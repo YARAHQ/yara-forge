@@ -1,0 +1,3 @@
+[submodule "yaraQA"]
+	path = yaraQA
+	url = https://github.com/Neo23x0/yaraQA.git
