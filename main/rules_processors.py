@@ -55,7 +55,7 @@ def process_yara_rules(yara_rule_repo_sets, debug=False):
 # Change YARA rule author
 def process_yara_rule_author(rule_meta_data, repo_author):
    # List of possible author names
-   author_names = ['author', 'authors', 'writer', 'creator', 'created_by', 'created_by', 'copyright', 'made_by']
+   author_names = ['author', 'authors', 'writer', 'creator', 'created_by', 'created_by', 'copyright', 'made_by', 'contributor', 'contributed_by']
    # Look for the author in the rule meta data
    author_found = False
    author_value = ""
