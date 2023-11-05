@@ -12,6 +12,15 @@ YARA_RULE_PACKAGES = [
    }
 ]
 
+REPO_HEADER = """
+/* ----------------------------------------------------------------------------------------------
+ * YARA rules
+ * Repository: {repo_url}
+ * Retrieval date: {retrieval_date}
+ * ---------------------------------------------------------------------------------------------- */
+
+"""
+
 # Loop over the rules and write them as plain text into separate files
 def write_yara_packages(processed_yara_repos, debug=False):
    for rule_package in YARA_RULE_PACKAGES:
@@ -27,12 +36,11 @@ def write_yara_packages(processed_yara_repos, debug=False):
       with open(rule_file_path, "w") as f:
          # Loop over the repositories
          for repo in processed_yara_repos:
-            pprint.pprint(repo)
-            # Rule set identifier
-            rule_set_id = repo['name'].replace(" ", "_").upper()
             # Debug output
             if debug:
                print("Writing YARA rules from repository: %s" % repo['name'])
+            # Write header into the output file for each repository
+            f.write(REPO_HEADER.format(repo_url=repo['url'], retrieval_date=repo['retrieval_date']))
             # Loop over the rule sets in the repository and modify the rules
             for rule_sets in repo['rules_sets']:
                # Debug output

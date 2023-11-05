@@ -47,6 +47,8 @@ def process_yara_rules(yara_rule_repo_sets, debug=False):
             # rule['strings'] = process_yara_rule_strings(rule['strings'])
             # # Modify the rule condition
             # rule['condition'] = process_yara_rule_condition(rule['condition'])
+            # Add a rule source URL to the original file
+            rule['metadata'].append({'source_url': f'{repo["url"]}/blob/{repo["branch"]}/{rules["file_path"]}'})
    return yara_rule_repo_sets
 
 

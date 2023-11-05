@@ -35,6 +35,15 @@ def retrieve_yara_rule_sets(debug=False):
          with tempfile.TemporaryDirectory() as tmp_dir:
             shutil.unpack_archive(tmp_file.name, tmp_dir, format="zip")
 
+            # Walk through the extracted folders and find a LICENSE file and save it into the repository object
+            for root, dirs, files in os.walk(tmp_dir):
+               for file in files:
+                  if file == "LICENSE" or file == "LICENSE.txt" or file == "LICENSE.md":
+                     file_path = os.path.join(root, file)
+                     with open(file_path, "r") as f:
+                        repo['license'] = f.read()
+                        break
+
             # Walk through the extracted folders and find all YARA files
             yara_rule_sets = []
             for root, dirs, files in os.walk(tmp_dir):
@@ -76,6 +85,7 @@ def retrieve_yara_rule_sets(debug=False):
          yara_rule_repo = {
             "name": repo['name'],
             "url": repo['url'],
+            "author": repo['author'],
             "owner": repo['owner'],
             "repo": repo['repo'],
             "branch": repo['branch'],
