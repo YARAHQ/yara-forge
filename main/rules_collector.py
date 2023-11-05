@@ -1,5 +1,4 @@
 import os
-import sys
 import requests
 import shutil
 import tempfile
@@ -9,13 +8,13 @@ import logging
 
 YARA_REPOS = [
    {
-      "name": "YARA Style Guide",
-      "url": 'https://github.com/Neo23x0/YARA-Style-Guide',
-      "author": "Florian Roth",
-      "owner": 'Neo23x0',
-      "repo": "YARA-Style-Guide",
-      "quality": "high",
-      "branch": "master"
+      "name": "YARA Style Guide",  # used in headers and as prefix for each of the rules (so keep it short)
+      "url": 'https://github.com/Neo23x0/YARA-Style-Guide',  # URL of the repository on GitHub
+      "author": "Florian Roth",  # used when the author is not defined in the rule
+      "owner": 'Neo23x0',  # name of the owner of the repository on GitHub
+      "repo": "YARA-Style-Guide",  # name of the repository on GitHub
+      "quality": 70,  # 0-100 (0 = low, 100 = high) base value; indicates the quality of the rules in the repository
+      "branch": "master"  # name of the branch to download
    },
 ]
 
@@ -26,6 +25,10 @@ def retrieve_yara_rule_sets(logger):
    
    # Loop over the repositories
    for repo in YARA_REPOS:
+      
+      # Output the repository information to the console in a single line
+      logger.log(logging.INFO, "Retrieving YARA rules from repository: %s" % repo['name'])
+
       # Download the latest version of the repository
       response = requests.get(f"{repo['url']}/archive/refs/heads/{repo['branch']}.zip")
       with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
@@ -94,6 +97,8 @@ def retrieve_yara_rule_sets(logger):
             "retrieval_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
          }
          yara_rule_repo_sets.append(yara_rule_repo)
+
+         logger.log(logging.INFO, "Retrieved %d YARA rules from repository: %s" % (len(yara_rule_sets), repo['name']))
 
    # Return the YARA rule sets
    return yara_rule_repo_sets

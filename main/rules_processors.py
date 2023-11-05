@@ -1,6 +1,4 @@
-import plyara
 import requests
-import pprint
 import dateparser
 import logging
 
@@ -16,7 +14,7 @@ def process_yara_rules(yara_rule_repo_sets, logger):
       # Rule set identifier
       rule_set_id = repo['name'].replace(" ", "_").upper()
       # Debug output
-      logger.log(logging.DEBUG, "Processing YARA rules from repository: %s" % repo['name'])
+      logger.log(logging.INFO, "Processing YARA rules from repository: %s" % repo['name'])
       # Loop over the rule sets in the repository and modify the rules
       for rules in repo['rules_sets']:
          # Debug output
@@ -25,6 +23,16 @@ def process_yara_rules(yara_rule_repo_sets, logger):
          for rule in rules['rules']:
             # Debug output
             logger.log(logging.DEBUG, "Processing YARA rule: %s" % rule['rule_name'])
+
+            # Rule Meta Data Modifications ----------------------------------------------
+
+            # Adding additional meta data values ----------------------------------------
+            # Add a quality value based on the original repo 
+            modify_meta_data_value(rule['metadata'], 'quality', repo['quality'])
+            # Add a rule source URL to the original file
+            modify_meta_data_value(rule['metadata'], 'source_url', f'{repo["url"]}/blob/{repo["branch"]}/{rules["file_path"]}')
+
+            # Modifying existing meta data values ---------------------------------------
             # Modify the rule name
             rule['rule_name'] = align_yara_rule_name(rule['rule_name'], rule_set_id)
             # Modify the rule references
@@ -36,7 +44,7 @@ def process_yara_rules(yara_rule_repo_sets, logger):
             # # Modify the rule tags
             # rule['metadata'] = process_yara_rule_tags(rule['metadata'], repo['tags'])
             # # Modify the rule description
-            # rule['metadata'] = process_yara_rule_description(rule['metadata'], repo['description'])
+            rule['metadata'] = align_yara_rule_description(rule['metadata'], repo['name'])
             # Modify the rule author
             rule['metadata'] = align_yara_rule_author(rule['metadata'], repo['author'])
             # # Modify the rule license
@@ -50,40 +58,85 @@ def process_yara_rules(yara_rule_repo_sets, logger):
             # Add a score based on the rule quality and meta data keywords 
             rule_score = evaluate_yara_rule_score(rule)
             modify_meta_data_value(rule['metadata'], 'score', rule_score)
-            # Add a rule source URL to the original file
-            modify_meta_data_value(rule['metadata'], 'source_url', f'{repo["url"]}/blob/{repo["branch"]}/{rules["file_path"]}')
+
    return yara_rule_repo_sets
 
 
+# Check if there's a description set in the YARA rule and if not, add the repository description
+def align_yara_rule_description(rule_meta_data, repo_description):
+   # List of possible description names
+   description_names = ['description', 'desc', 'details', 'information', 'info', 'notes', 'abstract', 'explanation', 'rationale']
+   description_values_prefixes = ['Detects ']
+   # Look for the description in the rule meta data
+   description_found = False
+   description_value = f"No description has been set in the source file - {repo_description}"
+   # We create a copy so that we can delete elements from the original
+   meta_data_copy = rule_meta_data.copy()
+   # Now we loop over the copy
+   for meta_data in meta_data_copy:
+      for key, value in meta_data.items():
+         # If the key is in the list of possible description names, then we found the description
+         if key in description_names:
+            description_found = True
+            description_value = value
+            # Remove the description from the original meta data
+            rule_meta_data.remove(meta_data)
+         # If the value starts with one of the prefixes, then we found the description
+         elif isinstance(value, str) and value.startswith(tuple(description_values_prefixes)):
+            description_found = True
+            description_value = value
+            # Remove the description from the original meta data
+            rule_meta_data.remove(meta_data)
+   # Lower the quality score if the descriptions hasn't been set
+   if not description_found:
+      modify_yara_rule_quality(rule_meta_data, -5)
+   # Set the new description
+   rule_meta_data.append({'description': description_value})
+   return rule_meta_data
+
+
 # Check for all the hash values in the meta data and align them to the key value 'hash'
-def align_yara_rule_hashes(meta_data):
+def align_yara_rule_hashes(rule_meta_data):
    # List of possible hash names
    hash_names = ['hash', 'hashes', 'md5', 'sha1', 'sha256', 'sha512', 'sha-1', 'sha-256', 'sha-512', 'sha_256', 'sha_1', 'sha_512', 'md5sum', 'sha1sum', 'sha256sum', 'sha512sum', 'md5sums', 'sha1sums', 'sha256sums', 'sha512sums']
    # Look for the hashes in the rule meta data
    hashes_found = False
    hashes_values = []
    # We create a copy so that we can delete elements from the original
-   meta_data_copy = meta_data.copy()
+   meta_data_copy = rule_meta_data.copy()
    # Now we loop over the copy
-   for meta_data in meta_data_copy:
-      for key, value in meta_data.items():
+   for mdata in meta_data_copy:
+      for key, value in mdata.items():
          # If the key is in the list of possible hash names, then we found the hashes
          if key.lower() in hash_names:
             hashes_found = True
             hashes_values.append(value.lower())
             # Remove the hashes from the original meta data
-            meta_data_copy.remove(meta_data)
+            rule_meta_data.remove(mdata)
    # If the hashes are found, modify them
    if hashes_found:
       for value in hashes_values:
-         meta_data_copy.append({'hash': value})
-   return meta_data_copy
+         rule_meta_data.append({'hash': value})
+   return rule_meta_data
 
+
+# Modify the quality score of a YARA rule
+def modify_yara_rule_quality(rule_meta_data, reduction_value):
+   # We create a copy so that we can delete elements from the original
+   meta_data_copy = rule_meta_data.copy()
+   # Now we loop over the copy
+   for mdata in meta_data_copy:
+      for k, v in mdata.items():
+         # If the key is in the meta data, then we modify it
+         if k == "quality":
+            mdata[k] += reduction_value
+            return meta_data_copy
+   return rule_meta_data
 
 # Modify a value in the meta data, if it exists, otherwise add it
-def modify_meta_data_value(meta_data, key, value):
+def modify_meta_data_value(rule_meta_data, key, value):
    # We create a copy so that we can delete elements from the original
-   meta_data_copy = meta_data.copy()
+   meta_data_copy = rule_meta_data.copy()
    # Now we loop over the copy
    for mdata in meta_data_copy:
       for k, v in mdata.items():
@@ -92,8 +145,8 @@ def modify_meta_data_value(meta_data, key, value):
             mdata[k] = value
             return mdata
    # If the key is not in the meta data, then we add it
-   meta_data.append({key: value})
-   return meta_data
+   rule_meta_data.append({key: value})
+   return rule_meta_data
 
 
 # Evaluate the YARA rule score
@@ -253,7 +306,7 @@ def get_rule_age_github(owner, repo, branch, file_path):
          last_commit = commits[0]
          last_modified_date_string = last_commit['commit']['committer']['date']
          last_modified_date = dateparser.parse(last_modified_date_string).strftime("%Y-%m-%d")
-         print(f"The file was last modified on: {last_modified_date}")
+         logging.log(logging.DEBUG, f"Retrieved date info for file {file_path} from Github. Last modified date: {last_modified_date}")
       else:
          print("File has not been modified or does not exist.")
    except Exception as e:

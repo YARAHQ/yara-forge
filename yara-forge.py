@@ -7,6 +7,8 @@
 # Florian Roth
 # November 2023
 
+__version__ = '0.1.0'
+
 import argparse
 import pprint
 import logging
@@ -43,6 +45,9 @@ if __name__ == "__main__":
    # (only set the level to debug if the debug argument is set)
    logger = logging.getLogger()
    logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
+   # Set the level of the plyara logger to warning
+   logging.getLogger('plyara').setLevel(logging.WARNING)
+   logging.getLogger('tzlocal').setLevel(logging.CRITICAL)
    # Create a handler for the command line
    ch = logging.StreamHandler()
    ch.setLevel(logging.DEBUG if args.debug else logging.INFO)
@@ -63,7 +68,6 @@ if __name__ == "__main__":
    # Retrieve the YARA rule sets
    write_section_header("Retrieving YARA rule sets")
    yara_rule_repo_sets = retrieve_yara_rule_sets(logger=logger)
-   logger.log(logging.DEBUG, "Number of YARA rule repo sets: %d" % len(yara_rule_repo_sets))
    #pprint.pprint(yara_rule_repo_sets)
 
    # Process the YARA rules
