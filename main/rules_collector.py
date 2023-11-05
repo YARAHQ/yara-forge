@@ -10,6 +10,9 @@ YARA_REPOS = [
    {
       "name": "YARA Style Guide",
       "url": 'https://github.com/Neo23x0/YARA-Style-Guide',
+      "author": "Florian Roth",
+      "owner": 'Neo23x0',
+      "repo": "YARA-Style-Guide",
       "quality": "high",
       "branch": "master"
    },
@@ -73,6 +76,9 @@ def retrieve_yara_rule_sets(debug=False):
          yara_rule_repo = {
             "name": repo['name'],
             "url": repo['url'],
+            "owner": repo['owner'],
+            "repo": repo['repo'],
+            "branch": repo['branch'],
             "rules_sets": yara_rule_sets,
             "quality": repo['quality'],
             "retrieval_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),

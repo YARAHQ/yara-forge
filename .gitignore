@@ -1,2 +1,3 @@
 
 packages/default/yara-rules-default.yar
+*.pyc
