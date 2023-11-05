@@ -1,6 +1,7 @@
 import pprint
 import os
 from plyara.utils import rebuild_yara_rule
+import logging
 
 # YARA rule packages
 YARA_RULE_PACKAGES = [
@@ -17,12 +18,17 @@ REPO_HEADER = """
  * YARA rules
  * Repository: {repo_url}
  * Retrieval date: {retrieval_date}
- * ---------------------------------------------------------------------------------------------- */
+ * ---------------------------------------------------------------------------------------------- 
 
+ LICENSE
+
+ {repo_license}
+
+ */
 """
 
 # Loop over the rules and write them as plain text into separate files
-def write_yara_packages(processed_yara_repos, debug=False):
+def write_yara_packages(processed_yara_repos, logger):
    for rule_package in YARA_RULE_PACKAGES:
       # Create the directory for the rule package
       package_dir = os.path.join("packages", rule_package['name'])
@@ -37,14 +43,12 @@ def write_yara_packages(processed_yara_repos, debug=False):
          # Loop over the repositories
          for repo in processed_yara_repos:
             # Debug output
-            if debug:
-               print("Writing YARA rules from repository: %s" % repo['name'])
+            logging.log(logging.DEBUG, "Writing YARA rules from repository: %s" % repo['name'])
             # Write header into the output file for each repository
-            f.write(REPO_HEADER.format(repo_url=repo['url'], retrieval_date=repo['retrieval_date']))
+            f.write(REPO_HEADER.format(repo_url=repo['url'], retrieval_date=repo['retrieval_date'], repo_license=repo['license']))
             # Loop over the rule sets in the repository and modify the rules
             for rule_sets in repo['rules_sets']:
-               # Debug output
-               if debug:
-                  print("Writing YARA rules from rule set: %s" % rule_sets['file_path'])
-               for rule in rule_sets['rules']:
-                  f.write(rebuild_yara_rule(rule))
+                # Debug output
+                logging.log(logging.DEBUG, "Writing YARA rules from rule set: %s" % rule_sets['file_path'])
+                for rule in rule_sets['rules']:
+                    f.write(rebuild_yara_rule(rule))

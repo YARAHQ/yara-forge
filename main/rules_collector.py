@@ -5,6 +5,7 @@ import shutil
 import tempfile
 import plyara
 import datetime
+import logging
 
 YARA_REPOS = [
    {
@@ -19,7 +20,7 @@ YARA_REPOS = [
 ]
 
 # Retrieve YARA rules from online repositories
-def retrieve_yara_rule_sets(debug=False):
+def retrieve_yara_rule_sets(logger):
    
    yara_rule_repo_sets = []
    
@@ -52,8 +53,7 @@ def retrieve_yara_rule_sets(debug=False):
                      file_path = os.path.join(root, file)
 
                      # Debug output
-                     if debug:
-                        print("Parsing YARA file: %s" % file_path)
+                     logger.log(logging.DEBUG, "Found YARA rule file: %s" % file_path)
 
                      # Read the YARA file
                      with open(file_path, "r") as f:
@@ -72,14 +72,13 @@ def retrieve_yara_rule_sets(debug=False):
                               "file_path": relative_path_without_first_segment,
                            }
                            # Debug output
-                           if debug:
-                              print("Found %d YARA rules in file: %s" % (len(yara_rules), file_path))
+                           logger.log(logging.DEBUG, "Found %d YARA rules in file: %s" % (len(yara_rules), file_path))
                            # Append to list of YARA rule sets
                            yara_rule_sets.append(yara_rule_set)
                            
                         except Exception as e:
                            print(e)
-                           print("Skipping YARA rule in the following file because of a syntax error: %s " % file_path)
+                           logger.log(logging.ERROR, "Skipping YARA rule in the following file because of a syntax error: %s " % file_path)
             
          # Append the YARA rule repository
          yara_rule_repo = {
@@ -91,6 +90,7 @@ def retrieve_yara_rule_sets(debug=False):
             "branch": repo['branch'],
             "rules_sets": yara_rule_sets,
             "quality": repo['quality'],
+            "license": repo['license'],
             "retrieval_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
          }
          yara_rule_repo_sets.append(yara_rule_repo)

@@ -2,6 +2,7 @@ import plyara
 import requests
 import pprint
 import dateparser
+import logging
 
 
 # Date Lookup Cache
@@ -9,36 +10,35 @@ date_lookup_cache = {}
 
 
 # Process the YARA rules
-def process_yara_rules(yara_rule_repo_sets, debug=False):
+def process_yara_rules(yara_rule_repo_sets, logger):
    # Loop over the repositories
    for repo in yara_rule_repo_sets:
       # Rule set identifier
       rule_set_id = repo['name'].replace(" ", "_").upper()
       # Debug output
-      if debug:
-         print("Processing YARA rules from repository: %s" % repo['name'])
+      logger.log(logging.DEBUG, "Processing YARA rules from repository: %s" % repo['name'])
       # Loop over the rule sets in the repository and modify the rules
       for rules in repo['rules_sets']:
          # Debug output
-         if debug:
-            print("Processing YARA rules from rule set: %s" % rules['file_path'])
+         logger.log(logging.DEBUG, "Processing YARA rules from rule set: %s" % rules['file_path'])
          # Loop over each of the rules and modify them
          for rule in rules['rules']:
             # Debug output
-            if debug:
-               print("Processing YARA rule: %s" % rule['rule_name'])
+            logger.log(logging.DEBUG, "Processing YARA rule: %s" % rule['rule_name'])
             # Modify the rule name
-            rule['rule_name'] = process_yara_rule_name(rule['rule_name'], rule_set_id)
+            rule['rule_name'] = align_yara_rule_name(rule['rule_name'], rule_set_id)
             # Modify the rule references
-            rule['metadata'] = process_yara_rule_reference(rule['metadata'], repo['url'])
+            rule['metadata'] = align_yara_rule_reference(rule['metadata'], repo['url'])
             # Modify the rule date
-            rule['metadata'] = process_yara_rule_date(rule['metadata'], repo['owner'], repo['repo'], repo['branch'], rules['file_path'])
+            rule['metadata'] = align_yara_rule_date(rule['metadata'], repo['owner'], repo['repo'], repo['branch'], rules['file_path'])
+            # Modify the rule hashes
+            rule['metadata'] = align_yara_rule_hashes(rule['metadata'])
             # # Modify the rule tags
             # rule['metadata'] = process_yara_rule_tags(rule['metadata'], repo['tags'])
             # # Modify the rule description
             # rule['metadata'] = process_yara_rule_description(rule['metadata'], repo['description'])
             # Modify the rule author
-            rule['metadata'] = process_yara_rule_author(rule['metadata'], repo['author'])
+            rule['metadata'] = align_yara_rule_author(rule['metadata'], repo['author'])
             # # Modify the rule license
             # rule['metadata'] = process_yara_rule_license(rule['metadata'], repo['license'])
             # # Modify the rule version
@@ -47,13 +47,84 @@ def process_yara_rules(yara_rule_repo_sets, debug=False):
             # rule['strings'] = process_yara_rule_strings(rule['strings'])
             # # Modify the rule condition
             # rule['condition'] = process_yara_rule_condition(rule['condition'])
+            # Add a score based on the rule quality and meta data keywords 
+            rule_score = evaluate_yara_rule_score(rule)
+            modify_meta_data_value(rule['metadata'], 'score', rule_score)
             # Add a rule source URL to the original file
-            rule['metadata'].append({'source_url': f'{repo["url"]}/blob/{repo["branch"]}/{rules["file_path"]}'})
+            modify_meta_data_value(rule['metadata'], 'source_url', f'{repo["url"]}/blob/{repo["branch"]}/{rules["file_path"]}')
    return yara_rule_repo_sets
 
 
+# Check for all the hash values in the meta data and align them to the key value 'hash'
+def align_yara_rule_hashes(meta_data):
+   # List of possible hash names
+   hash_names = ['hash', 'hashes', 'md5', 'sha1', 'sha256', 'sha512', 'sha-1', 'sha-256', 'sha-512', 'sha_256', 'sha_1', 'sha_512', 'md5sum', 'sha1sum', 'sha256sum', 'sha512sum', 'md5sums', 'sha1sums', 'sha256sums', 'sha512sums']
+   # Look for the hashes in the rule meta data
+   hashes_found = False
+   hashes_values = []
+   # We create a copy so that we can delete elements from the original
+   meta_data_copy = meta_data.copy()
+   # Now we loop over the copy
+   for meta_data in meta_data_copy:
+      for key, value in meta_data.items():
+         # If the key is in the list of possible hash names, then we found the hashes
+         if key.lower() in hash_names:
+            hashes_found = True
+            hashes_values.append(value.lower())
+            # Remove the hashes from the original meta data
+            meta_data_copy.remove(meta_data)
+   # If the hashes are found, modify them
+   if hashes_found:
+      for value in hashes_values:
+         meta_data_copy.append({'hash': value})
+   return meta_data_copy
+
+
+# Modify a value in the meta data, if it exists, otherwise add it
+def modify_meta_data_value(meta_data, key, value):
+   # We create a copy so that we can delete elements from the original
+   meta_data_copy = meta_data.copy()
+   # Now we loop over the copy
+   for mdata in meta_data_copy:
+      for k, v in mdata.items():
+         # If the key is in the meta data, then we modify it
+         if k == key:
+            mdata[k] = value
+            return mdata
+   # If the key is not in the meta data, then we add it
+   meta_data.append({key: value})
+   return meta_data
+
+
+# Evaluate the YARA rule score
+def evaluate_yara_rule_score(rule):
+   # Score for the rule quality
+   base_rule_score = 75
+   # Score for the rule quality
+   #quality_modifier = evaluate_yara_rule_quality(rule)
+   # Score for the rule meta data
+   meta_data_modifier = evaluate_yara_rule_meta_data(rule)
+   # Score for the rule strings
+   rule_score = base_rule_score + meta_data_modifier
+   return rule_score
+
+# Evaluate the score modifier based on the rule meta data
+def evaluate_yara_rule_meta_data(rule):
+   # List of possible meta data keywords
+   meta_data_keywords_suspicious = ['hunting', 'experimental', 'test', 'testing', 'false positive', 'unstable', 'untested', 'unverified', 'unreliable', 'unconfirmed']
+   # Check if one of the keywords appears in the meta data values
+   for meta_data in rule['metadata']:
+      for key, value in meta_data.items():
+         if isinstance(value, str) and value.lower() in meta_data_keywords_suspicious:
+            return -15
+   # Check if one of the keywords appears in the rule name
+   for keyword in meta_data_keywords_suspicious:
+      if keyword in rule['rule_name'].lower():
+         return -15
+   return 0
+
 # Change YARA rule author
-def process_yara_rule_author(rule_meta_data, repo_author):
+def align_yara_rule_author(rule_meta_data, repo_author):
    # List of possible author names
    author_names = ['author', 'authors', 'writer', 'creator', 'created_by', 'created_by', 'copyright', 'made_by', 'contributor', 'contributed_by']
    # Look for the author in the rule meta data
@@ -80,7 +151,7 @@ def process_yara_rule_author(rule_meta_data, repo_author):
 
 
 # Change YARA rule name
-def process_yara_rule_name(rule_name, rule_set_id):
+def align_yara_rule_name(rule_name, rule_set_id):
    # New name elements
    new_name_elements = []
    # Add the rule set identifier 
@@ -100,7 +171,7 @@ def process_yara_rule_name(rule_name, rule_set_id):
 
 
 # Modify the YARA rule references
-def process_yara_rule_reference(rule_meta_data, rule_set_url):
+def align_yara_rule_reference(rule_meta_data, rule_set_url):
    # List of possible reference names
    other_ref_names = ['reference', 'references', 'ref', 'url', 'source', 'link', 'website', 'webpage']
    other_indicators = ['http://', 'https://']
@@ -134,7 +205,7 @@ def process_yara_rule_reference(rule_meta_data, rule_set_url):
 
 
 # Modify the YARA rule date
-def process_yara_rule_date(rule_meta_data, owner, repo, branch, file_path):
+def align_yara_rule_date(rule_meta_data, owner, repo, branch, file_path):
    # List of possible date names
    date_names = ['date', 'created', 'created_at', 'creation_date', 'creation_time', 'creation', 'timestamp', 'time', 'datetime']
    # Look for the date in the rule meta data
