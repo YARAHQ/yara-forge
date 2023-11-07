@@ -16,6 +16,7 @@ import logging
 from main.rule_collector import retrieve_yara_rule_sets
 from main.rule_processors import process_yara_rules
 from main.rule_output import write_yara_packages
+from qa.rule_qa import evaluate_rules_quality
 
 
 # Write a section header with dividers
@@ -73,6 +74,10 @@ if __name__ == "__main__":
    # Process the YARA rules
    write_section_header("Processing YARA rules")
    processed_yara_repos = process_yara_rules(yara_rule_repo_sets, logger=logger)
+
+   # Evaluate the quality of the rules
+   write_section_header("Evaluating YARA rules")
+   evaluate_rules_quality(processed_yara_repos, logger=logger)
 
    # Write the YARA packages
    write_section_header
