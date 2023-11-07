@@ -9,7 +9,7 @@
 #            Do not install plyara via pip
 #            Use https://github.com/plyara/plyara
 
-__version__ = "0.8.1"
+__version__ = "0.9.0"
 
 import os
 import sys
@@ -18,8 +18,7 @@ import logging
 import pprint
 import platform
 
-from main.core import YaraQA
-from main.fileops import readFiles
+from main.core import YaraQA, readFiles
 
 sys.path.insert(0, os.getcwd())
 
@@ -100,7 +99,7 @@ if __name__ == '__main__':
 
     # Analyze rules
     Log.info("Analyzing rules for issues ...")
-    rule_issues = m.analyzeRules(rule_sets)
+    rule_issues = m.analyze_rules(rule_sets)
     Log.info("%d rule issues have been found (all types)" % len(rule_issues))
 
     # Print rule issues
