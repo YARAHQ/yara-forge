@@ -13,8 +13,8 @@ import argparse
 import pprint
 import logging
 
-from main.rules_collector import retrieve_yara_rule_sets
-from main.rules_processors import process_yara_rules
+from main.rule_collector import retrieve_yara_rule_sets
+from main.rule_processors import process_yara_rules
 from main.rule_output import write_yara_packages
 
 
