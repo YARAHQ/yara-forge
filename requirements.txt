@@ -1,3 +1,4 @@
 plyara
 requests
 dateparser
+yara-python

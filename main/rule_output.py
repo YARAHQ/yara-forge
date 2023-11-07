@@ -1,5 +1,8 @@
 import pprint
 import os
+import dateparser
+import datetime
+from pprint import pprint
 from plyara.utils import rebuild_yara_rule
 import logging
 
@@ -8,8 +11,8 @@ YARA_RULE_PACKAGES = [
    {
       "name": "default",
       "description": "Default YARA rule package",
-      "minimum_quality": "medium", # low, medium, high
-      "maximum_performance_impact": "medium" # low, medium, high
+      "minimum_quality": 50, # based on the quality score
+      "minimum_age": 7, # in days
    }
 ]
 
@@ -48,7 +51,32 @@ def write_yara_packages(processed_yara_repos, logger):
             f.write(REPO_HEADER.format(repo_url=repo['url'], retrieval_date=repo['retrieval_date'], repo_license=repo['license']))
             # Loop over the rule sets in the repository and modify the rules
             for rule_sets in repo['rules_sets']:
-                # Debug output
-                logging.log(logging.DEBUG, "Writing YARA rules from rule set: %s" % rule_sets['file_path'])
-                for rule in rule_sets['rules']:
-                    f.write(rebuild_yara_rule(rule))
+               # Debug output
+               logging.log(logging.DEBUG, "Writing YARA rules from rule set: %s" % rule_sets['file_path'])
+               # Loop over the rules in the rule set
+               for rule in rule_sets['rules']:
+
+                  # Perform some check based on the meta data of the rule
+                  skip_rule = False
+                  # Loop over the metadata
+                  for metadata in rule['metadata']:
+
+                     # Check if the rule has a minimum age
+                     if "date" in metadata:
+                        rule_date = dateparser.parse(metadata['date'])
+                        # Check if the rule is old enough
+                        if (datetime.datetime.now() - rule_date).days < rule_package['minimum_age']:
+                           logger.log(logging.DEBUG, "Skipping rule %s because it is too young: %s" % (rule['rule_name'], metadata['date']))
+                           skip_rule = True
+
+                     if "quality" in metadata:
+                        # Check if the rule has the require quality
+                        if metadata['quality'] < rule_package['minimum_quality']:
+                           logger.log(logging.DEBUG, "Skipping rule %s because of insufficient quality score: %d" % (rule['rule_name'], metadata['quality']))
+                           skip_rule = True
+
+                  if skip_rule:
+                     continue
+
+                  # Write the rule into the output file
+                  f.write(rebuild_yara_rule(rule))

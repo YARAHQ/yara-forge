@@ -61,7 +61,6 @@ def process_yara_rules(yara_rule_repo_sets, logger):
 
    return yara_rule_repo_sets
 
-
 # Check if there's a description set in the YARA rule and if not, add the repository description
 def align_yara_rule_description(rule_meta_data, repo_description):
    # List of possible description names
@@ -263,7 +262,7 @@ def align_yara_rule_date(rule_meta_data, owner, repo, branch, file_path):
    date_names = ['date', 'created', 'created_at', 'creation_date', 'creation_time', 'creation', 'timestamp', 'time', 'datetime']
    # Look for the date in the rule meta data
    date_found = False
-   date_value = ""
+   date_value = "2010-01-01" # Default date
    # We create a copy so that we can delete elements from the original
    meta_data_copy = rule_meta_data.copy()
    # Now we loop over the copy
@@ -298,10 +297,12 @@ def align_yara_rule_date(rule_meta_data, owner, repo, branch, file_path):
 # Get the age of the YARA rule file from GitHub
 def get_rule_age_github(owner, repo, branch, file_path):
    try:
+      # Get the last modified date from GitHub
       url = f"https://api.github.com/repos/{owner}/{repo}/commits?path={file_path}&sha={branch}"
       response = requests.get(url)
       commits = response.json()
 
+      # Get the last modified date
       if commits:
          last_commit = commits[0]
          last_modified_date_string = last_commit['commit']['committer']['date']

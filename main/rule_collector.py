@@ -13,7 +13,7 @@ YARA_REPOS = [
       "author": "Florian Roth",  # used when the author is not defined in the rule
       "owner": 'Neo23x0',  # name of the owner of the repository on GitHub
       "repo": "YARA-Style-Guide",  # name of the repository on GitHub
-      "quality": 70,  # 0-100 (0 = low, 100 = high) base value; indicates the quality of the rules in the repository
+      "quality": 80,  # 0-100 (0 = low, 100 = high) base value; indicates the quality of the rules in the repository
       "branch": "master"  # name of the branch to download
    },
 ]
