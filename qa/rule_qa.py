@@ -19,16 +19,23 @@ ISSUE_LEVELS = {
 }
 
 def evaluate_rules_quality(processed_yara_repos, logger=None):
+
    # Create a yaraQA object
    yaraQA = YaraQA(log=logger)
 
    # Loop over the repositories
    for repo_rule_sets in processed_yara_repos:
       # Analyze the rule sets
-      logger.log(logging.INFO, "Analyzing rules from repository: %s" % repo_rule_sets['name'])
+      logger.log(logging.INFO, "Evaluating rules from repository: %s" % repo_rule_sets['name'])
+      # Issue statistics 
+      issue_statistics = {
+         "issues_syntax": 0,
+         "issues_efficiency": 0
+      }
+
       # Loop over the rule sets in the repository
       for rule_set in repo_rule_sets['rules_sets']:
-         logger.log(logging.INFO, "Analyzing rules from rule set: %s" % rule_set['file_path'])
+         logger.log(logging.DEBUG, "Evaluating rules from rule set: %s" % rule_set['file_path'])
          
          # Now we do stuff with each rule
          for rule in rule_set['rules']:
@@ -38,7 +45,7 @@ def evaluate_rules_quality(processed_yara_repos, logger=None):
             # - Compile issues
             issues_syntax = check_syntax_issues(rule, logger=logger)
             # Print the issues if debug is enabled
-            logger.log(logging.DEBUG, f"Analyzed rule {rule['rule_name']} syntax issues: {issues_syntax}")
+            logger.log(logging.DEBUG, f"Evaluated rule {rule['rule_name']} syntax issues: {issues_syntax}")
 
             # Analyze the rule quality 
             # Checks for
@@ -46,16 +53,24 @@ def evaluate_rules_quality(processed_yara_repos, logger=None):
             # - Resource usage issues
             issues_efficiency = yaraQA.analyze_rule(rule)
             # Print the issues if debug is enabled
-            logger.log(logging.DEBUG, f"Analyzed rule {rule['rule_name']} efficiency issues: {issues_efficiency}")
+            logger.log(logging.DEBUG, f"Evaluated rule {rule['rule_name']} efficiency issues: {issues_efficiency}")
 
             # Reduce the rule's quality score based on the levels of the issues found in the rules
             issues = issues_syntax + issues_efficiency
+            # Adding the values to the statistics
+            issue_statistics['issues_syntax'] += len(issues_syntax)
+            issue_statistics['issues_efficiency'] += len(issues_efficiency)
+            # Loop over the issues
             for issue in issues:
                issue['score'] = ISSUE_LEVELS[issue['level']]
             # Calculate the total score   
             total_score = sum([issue['score'] for issue in issues])
             # Add the total score to the rule's quality score 
             rule['metadata'] = modify_yara_rule_quality(rule['metadata'], -total_score)
+
+      # Print the issues statistics
+      logger.log(logging.INFO, f"Issues statistics: {issue_statistics['issues_syntax']} syntax issues, {issue_statistics['issues_efficiency']} efficiency issues")
+
 
 def check_syntax_issues(rule, logger=None):
    # Syntax issues list

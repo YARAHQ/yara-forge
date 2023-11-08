@@ -1,11 +1,11 @@
+import sys
 import requests
 import dateparser
 import logging
-
+from git import Repo
 
 # Date Lookup Cache
 date_lookup_cache = {}
-
 
 # Process the YARA rules
 def process_yara_rules(yara_rule_repo_sets, logger):
@@ -16,6 +16,7 @@ def process_yara_rules(yara_rule_repo_sets, logger):
       # Debug output
       logger.log(logging.INFO, "Processing YARA rules from repository: %s" % repo['name'])
       # Loop over the rule sets in the repository and modify the rules
+      num_rules = 0
       for rules in repo['rules_sets']:
          # Debug output
          logger.log(logging.DEBUG, "Processing YARA rules from rule set: %s" % rules['file_path'])
@@ -38,7 +39,7 @@ def process_yara_rules(yara_rule_repo_sets, logger):
             # Modify the rule references
             rule['metadata'] = align_yara_rule_reference(rule['metadata'], repo['url'])
             # Modify the rule date
-            rule['metadata'] = align_yara_rule_date(rule['metadata'], repo['owner'], repo['repo'], repo['branch'], rules['file_path'])
+            rule['metadata'] = align_yara_rule_date(rule['metadata'], repo['repo_path'], rules['file_path'])
             # Modify the rule hashes
             rule['metadata'] = align_yara_rule_hashes(rule['metadata'])
             # # Modify the rule tags
@@ -58,6 +59,9 @@ def process_yara_rules(yara_rule_repo_sets, logger):
             # Add a score based on the rule quality and meta data keywords 
             rule_score = evaluate_yara_rule_score(rule)
             modify_meta_data_value(rule['metadata'], 'score', rule_score)
+            num_rules += 1
+      # Info output about the number of rules in the repository
+      logger.log(logging.INFO, f"Normalized {num_rules} rules from repository: {repo['name']}")
 
    return yara_rule_repo_sets
 
@@ -257,12 +261,12 @@ def align_yara_rule_reference(rule_meta_data, rule_set_url):
 
 
 # Modify the YARA rule date
-def align_yara_rule_date(rule_meta_data, owner, repo, branch, file_path):
+def align_yara_rule_date(rule_meta_data, repo_path, file_path):
    # List of possible date names
    date_names = ['date', 'created', 'created_at', 'creation_date', 'creation_time', 'creation', 'timestamp', 'time', 'datetime']
    # Look for the date in the rule meta data
    date_found = False
-   date_value = "2010-01-01" # Default date
+   date_value = "N/A" # Default date
    # We create a copy so that we can delete elements from the original
    meta_data_copy = rule_meta_data.copy()
    # Now we loop over the copy
@@ -282,11 +286,12 @@ def align_yara_rule_date(rule_meta_data, owner, repo, branch, file_path):
       # Check if the date is in the cache
       if file_path in date_lookup_cache:
          # Debug info
-         print(f"Getting the date from the cache for file: {file_path}")
+         logging.log(logging.DEBUG, f"Retrieved date info for file {file_path} from cache.")
          date_value = date_lookup_cache[file_path]
       else:
-         # Trying to get the date from GitHub
-         date_value = get_rule_age_github(owner, repo, branch, file_path)
+         # Getting the last modification date of the rule file from the git log 
+         # (this is not completely reliable, but better than nothing)
+         date_value = get_rule_age_git(repo_path, file_path)
          # Add the date to the cache
          date_lookup_cache[file_path] = date_value
       # Add the date to the rule meta data
@@ -294,25 +299,25 @@ def align_yara_rule_date(rule_meta_data, owner, repo, branch, file_path):
    return rule_meta_data
 
 
-# Get the age of the YARA rule file from GitHub
-def get_rule_age_github(owner, repo, branch, file_path):
-   try:
-      # Get the last modified date from GitHub
-      url = f"https://api.github.com/repos/{owner}/{repo}/commits?path={file_path}&sha={branch}"
-      response = requests.get(url)
-      commits = response.json()
+# Get the last modification date of the rule file from the git log
+def get_rule_age_git(repo_path, file_path):
 
-      # Get the last modified date
-      if commits:
-         last_commit = commits[0]
-         last_modified_date_string = last_commit['commit']['committer']['date']
-         last_modified_date = dateparser.parse(last_modified_date_string).strftime("%Y-%m-%d")
-         logging.log(logging.DEBUG, f"Retrieved date info for file {file_path} from Github. Last modified date: {last_modified_date}")
-      else:
-         print("File has not been modified or does not exist.")
-   except Exception as e:
-      print(e)
-      print("Could not get the last modified date from GitHub.")
-      last_modified_date = "N/A"
+   # Initialize the repository object
+   repo = Repo(repo_path)
 
-   return last_modified_date
+   logging.log(logging.DEBUG, f"Repo path '{repo_path}'")
+   logging.log(logging.DEBUG, f"Retrieving date info for file '{file_path}' from git log.")
+
+   # Iterate over the commits that modified the file, and take the first one
+   commits = list(repo.iter_commits(paths=file_path, max_count=1))
+   if commits:
+      last_commit = commits[0]
+      # Extract the datetime of the last commit that modified the file
+      last_modified_date = last_commit.committed_datetime
+      logging.log(logging.DEBUG, f"Retrieved date info for file {file_path} from git log. Last modified date: {last_modified_date}")
+      # Return the date in the format YYYY-MM-DD
+      return last_modified_date.strftime("%Y-%m-%d")
+   else:
+      print(f"No commits found for the file {file_path}.")
+      sys.exit(1)
+   return "N/A"

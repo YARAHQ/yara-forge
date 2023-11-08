@@ -1,4 +1,5 @@
 
-packages/default/yara-rules-default.yar
+packages/*
 *.pyc
 yara-forge.log
+repos/*

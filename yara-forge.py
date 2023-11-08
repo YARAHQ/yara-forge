@@ -36,6 +36,8 @@ if __name__ == "__main__":
    print(r'                                            /____/        ');
    print(r'  YARA Forge                                              ');
    print(r'  Aligning hundreds of YARA rules to a common standard    ');
+   print(r'                                                          ');
+   print(r'  Version %s                                              ' % __version__)
    print(r'  Florian Roth, November 2023                             ');
 
    parser = argparse.ArgumentParser()
@@ -80,5 +82,5 @@ if __name__ == "__main__":
    evaluate_rules_quality(processed_yara_repos, logger=logger)
 
    # Write the YARA packages
-   write_section_header
-   write_yara_packages(processed_yara_repos, logger=logger)
+   write_section_header("Writing YARA packages")
+   write_yara_packages(processed_yara_repos, logger=logger, program_version=__version__)
