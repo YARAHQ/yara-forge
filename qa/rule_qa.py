@@ -18,15 +18,15 @@ ISSUE_LEVELS = {
    4: 100
 }
 
-def evaluate_rules_quality(processed_yara_repos, logger=None):
+def evaluate_rules_quality(processed_yara_repos):
 
    # Create a yaraQA object
-   yaraQA = YaraQA(log=logger)
+   yaraQA = YaraQA()
 
    # Loop over the repositories
    for repo_rule_sets in processed_yara_repos:
       # Analyze the rule sets
-      logger.log(logging.INFO, "Evaluating rules from repository: %s" % repo_rule_sets['name'])
+      logging.log(logging.INFO, "Evaluating rules from repository: %s" % repo_rule_sets['name'])
       # Issue statistics 
       issue_statistics = {
          "issues_syntax": 0,
@@ -35,7 +35,7 @@ def evaluate_rules_quality(processed_yara_repos, logger=None):
 
       # Loop over the rule sets in the repository
       for rule_set in repo_rule_sets['rules_sets']:
-         logger.log(logging.DEBUG, "Evaluating rules from rule set: %s" % rule_set['file_path'])
+         logging.log(logging.DEBUG, "Evaluating rules from rule set: %s" % rule_set['file_path'])
          
          # Now we do stuff with each rule
          for rule in rule_set['rules']:
@@ -43,9 +43,9 @@ def evaluate_rules_quality(processed_yara_repos, logger=None):
             # Analyze the rule syntax
             # - Syntactical issues
             # - Compile issues
-            issues_syntax = check_syntax_issues(rule, logger=logger)
+            issues_syntax = check_syntax_issues(rule)
             # Print the issues if debug is enabled
-            logger.log(logging.DEBUG, f"Evaluated rule {rule['rule_name']} syntax issues: {issues_syntax}")
+            logging.log(logging.DEBUG, f"Evaluated rule {rule['rule_name']} syntax issues: {issues_syntax}")
 
             # Analyze the rule quality 
             # Checks for
@@ -53,7 +53,7 @@ def evaluate_rules_quality(processed_yara_repos, logger=None):
             # - Resource usage issues
             issues_efficiency = yaraQA.analyze_rule(rule)
             # Print the issues if debug is enabled
-            logger.log(logging.DEBUG, f"Evaluated rule {rule['rule_name']} efficiency issues: {issues_efficiency}")
+            logging.log(logging.DEBUG, f"Evaluated rule {rule['rule_name']} efficiency issues: {issues_efficiency}")
 
             # Reduce the rule's quality score based on the levels of the issues found in the rules
             issues = issues_syntax + issues_efficiency
@@ -69,14 +69,25 @@ def evaluate_rules_quality(processed_yara_repos, logger=None):
             rule['metadata'] = modify_yara_rule_quality(rule['metadata'], -total_score)
 
       # Print the issues statistics
-      logger.log(logging.INFO, f"Issues statistics: {issue_statistics['issues_syntax']} syntax issues, {issue_statistics['issues_efficiency']} efficiency issues")
+      logging.log(logging.INFO, f"Issues statistics: {issue_statistics['issues_syntax']} syntax issues, {issue_statistics['issues_efficiency']} efficiency issues")
 
 
-def check_syntax_issues(rule, logger=None):
+def check_syntax_issues(rule):
    # Syntax issues list
    issues = []
+
+   # Check if the rule requires some private rules
+   prepended_private_rules_string = ""
+   if 'private_rules_used' in rule:
+      for priv_rule in rule['private_rules_used']:
+         # Get the rule from the plyara object
+         priv_rule_string = rebuild_yara_rule(priv_rule["rule"])
+         # Add the rule to the string
+         prepended_private_rules_string += priv_rule_string + "\n"
+
    # Get the serialized rule from the plyara object
-   yara_rule_string = rebuild_yara_rule(rule)
+   yara_rule_string = prepended_private_rules_string + rebuild_yara_rule(rule)
+
    # Compile the rule
    try:
       # Check for errors

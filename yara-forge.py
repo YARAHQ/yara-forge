@@ -70,17 +70,17 @@ if __name__ == "__main__":
 
    # Retrieve the YARA rule sets
    write_section_header("Retrieving YARA rule sets")
-   yara_rule_repo_sets = retrieve_yara_rule_sets(logger=logger)
+   yara_rule_repo_sets = retrieve_yara_rule_sets()
    #pprint.pprint(yara_rule_repo_sets)
 
    # Process the YARA rules
    write_section_header("Processing YARA rules")
-   processed_yara_repos = process_yara_rules(yara_rule_repo_sets, logger=logger)
+   processed_yara_repos = process_yara_rules(yara_rule_repo_sets)
 
    # Evaluate the quality of the rules
    write_section_header("Evaluating YARA rules")
-   evaluate_rules_quality(processed_yara_repos, logger=logger)
+   evaluate_rules_quality(processed_yara_repos)
 
    # Write the YARA packages
    write_section_header("Writing YARA packages")
-   write_yara_packages(processed_yara_repos, logger=logger, program_version=__version__)
+   write_yara_packages(processed_yara_repos, program_version=__version__)

@@ -50,7 +50,7 @@ REPO_HEADER = """
 """
 
 # Loop over the rules and write them as plain text into separate files
-def write_yara_packages(processed_yara_repos, logger, program_version):
+def write_yara_packages(processed_yara_repos, program_version):
 
    # Loop over the rule packages
    for rule_package in YARA_RULE_PACKAGES:
@@ -72,12 +72,12 @@ def write_yara_packages(processed_yara_repos, logger, program_version):
       rule_file_path = os.path.join(package_dir, rule_file_name)
 
       # Write information about the rule package, the output file name and the output file path to the console
-      logger.log(logging.INFO, "------------------------------------------------------------------------")
-      logger.log(logging.INFO, "Creating YARA rule package '%s': %s" % (rule_package['name'], rule_file_path))
-      logger.log(logging.INFO, "Description: %s" % rule_package['description'])
-      logger.log(logging.INFO, "Minimum Quality: %d" % rule_package['minimum_quality'])
-      logger.log(logging.INFO, "Minimum Age: %d" % rule_package['minimum_age'])
-      logger.log(logging.INFO, "Output File: %s" % rule_file_path)
+      logging.log(logging.INFO, "------------------------------------------------------------------------")
+      logging.log(logging.INFO, "Creating YARA rule package '%s': %s" % (rule_package['name'], rule_file_path))
+      logging.log(logging.INFO, "Description: %s" % rule_package['description'])
+      logging.log(logging.INFO, "Minimum Quality: %d" % rule_package['minimum_quality'])
+      logging.log(logging.INFO, "Minimum Age: %d" % rule_package['minimum_age'])
+      logging.log(logging.INFO, "Output File: %s" % rule_file_path)
 
       # List of strings composed of the rules from each repository
       output_rule_set_strings = []
@@ -115,7 +115,7 @@ def write_yara_packages(processed_yara_repos, logger, program_version):
                      rule_date = dateparser.parse(metadata['date'])
                      # Check if the rule is old enough
                      if (datetime.datetime.now() - rule_date).days < rule_package['minimum_age']:
-                        logger.log(logging.DEBUG, "Skipping rule %s because it is too young: %s" % (rule['rule_name'], metadata['date']))
+                        logging.log(logging.DEBUG, "Skipping rule %s because it is too young: %s" % (rule['rule_name'], metadata['date']))
                         skip_rule = True
                         rule_set_statistics['total_rules_skipped_age'] += 1
 
@@ -123,7 +123,7 @@ def write_yara_packages(processed_yara_repos, logger, program_version):
                   if "quality" in metadata:
                      # Check if the rule has the require quality
                      if metadata['quality'] < rule_package['minimum_quality']:
-                        logger.log(logging.DEBUG, "Skipping rule %s because of insufficient quality score: %d" % (rule['rule_name'], metadata['quality']))
+                        logging.log(logging.DEBUG, "Skipping rule %s because of insufficient quality score: %d" % (rule['rule_name'], metadata['quality']))
                         skip_rule = True
                         rule_set_statistics['total_rules_skipped_quality'] += 1
 
@@ -149,14 +149,14 @@ def write_yara_packages(processed_yara_repos, logger, program_version):
             output_rule_set_strings.append(repo_rule_set_header)
             output_rule_set_strings.extend(repo_rules_strings)
             # Write the rule set statistics including total and skipped rules to the console
-            logger.log(logging.INFO, "Rule set: '%s' Total rules: %d, Skipped: %d (age), %d (quality)" % (repo['name'], rule_set_statistics['total_rules'], rule_set_statistics['total_rules_skipped_age'], rule_set_statistics['total_rules_skipped_quality']))
+            logging.log(logging.INFO, "Rule set: '%s' Total rules: %d, Skipped: %d (age), %d (quality)" % (repo['name'], rule_set_statistics['total_rules'], rule_set_statistics['total_rules_skipped_age'], rule_set_statistics['total_rules_skipped_quality']))
 
       # Add the repo statistics to the the rule package statistics
       rule_package_statistics = {key: rule_package_statistics[key] + rule_set_statistics.get(key, 0) for key in rule_package_statistics}
 
       # Write the rule package statistics including total and skipped rules to the console
-      logger.log(logging.INFO, "------------------------------------------------------------------------")
-      logger.log(logging.INFO, "Rule package: '%s' Total rules: %d, Skipped: %d (age), %d (quality)" % (rule_package['name'], rule_package_statistics['total_rules'], rule_package_statistics['total_rules_skipped_age'], rule_package_statistics['total_rules_skipped_quality']))
+      logging.log(logging.INFO, "------------------------------------------------------------------------")
+      logging.log(logging.INFO, "Rule package: '%s' Total rules: %d, Skipped: %d (age), %d (quality)" % (rule_package['name'], rule_package_statistics['total_rules'], rule_package_statistics['total_rules_skipped_age'], rule_package_statistics['total_rules_skipped_quality']))
 
       # Only write the rule file if there's at least one rule in the set
       if rule_package_statistics['total_rules'] > 0:

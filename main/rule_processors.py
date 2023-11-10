@@ -1,69 +1,129 @@
 import sys
-import requests
 import dateparser
 import logging
+from pprint import pprint
 from git import Repo
 
 # Date Lookup Cache
 date_lookup_cache = {}
 
+# Private YARA rules
+private_rule_mapping = []
+
 # Process the YARA rules
-def process_yara_rules(yara_rule_repo_sets, logger):
+def process_yara_rules(yara_rule_repo_sets):
    # Loop over the repositories
    for repo in yara_rule_repo_sets:
+      
       # Rule set identifier
       rule_set_id = repo['name'].replace(" ", "_").upper()
+      
       # Debug output
-      logger.log(logging.INFO, "Processing YARA rules from repository: %s" % repo['name'])
+      logging.log(logging.INFO, "Processing YARA rules from repository: %s" % repo['name'])
+      
       # Loop over the rule sets in the repository and modify the rules
       num_rules = 0
       for rules in repo['rules_sets']:
          # Debug output
-         logger.log(logging.DEBUG, "Processing YARA rules from rule set: %s" % rules['file_path'])
+         logging.log(logging.DEBUG, "Processing YARA rules from rule set: %s" % rules['file_path'])
          # Loop over each of the rules and modify them
          for rule in rules['rules']:
             # Debug output
-            logger.log(logging.DEBUG, "Processing YARA rule: %s" % rule['rule_name'])
+            logging.log(logging.DEBUG, "Processing YARA rule: %s" % rule['rule_name'])
 
             # Rule Meta Data Modifications ----------------------------------------------
 
+            # Check if the rule is a private rule
+            is_private_rule = False
+            if 'scopes' in rule:
+               if 'private' in rule['scopes']:
+                  is_private_rule = True
+
+            # Add metadata to rules that don't have any
+            if 'metadata' not in rule:
+               rule['metadata'] = []
+
             # Adding additional meta data values ----------------------------------------
-            # Add a quality value based on the original repo 
+            # Add a quality value based on the original repo
             modify_meta_data_value(rule['metadata'], 'quality', repo['quality'])
             # Add a rule source URL to the original file
             modify_meta_data_value(rule['metadata'], 'source_url', f'{repo["url"]}/blob/{repo["branch"]}/{rules["file_path"]}')
 
             # Modifying existing meta data values ---------------------------------------
-            # Modify the rule name
-            rule['rule_name'] = align_yara_rule_name(rule['rule_name'], rule_set_id)
+
             # Modify the rule references
             rule['metadata'] = align_yara_rule_reference(rule['metadata'], repo['url'])
+            
             # Modify the rule date
             rule['metadata'] = align_yara_rule_date(rule['metadata'], repo['repo_path'], rules['file_path'])
+            
             # Modify the rule hashes
             rule['metadata'] = align_yara_rule_hashes(rule['metadata'])
+            
             # # Modify the rule tags
             # rule['metadata'] = process_yara_rule_tags(rule['metadata'], repo['tags'])
+            
             # # Modify the rule description
             rule['metadata'] = align_yara_rule_description(rule['metadata'], repo['name'])
+            
             # Modify the rule author
             rule['metadata'] = align_yara_rule_author(rule['metadata'], repo['author'])
+            
             # # Modify the rule license
             # rule['metadata'] = process_yara_rule_license(rule['metadata'], repo['license'])
+            
             # # Modify the rule version
             # rule['metadata'] = process_yara_rule_version(rule['metadata'], repo['version'])
+            
             # # Modify the rule strings
             # rule['strings'] = process_yara_rule_strings(rule['strings'])
+            
             # # Modify the rule condition
             # rule['condition'] = process_yara_rule_condition(rule['condition'])
+            
             # Add a score based on the rule quality and meta data keywords 
             rule_score = evaluate_yara_rule_score(rule)
             modify_meta_data_value(rule['metadata'], 'score', rule_score)
+
+            # Modify the rule name
+            rule_name_old = rule['rule_name']
+            rule_name_new = align_yara_rule_name(rule['rule_name'], rule_set_id)
+            # If the rule is private, add the _PRIVATE suffix and 
+            if is_private_rule:
+               rule_name_new = f"{rule_name_new}_PRIVATE"
+               # Add the rule to the private rule mapping
+               private_rule_mapping.append({
+                  "old_name": rule_name_old,
+                  "new_name": rule_name_new,
+                  "rule": rule
+               })
+            # Set the new rule name
+            rule['rule_name'] = rule_name_new
+            
+            # Check if the rule uses private rules
+            private_rules_used = check_rule_uses_private_rules(rule, private_rule_mapping)
+            rule['private_rules_used'] = private_rules_used
+            logging.debug(f"Private rules used: {private_rules_used}")
+
+            # Count the number of rules
             num_rules += 1
+
       # Info output about the number of rules in the repository
-      logger.log(logging.INFO, f"Normalized {num_rules} rules from repository: {repo['name']}")
+      logging.log(logging.INFO, f"Normalized {num_rules} rules from repository: {repo['name']}")
 
    return yara_rule_repo_sets
+
+# Check if the rule uses private rules
+def check_rule_uses_private_rules(rule, private_rule_mapping):
+   # List of private rules used
+   private_rules_used = []
+   # Loop over the private rules
+   for private_rule in private_rule_mapping:
+      # Check if the rule uses the private rule
+      if private_rule['old_name'] in rule['condition_terms']:
+         # Add the private rule to the list of private rules used
+         private_rules_used.append(private_rule)
+   return private_rules_used
 
 # Check if there's a description set in the YARA rule and if not, add the repository description
 def align_yara_rule_description(rule_meta_data, repo_description):

@@ -8,6 +8,13 @@ import logging
 REPO_STAGING_DIR = "./repos"
 
 YARA_REPOS = [
+   # {
+   #    "name": "AvastTI",
+   #    "url": 'https://github.com/avast/ioc',
+   #    "author": "Avast Threat Intel Team",
+   #    "quality": 90,
+   #    "branch": "master"
+   # },
    {
       "name": "YARA Style Guide",  # used in headers and as prefix for each of the rules (so keep it short)
       "url": 'https://github.com/Neo23x0/YARA-Style-Guide',  # URL of the repository on GitHub
@@ -15,17 +22,17 @@ YARA_REPOS = [
       "quality": 80,  # 0-100 (0 = low, 100 = high) base value; indicates the quality of the rules in the repository
       "branch": "master"  # name of the branch to download
    },
-   {
-      "name": "ReversingLabs",
-      "url": 'https://github.com/reversinglabs/reversinglabs-yara-rules/',
-      "author": "ReversingLabs",
-      "quality": 90,
-      "branch": "develop"
-   }
+   # {
+   #    "name": "ReversingLabs",
+   #    "url": 'https://github.com/reversinglabs/reversinglabs-yara-rules/',
+   #    "author": "ReversingLabs",
+   #    "quality": 90,
+   #    "branch": "develop"
+   # },
 ]
 
 # Retrieve YARA rules from online repositories
-def retrieve_yara_rule_sets(logger):
+def retrieve_yara_rule_sets():
    
    # The list of YARA rule sets of all repositories
    yara_rule_repo_sets = []
@@ -37,7 +44,7 @@ def retrieve_yara_rule_sets(logger):
    for repo in YARA_REPOS:
       
       # Output the repository information to the console in a single line
-      logger.log(logging.INFO, "Retrieving YARA rules from repository: %s" % repo['name'])
+      logging.log(logging.INFO, "Retrieving YARA rules from repository: %s" % repo['name'])
 
       # Extract the owner and the repository name from the URL
       repo_url_parts = repo['url'].split("/")
@@ -49,6 +56,7 @@ def retrieve_yara_rule_sets(logger):
       Repo.clone_from(repo['url'], repo_folder, branch=repo['branch'])
 
       # Walk through the extracted folders and find a LICENSE file and save it into the repository object
+      repo['license'] = "NO LICENSE SET"
       for root, dirs, files in os.walk(os.path.join(REPO_STAGING_DIR, repo['repo'])):
          for file in files:
             if file == "LICENSE" or file == "LICENSE.txt" or file == "LICENSE.md":
@@ -65,7 +73,7 @@ def retrieve_yara_rule_sets(logger):
                file_path = os.path.join(root, file)
 
                # Debug output
-               logger.log(logging.DEBUG, "Found YARA rule file: %s" % file_path)
+               logging.log(logging.DEBUG, "Found YARA rule file: %s" % file_path)
 
                # Read the YARA file
                with open(file_path, "r") as f:
@@ -83,13 +91,13 @@ def retrieve_yara_rule_sets(logger):
                         "file_path": relative_path,
                      }
                      # Debug output
-                     logger.log(logging.DEBUG, "Found %d YARA rules in file: %s" % (len(yara_rules), file_path))
+                     logging.log(logging.DEBUG, "Found %d YARA rules in file: %s" % (len(yara_rules), file_path))
                      # Append to list of YARA rule sets
                      yara_rule_sets.append(yara_rule_set)
                      
                   except Exception as e:
                      print(e)
-                     logger.log(logging.ERROR, "Skipping YARA rule in the following file because of a syntax error: %s " % file_path)
+                     logging.log(logging.ERROR, "Skipping YARA rule in the following file because of a syntax error: %s " % file_path)
       
       # Append the YARA rule repository
       yara_rule_repo = {
@@ -107,7 +115,7 @@ def retrieve_yara_rule_sets(logger):
       }
       yara_rule_repo_sets.append(yara_rule_repo)
 
-      logger.log(logging.INFO, "Retrieved %d YARA rules from repository: %s" % (len(yara_rule_sets), repo['name']))
+      logging.log(logging.INFO, "Retrieved %d YARA rules from repository: %s" % (len(yara_rule_sets), repo['name']))
 
    # Return the YARA rule sets
    return yara_rule_repo_sets
