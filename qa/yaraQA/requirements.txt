@@ -1,3 +1,0 @@
-yara-python
-plyara>=2.1.0
-argparse
