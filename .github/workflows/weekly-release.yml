@@ -5,9 +5,8 @@ permissions:
 
 on:
   schedule:
-    # Run at 00:00 every Sunday, use cron syntax to set the schedule
-    - cron: '0 0 * * 0'
-  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+    - cron: '0 0 * * 0' # Runs at 00:00 every Sunday
+  workflow_dispatch:
 
 jobs:
   create-release:
@@ -27,7 +26,6 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Run YARA-Forge
@@ -35,13 +33,21 @@ jobs:
         python yara-forge.py
 
     - name: Get current date
-      id: current_date
-      run: echo "::set-output name=date::$(date +'%Y%m%d')"
+      run: echo "CURRENT_DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
       shell: bash
 
-    - name: Zip packages
+    - name: Zip and upload packages
       run: |
-        zip -r release-packages.zip ./packages
+        for folder in packages/*; do
+          if [ -d "$folder" ]; then
+            foldername=$(basename "$folder")
+            zipfile="${foldername}-${{ env.CURRENT_DATE }}.zip"
+            zip -r "$zipfile" "$folder"
+            echo "::set-output name=${foldername}_zip_path::$zipfile"
+          fi
+        done
+      id: zip_files
+      shell: bash
 
     - name: Create Release
       id: create_release
@@ -49,19 +55,30 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.current_date.outputs.date }}
-        release_name: Release ${{ steps.current_date.outputs.date }}
+        tag_name: ${{ env.CURRENT_DATE }}
+        release_name: Release ${{ env.CURRENT_DATE }}
+        body: This release contains the latest YARA rule sets from YARA Forge.
         draft: false
         prerelease: false
 
-    - name: Upload Release Asset
+    - name: Upload core asset
+      if: always()
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        release_name: YARA Forge Rule Set Release ${{ steps.current_date.outputs.date }}
-        body: This release contains the latest YARA rule set from YARA Forge.
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release-packages.zip
-        asset_name: yara-forge-${{ steps.current_date.outputs.date }}.zip
+        asset_path: ./core-${{ env.CURRENT_DATE }}.zip
+        asset_name: core-${{ env.CURRENT_DATE }}.zip
+        asset_content_type: application/zip
+
+    - name: Upload full asset
+      if: always()
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./full-${{ env.CURRENT_DATE }}.zip
+        asset_name: full-${{ env.CURRENT_DATE }}.zip
         asset_content_type: application/zip

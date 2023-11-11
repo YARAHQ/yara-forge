@@ -40,7 +40,15 @@ issue_levels:
 yara_rule_packages:
   - name: "core"
     description: "Default YARA Rule Package - Core"
+    minimum_quality: 70
+    minimum_age: 7
+  - name: "extended"
+    description: "Default YARA Rule Package - Extended"
     minimum_quality: 50
+    minimum_age: 3
+  - name: "full"
+    description: "Default YARA Rule Package - Full"
+    minimum_quality: 20
     minimum_age: 0
 
 rule_set_header: |
