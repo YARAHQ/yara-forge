@@ -34,3 +34,8 @@ jobs:
     - name: Run YARA-Forge
       run: |
         python yara-forge.py --debug
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: package-artifacts
+        path: ./packages/*
