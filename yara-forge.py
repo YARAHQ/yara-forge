@@ -75,7 +75,9 @@ if __name__ == "__main__":
 
     # Retrieve the YARA rule sets
     write_section_header("Retrieving YARA rule sets")
-    yara_rule_repo_sets = retrieve_yara_rule_sets(YARA_FORGE_CONFIG['repo_staging_dir'], YARA_FORGE_CONFIG['yara_repositories'])
+    yara_rule_repo_sets = retrieve_yara_rule_sets(
+        YARA_FORGE_CONFIG['repo_staging_dir'], 
+        YARA_FORGE_CONFIG['yara_repositories'])
     #pprint.pprint(yara_rule_repo_sets)
 
     # Process the YARA rules

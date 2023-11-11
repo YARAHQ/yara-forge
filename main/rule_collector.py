@@ -19,10 +19,10 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
 
     # Remove the existing repo directory and all its contents
     shutil.rmtree(os.path.join(repo_staging_dir), ignore_errors=True)
-    
+
     # Loop over the repositories
     for repo in yara_repos:
-        
+
         # Output the repository information to the console in a single line
         logging.info("Retrieving YARA rules from repository: %s", repo['name'])
 
@@ -35,7 +35,8 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
         repo_folder = os.path.join(repo_staging_dir, repo['repo'])
         Repo.clone_from(repo['url'], repo_folder, branch=repo['branch'])
 
-        # Walk through the extracted folders and find a LICENSE file and save it into the repository object
+        # Walk through the extracted folders and find a LICENSE file
+        # and save it into the repository object
         repo['license'] = "NO LICENSE SET"
         for root, _, files in os.walk(os.path.join(repo_staging_dir, repo['repo'])):
             for file in files:
@@ -71,14 +72,16 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
                                 "file_path": relative_path,
                             }
                             # Debug output
-                            logging.debug("Found %d YARA rules in file: %s", len(yara_rules), file_path)
+                            logging.debug("Found %d YARA rules in file: %s",
+                                          len(yara_rules), file_path)
                             # Append to list of YARA rule sets
                             yara_rule_sets.append(yara_rule_set)
-                            
+
                         except Exception as e:
                             print(e)
-                            logging.error("Skipping YARA rule in the following file because of a syntax error: %s ", file_path)
-        
+                            logging.error("Skipping YARA rule in the following " \
+                                          "file because of a syntax error: %s ", file_path)
+
         # Append the YARA rule repository
         yara_rule_repo = {
             "name": repo['name'],
@@ -95,7 +98,8 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
         }
         yara_rule_repo_sets.append(yara_rule_repo)
 
-        logging.info("Retrieved %d YARA rules from repository: %s", len(yara_rule_sets), repo['name'])
+        logging.info("Retrieved %d YARA rules from repository: %s",
+                     len(yara_rule_sets), repo['name'])
 
     # Return the YARA rule sets
     return yara_rule_repo_sets

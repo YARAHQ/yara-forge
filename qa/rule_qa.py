@@ -41,7 +41,8 @@ def evaluate_rules_quality(processed_yara_repos, config):
                 # - Compile issues
                 issues_syntax = check_syntax_issues(rule)
                 # Print the issues if debug is enabled
-                logging.debug("Evaluated rule %s syntax issues: %s", rule['rule_name'], issues_syntax)
+                logging.debug("Evaluated rule %s syntax issues: %s",
+                              rule['rule_name'], issues_syntax)
 
                 # Analyze the rule quality
                 # Checks for
@@ -49,9 +50,11 @@ def evaluate_rules_quality(processed_yara_repos, config):
                 # - Resource usage issues
                 issues_efficiency = yara_qa.analyze_rule(rule)
                 # Print the issues if debug is enabled
-                logging.debug("Evaluated rule %s efficiency issues: %s", rule['rule_name'], issues_efficiency)
+                logging.debug("Evaluated rule %s efficiency issues: %s",
+                              rule['rule_name'], issues_efficiency)
 
-                # Reduce the rule's quality score based on the levels of the issues found in the rules
+                # Reduce the rule's quality score based on the levels of 
+                # the issues found in the rules
                 issues = issues_syntax + issues_efficiency
                 # Adding the values to the statistics
                 issue_statistics['issues_syntax'] += len(issues_syntax)
@@ -60,12 +63,13 @@ def evaluate_rules_quality(processed_yara_repos, config):
                 for issue in issues:
                     issue['score'] = config['issue_levels'][issue['level']]
                 # Calculate the total score
-                total_score = sum([issue['score'] for issue in issues])
+                total_score = sum(issue['score'] for issue in issues)
                 # Add the total score to the rule's quality score
                 rule['metadata'] = modify_yara_rule_quality(rule['metadata'], -total_score)
 
         # Print the issues statistics
-        logging.info("Issues statistics: %d syntax issues, %d efficiency issues", issue_statistics['issues_syntax'], issue_statistics['issues_efficiency'])
+        logging.info("Issues statistics: %d syntax issues, %d efficiency issues", 
+                     issue_statistics['issues_syntax'], issue_statistics['issues_efficiency'])
 
 
 def check_syntax_issues(rule):
@@ -139,7 +143,8 @@ def check_yara_packages(repo_files):
     """
     # Loop over the list and print the file names
     for repo_file in repo_files:
-        logging.info("Checking YARA package '%s' in file: %s", repo_file['name'], repo_file['file_path'])
+        logging.info("Checking YARA package '%s' in file: %s", 
+                     repo_file['name'], repo_file['file_path'])
         # Compile the rule set
         try:
             # Check for errors
