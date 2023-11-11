@@ -93,13 +93,3 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
 
 	# Return the YARA rule sets
 	return yara_rule_repo_sets
-
-
-def check_yara_rule(yara_rule_string):
-	yara_parser = plyara.Plyara()
-	try:
-		yara_parser.parse_string(yara_rule_string) 
-		return True
-	except Exception as e:
-		print(e)
-		return False
