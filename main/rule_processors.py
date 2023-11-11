@@ -69,18 +69,6 @@ def process_yara_rules(yara_rule_repo_sets):
             # Modify the rule author
             rule['metadata'] = align_yara_rule_author(rule['metadata'], repo['author'])
             
-            # # Modify the rule license
-            # rule['metadata'] = process_yara_rule_license(rule['metadata'], repo['license'])
-            
-            # # Modify the rule version
-            # rule['metadata'] = process_yara_rule_version(rule['metadata'], repo['version'])
-            
-            # # Modify the rule strings
-            # rule['strings'] = process_yara_rule_strings(rule['strings'])
-            
-            # # Modify the rule condition
-            # rule['condition'] = process_yara_rule_condition(rule['condition'])
-            
             # Add a score based on the rule quality and meta data keywords 
             rule_score = evaluate_yara_rule_score(rule)
             modify_meta_data_value(rule['metadata'], 'score', rule_score)
@@ -102,6 +90,10 @@ def process_yara_rules(yara_rule_repo_sets):
             
             # Check if the rule uses private rules
             private_rules_used = check_rule_uses_private_rules(rule, private_rule_mapping)
+            if private_rules_used:
+               # Change the condition terms of the rule to align them with the new private rule names
+               rule['condition_terms'] = adjust_identifier_names(rule['condition_terms'], private_rules_used)
+            # Add the private rules used to the rule
             rule['private_rules_used'] = private_rules_used
             logging.debug(f"Private rules used: {private_rules_used}")
 
@@ -112,6 +104,18 @@ def process_yara_rules(yara_rule_repo_sets):
       logging.log(logging.INFO, f"Normalized {num_rules} rules from repository: {repo['name']}")
 
    return yara_rule_repo_sets
+
+# Adjust the identifier names of a rule to align them with the new private rule names
+def adjust_identifier_names(condition_terms, private_rules_used):
+   # Loop over the private rules used
+   for private_rule in private_rules_used:
+      # Loop over the condition terms
+      for i, condition_term in enumerate(condition_terms):
+         # Check if the condition term is the private rule
+         if condition_term == private_rule['old_name']:
+            # Replace the condition term with the new private rule name
+            condition_terms[i] = private_rule['new_name']
+   return condition_terms
 
 # Check if the rule uses private rules
 def check_rule_uses_private_rules(rule, private_rule_mapping):
@@ -130,6 +134,7 @@ def align_yara_rule_description(rule_meta_data, repo_description):
    # List of possible description names
    description_names = ['description', 'desc', 'details', 'information', 'info', 'notes', 'abstract', 'explanation', 'rationale']
    description_values_prefixes = ['Detects ']
+   threat_names = ['threat_name', 'threat', 'malware', 'mal', 'malware_name', 'mal_name', 'threat_type', 'threat_category', 'threat_family', 'threat_group',]
    # Look for the description in the rule meta data
    description_found = False
    description_value = f"No description has been set in the source file - {repo_description}"
@@ -150,6 +155,16 @@ def align_yara_rule_description(rule_meta_data, repo_description):
             description_value = value
             # Remove the description from the original meta data
             rule_meta_data.remove(meta_data)
+      # If we couldn't find a description so far, we use the first threat name we can find
+      if not description_found:
+         for key, value in meta_data.items():
+            # If we can find a threat name, we use it to formulate a description
+            if key.lower() in threat_names:
+               description_found = True
+               # If the threat name contains a period or dash we replace it and put the original name in brackets
+               description_value = f"Detects {value.replace('.', ' ').replace('-', ' ').title()} ({value})"
+               # Remove the description from the original meta data
+               rule_meta_data.remove(meta_data)
    # Lower the quality score if the descriptions hasn't been set
    if not description_found:
       modify_yara_rule_quality(rule_meta_data, -5)
@@ -161,7 +176,7 @@ def align_yara_rule_description(rule_meta_data, repo_description):
 # Check for all the hash values in the meta data and align them to the key value 'hash'
 def align_yara_rule_hashes(rule_meta_data):
    # List of possible hash names
-   hash_names = ['hash', 'hashes', 'md5', 'sha1', 'sha256', 'sha512', 'sha-1', 'sha-256', 'sha-512', 'sha_256', 'sha_1', 'sha_512', 'md5sum', 'sha1sum', 'sha256sum', 'sha512sum', 'md5sums', 'sha1sums', 'sha256sums', 'sha512sums']
+   hash_names = ['hash', 'hashes', 'md5', 'sha1', 'sha256', 'sha512', 'sha-1', 'sha-256', 'sha-512', 'sha_256', 'sha_1', 'sha_512', 'md5sum', 'sha1sum', 'sha256sum', 'sha512sum', 'md5sums', 'sha1sums', 'sha256sums', 'sha512sums', 'reference_sample', 'sample']
    # Look for the hashes in the rule meta data
    hashes_found = False
    hashes_values = []
@@ -324,9 +339,27 @@ def align_yara_rule_reference(rule_meta_data, rule_set_url):
 def align_yara_rule_date(rule_meta_data, repo_path, file_path):
    # List of possible date names
    date_names = ['date', 'created', 'created_at', 'creation_date', 'creation_time', 'creation', 'timestamp', 'time', 'datetime']
+   modified_names = ['modified', 'last_modified', 'last_modified_at', 'last_modified_date', 'last_change', 'last_change_date', 'last_update', 'last_update_date', 'updated', 'updated_at', 'updated_date', 'updated_timestamp']
    # Look for the date in the rule meta data
    date_found = False
    date_value = "N/A" # Default date
+
+   # GIT HISTORY -----------------------------------------------------------
+   # We retrieve values from the git history that we can use in case we don't find these values in the meta data
+   # Check if the date is in the cache
+   if file_path in date_lookup_cache:
+      # Debug info
+      logging.log(logging.DEBUG, f"Retrieved date info for file {file_path} from cache.")
+      (git_creation_date, git_modification_date) = date_lookup_cache[file_path]
+   else:
+      # Getting the last modification date of the rule file from the git log 
+      # (this is not completely reliable, but better than nothing)
+      (git_creation_date, git_modification_date) = get_rule_age_git(repo_path, file_path)
+      if git_creation_date:
+         # Add the date to the cache
+         date_lookup_cache[file_path] = (git_creation_date, git_modification_date)
+
+   # CREATION DATE -----------------------------------------------------------
    # We create a copy so that we can delete elements from the original
    meta_data_copy = rule_meta_data.copy()
    # Now we loop over the copy
@@ -335,27 +368,49 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
          # If the key is in the list of possible date names, then we found the date
          if key in date_names:
             date_found = True
-            date_value = dateparser.parse(value)
+            date_created = dateparser.parse(value)
             # Remove the date from the original meta data
             rule_meta_data.remove(meta_data)
-   # If the date is found, modify it  
-   if date_found:
-      rule_meta_data.append({'date': date_value.strftime("%Y-%m-%d")}) 
-   # If the date is not found, add it
+            rule_meta_data.append({'date': date_created.strftime("%Y-%m-%d")}) 
+
+   # If the date is not found, try to get it from any of the meta data fields
    if not date_found:
-      # Check if the date is in the cache
-      if file_path in date_lookup_cache:
-         # Debug info
-         logging.log(logging.DEBUG, f"Retrieved date info for file {file_path} from cache.")
-         date_value = date_lookup_cache[file_path]
-      else:
-         # Getting the last modification date of the rule file from the git log 
-         # (this is not completely reliable, but better than nothing)
-         date_value = get_rule_age_git(repo_path, file_path)
-         # Add the date to the cache
-         date_lookup_cache[file_path] = date_value
+      # Check if we find the date in a different value by looking for fields that contain a date
+      for meta_data in meta_data_copy:
+         for key, value in meta_data.items():
+            # If the value contains a date, then we found the date
+            if isinstance(value, str) and dateparser.parse(value):
+               date_found = True
+               date_created = dateparser.parse(value)
+               # Remove the date from the original meta data
+               rule_meta_data.remove(meta_data)
+               rule_meta_data.append({'date': date_created.strftime("%Y-%m-%d")}) 
+
+   # If the date was still not found, we try to get the date from the git log
+   if not date_found:
       # Add the date to the rule meta data
-      rule_meta_data.append({'date': date_value})
+      rule_meta_data.append({'date': git_creation_date.strftime("%Y-%m-%d")})
+
+   # MODIFICATION DATE -----------------------------------------------------------
+   # Now we check for a modification date
+   modified_found = False
+   for meta_data in meta_data_copy:
+      for key, value in meta_data.items():
+         # If the key is in the list of possible date names, then we found the date
+         if key in modified_names:
+            modified_found = True
+            modified_value = dateparser.parse(value)
+            # Remove the date from the original meta data
+            rule_meta_data.remove(meta_data)
+   # If the modified date was found and removed, add the new streamlined date value
+   if modified_found:
+      rule_meta_data.append({'modified': modified_value.strftime("%Y-%m-%d")})
+
+   # If the modified date was still not found, we try to get the date from the git log
+   if not modified_found:
+      # Add the modified ate to the rule meta data
+      rule_meta_data.append({'modified': git_modification_date.strftime("%Y-%m-%d")})
+
    return rule_meta_data
 
 
@@ -371,13 +426,15 @@ def get_rule_age_git(repo_path, file_path):
    # Iterate over the commits that modified the file, and take the first one
    commits = list(repo.iter_commits(paths=file_path, max_count=1))
    if commits:
+      first_commit = commits[-1]
       last_commit = commits[0]
+      # Extract the datetime of the first commit that added the file
+      creation_date = first_commit.committed_datetime
       # Extract the datetime of the last commit that modified the file
-      last_modified_date = last_commit.committed_datetime
-      logging.log(logging.DEBUG, f"Retrieved date info for file {file_path} from git log. Last modified date: {last_modified_date}")
+      modification_date = last_commit.committed_datetime
+      logging.log(logging.DEBUG, f"Retrieved date info for file {file_path} from git log. Creation date: {creation_date}, Last modification: {modification_date}")
       # Return the date in the format YYYY-MM-DD
-      return last_modified_date.strftime("%Y-%m-%d")
+      return (creation_date, modification_date)
    else:
       print(f"No commits found for the file {file_path}.")
-      sys.exit(1)
-   return "N/A"
+   return None

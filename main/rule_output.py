@@ -6,54 +6,15 @@ from pprint import pprint
 from plyara.utils import rebuild_yara_rule
 import logging
 
-# YARA rule packages
-YARA_RULE_PACKAGES = [
-   {
-      "name": "core",
-      "description": "Default YARA Rule Package - Core",
-      "minimum_quality": 50, # based on the quality score
-      "minimum_age": 7, # in days
-   }
-]
-
-RULE_SET_HEADER = """
-/* ----------------------------------------------------------------------------------------------
-  * YARA-Forge YARA Rule Package
-  * https://github.com/NextronSystems/yara-forge
-  * 
-  * Rule Package Information
-  * Name: {rule_package_name} 
-  * Description: {rule_package_description}
-  * YARA-Forge Version: {program_version}
-  * Minimum Quality: {rule_package_minimum_quality}
-  * Minimum Age (in days): {rule_package_minimum_age}
-  * Creation Date: {retrieval_date}
-  * Skipped: {total_rules_skipped_age} (age), {total_rules_skipped_quality} (quality)
-  * ----------------------------------------------------------------------------------------------
-*/
-"""
-
-REPO_HEADER = """
-/* ----------------------------------------------------------------------------------------------
- * YARA Rule Set
- * Repository Name: {repo_name}
- * Repository: {repo_url}
- * Retrieval Date: {retrieval_date}
- * Skipped: {total_rules_skipped_age} (age), {total_rules_skipped_quality} (quality)
- * ---------------------------------------------------------------------------------------------- 
-
- LICENSE
-
- {repo_license}
-
- */
-"""
 
 # Loop over the rules and write them as plain text into separate files
-def write_yara_packages(processed_yara_repos, program_version):
+def write_yara_packages(processed_yara_repos, program_version, config):
+
+   # List of files that were written
+   package_files = []
 
    # Loop over the rule packages
-   for rule_package in YARA_RULE_PACKAGES:
+   for rule_package in config['yara_rule_packages']:
 
       # Statistics for the rule package
       rule_package_statistics = {
@@ -111,8 +72,8 @@ def write_yara_packages(processed_yara_repos, program_version):
 
                   # Age check ---------------------------------------------------------------
                   # Check if the rule has a minimum age
-                  if "date" in metadata:
-                     rule_date = dateparser.parse(metadata['date'])
+                  if "modified" in metadata:
+                     rule_date = dateparser.parse(metadata['modified'])
                      # Check if the rule is old enough
                      if (datetime.datetime.now() - rule_date).days < rule_package['minimum_age']:
                         logging.log(logging.DEBUG, "Skipping rule %s because it is too young: %s" % (rule['rule_name'], metadata['date']))
@@ -137,7 +98,7 @@ def write_yara_packages(processed_yara_repos, program_version):
          # Only write the rule set if there's at least one rule in the set
          if len(repo_rules_strings) > 0:
             # Prepend header to the output string
-            repo_rule_set_header = REPO_HEADER.format(
+            repo_rule_set_header = config['repo_header'].format(
                repo_name=repo['name'],
                repo_url=repo['url'],
                retrieval_date=datetime.datetime.now().strftime("%Y-%m-%d"),
@@ -163,7 +124,7 @@ def write_yara_packages(processed_yara_repos, program_version):
          with open(rule_file_path, "w") as f:
 
             # Compose the package header and add the statistics on total rules and skipped rules
-            rule_set_header = RULE_SET_HEADER.format(
+            rule_set_header = config['rule_set_header'].format(
                rule_package_name=rule_package['name'],
                rule_package_description=rule_package['description'],
                program_version=program_version,
@@ -174,8 +135,18 @@ def write_yara_packages(processed_yara_repos, program_version):
                total_rules_skipped_quality=rule_package_statistics['total_rules_skipped_quality'],
             )
 
+            logging.log(logging.INFO, "You can find more information about skipped files in the log file: yara-forge.log when you run it with --debug flag")
+
             # Prepend the header to the output rule set strings
             output_rule_set_strings.insert(0, rule_set_header)
 
             # Write the output rule set strings to the file
             f.write("".join(output_rule_set_strings))
+
+      # Add the name of the repo and the file path to the output file to the list 
+      package_files.append({
+         "name": rule_package['name'],
+         "file_path": rule_file_path,
+      })
+
+      return package_files

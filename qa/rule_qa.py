@@ -4,21 +4,7 @@ from plyara.utils import rebuild_yara_rule
 from pprint import pprint
 from qa.yaraQA.main.core import YaraQA
 
-# Explanations for the different issue levels used in the rule quality analysis
-# Level 1 - cosmetic issues with the rule
-# Level 2 - minor issues with the rule
-# Level 3 - major issues with the rule
-# Level 4 - critical issues with the rule
-
-# Levels and quality score reduction
-ISSUE_LEVELS = {
-   1: 5,
-   2: 20,
-   3: 40,
-   4: 100
-}
-
-def evaluate_rules_quality(processed_yara_repos):
+def evaluate_rules_quality(processed_yara_repos, config):
 
    # Create a yaraQA object
    yaraQA = YaraQA()
@@ -62,7 +48,7 @@ def evaluate_rules_quality(processed_yara_repos):
             issue_statistics['issues_efficiency'] += len(issues_efficiency)
             # Loop over the issues
             for issue in issues:
-               issue['score'] = ISSUE_LEVELS[issue['level']]
+               issue['score'] = config['issue_levels'][issue['level']]
             # Calculate the total score   
             total_score = sum([issue['score'] for issue in issues])
             # Add the total score to the rule's quality score 
@@ -129,3 +115,16 @@ def modify_yara_rule_quality(rule_meta_data, reduction_value):
             mdata[k] += reduction_value
             return meta_data_copy
    return rule_meta_data
+
+def check_yara_packages(repo_files):
+   # Loop over the list and print the file names
+   for repo_file in repo_files:
+      logging.info("Checking YARA package '%s' in file: %s" % (repo_file['name'], repo_file['file_path']))
+      # Compile the rule set
+      try:
+         # Check for errors
+         compiled_rule = yara.compile(filepath=repo_file['file_path'])
+      except Exception as e:
+         logging.error("The rule set didn't compile without errors: %s" % e)
+         return False
+   return True

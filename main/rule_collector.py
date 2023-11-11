@@ -5,43 +5,17 @@ import plyara
 import datetime
 import logging
 
-REPO_STAGING_DIR = "./repos"
-
-YARA_REPOS = [
-   # {
-   #    "name": "AvastTI",
-   #    "url": 'https://github.com/avast/ioc',
-   #    "author": "Avast Threat Intel Team",
-   #    "quality": 90,
-   #    "branch": "master"
-   # },
-   {
-      "name": "YARA Style Guide",  # used in headers and as prefix for each of the rules (so keep it short)
-      "url": 'https://github.com/Neo23x0/YARA-Style-Guide',  # URL of the repository on GitHub
-      "author": "Florian Roth",  # used when the author is not defined in the rule
-      "quality": 80,  # 0-100 (0 = low, 100 = high) base value; indicates the quality of the rules in the repository
-      "branch": "master"  # name of the branch to download
-   },
-   # {
-   #    "name": "ReversingLabs",
-   #    "url": 'https://github.com/reversinglabs/reversinglabs-yara-rules/',
-   #    "author": "ReversingLabs",
-   #    "quality": 90,
-   #    "branch": "develop"
-   # },
-]
-
 # Retrieve YARA rules from online repositories
-def retrieve_yara_rule_sets():
+def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
    
    # The list of YARA rule sets of all repositories
    yara_rule_repo_sets = []
 
    # Remove the existing repo directory and all its contents
-   shutil.rmtree(os.path.join(REPO_STAGING_DIR), ignore_errors=True)
+   shutil.rmtree(os.path.join(repo_staging_dir), ignore_errors=True)
    
    # Loop over the repositories
-   for repo in YARA_REPOS:
+   for repo in yara_repos:
       
       # Output the repository information to the console in a single line
       logging.log(logging.INFO, "Retrieving YARA rules from repository: %s" % repo['name'])
@@ -52,12 +26,12 @@ def retrieve_yara_rule_sets():
       repo['repo'] = repo_url_parts[4].split(".")[0]
 
       # Clone the repository
-      repo_folder = os.path.join(REPO_STAGING_DIR, repo['repo'])
+      repo_folder = os.path.join(repo_staging_dir, repo['repo'])
       Repo.clone_from(repo['url'], repo_folder, branch=repo['branch'])
 
       # Walk through the extracted folders and find a LICENSE file and save it into the repository object
       repo['license'] = "NO LICENSE SET"
-      for root, dirs, files in os.walk(os.path.join(REPO_STAGING_DIR, repo['repo'])):
+      for root, dirs, files in os.walk(os.path.join(repo_staging_dir, repo['repo'])):
          for file in files:
             if file == "LICENSE" or file == "LICENSE.txt" or file == "LICENSE.md":
                file_path = os.path.join(root, file)

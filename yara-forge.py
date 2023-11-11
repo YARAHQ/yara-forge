@@ -7,16 +7,17 @@
 # Florian Roth
 # November 2023
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 import argparse
 import pprint
 import logging
+import yaml
 
 from main.rule_collector import retrieve_yara_rule_sets
 from main.rule_processors import process_yara_rules
 from main.rule_output import write_yara_packages
-from qa.rule_qa import evaluate_rules_quality
+from qa.rule_qa import evaluate_rules_quality, check_yara_packages
 
 
 # Write a section header with dividers
@@ -68,9 +69,13 @@ if __name__ == "__main__":
    logger.addHandler(ch)
    logger.addHandler(fh)
 
+   # Read configuration file
+   with open('yara-forge-config.yml', 'r') as f:
+      YARA_FORGE_CONFIG = yaml.safe_load(f)
+
    # Retrieve the YARA rule sets
    write_section_header("Retrieving YARA rule sets")
-   yara_rule_repo_sets = retrieve_yara_rule_sets()
+   yara_rule_repo_sets = retrieve_yara_rule_sets(YARA_FORGE_CONFIG['repo_staging_dir'], YARA_FORGE_CONFIG['yara_repositories'])
    #pprint.pprint(yara_rule_repo_sets)
 
    # Process the YARA rules
@@ -79,8 +84,17 @@ if __name__ == "__main__":
 
    # Evaluate the quality of the rules
    write_section_header("Evaluating YARA rules")
-   evaluate_rules_quality(processed_yara_repos)
+   evaluate_rules_quality(processed_yara_repos, YARA_FORGE_CONFIG)
 
    # Write the YARA packages
    write_section_header("Writing YARA packages")
-   write_yara_packages(processed_yara_repos, program_version=__version__)
+   repo_files = write_yara_packages(processed_yara_repos, program_version=__version__, config=YARA_FORGE_CONFIG)
+
+   # We quality check the output files and look for errors
+   write_section_header("Quality checking YARA packages")
+   test_successful = check_yara_packages(repo_files)
+   if test_successful:
+      logging.log(logging.INFO, "Quality check finished successfully")
+   else:
+      logging.log(logging.ERROR, "Quality check failed")
+
