@@ -1,5 +1,8 @@
 name: Weekly Release
 
+permissions:
+  contents: write
+
 on:
   schedule:
     # Run at 00:00 every Sunday, use cron syntax to set the schedule
