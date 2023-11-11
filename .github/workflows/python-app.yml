@@ -18,7 +18,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Check out repository with submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: 'recursive' # Fetches all submodules recursively
+        python-version: ${{ matrix.python-version }}
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
