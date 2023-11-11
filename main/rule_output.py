@@ -8,7 +8,6 @@ import dateparser
 from plyara.utils import rebuild_yara_rule
 
 
-# Loop over the rules and write them as plain text into separate files
 def write_yara_packages(processed_yara_repos, program_version, config):
     """
     Writes YARA rules into separate files.

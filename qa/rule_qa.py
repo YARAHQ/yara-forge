@@ -10,6 +10,7 @@ import yara
 from plyara.utils import rebuild_yara_rule
 from qa.yaraQA.main.core import YaraQA
 
+
 def evaluate_rules_quality(processed_yara_repos, config):
     """
     Evaluates the quality of YARA rules.
@@ -21,7 +22,7 @@ def evaluate_rules_quality(processed_yara_repos, config):
     # Loop over the repositories
     for repo_rule_sets in processed_yara_repos:
         # Analyze the rule sets
-        logging.info("Evaluating rules from repository: {repo_rule_sets['name']}")
+        logging.info("Evaluating rules from repository: %s", repo_rule_sets['name'])
         # Issue statistics 
         issue_statistics = {
             "issues_syntax": 0,
@@ -115,7 +116,7 @@ def check_syntax_issues(rule):
             })
     return issues
 
-# Modify the quality score of a YARA rule
+
 def modify_yara_rule_quality(rule_meta_data, reduction_value):
     """
     Modifies the quality score of a YARA rule.
@@ -130,6 +131,7 @@ def modify_yara_rule_quality(rule_meta_data, reduction_value):
                 mdata[k] += reduction_value
                 return meta_data_copy
     return rule_meta_data
+
 
 def check_yara_packages(repo_files):
     """

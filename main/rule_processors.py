@@ -11,7 +11,7 @@ date_lookup_cache = {}
 # Private YARA rules
 private_rule_mapping = []
 
-# Process the YARA rules
+
 def process_yara_rules(yara_rule_repo_sets):
     """
     Processes the YARA rules
@@ -109,7 +109,7 @@ def process_yara_rules(yara_rule_repo_sets):
 
     return yara_rule_repo_sets
 
-# Adjust the identifier names of a rule to align them with the new private rule names
+
 def adjust_identifier_names(condition_terms, private_rules_used):
     """
     Adjust the identifier names of a rule to align them with the new private rule names
@@ -124,7 +124,7 @@ def adjust_identifier_names(condition_terms, private_rules_used):
                 condition_terms[i] = private_rule['new_name']
     return condition_terms
 
-# Check if the rule uses private rules
+
 def check_rule_uses_private_rules(rule, ext_private_rule_mapping):
     """
     Check if the rule uses private rules
@@ -139,7 +139,7 @@ def check_rule_uses_private_rules(rule, ext_private_rule_mapping):
             private_rules_used.append(private_rule)
     return private_rules_used
 
-# Check if there's a description set in the YARA rule and if not, add the repository description
+
 def align_yara_rule_description(rule_meta_data, repo_description):
     """
     Check if there's a description set in the YARA rule and if not, add the repository description
@@ -186,7 +186,6 @@ def align_yara_rule_description(rule_meta_data, repo_description):
     return rule_meta_data
 
 
-# Check for all the hash values in the meta data and align them to the key value 'hash'
 def align_yara_rule_hashes(rule_meta_data):
     """
     Check for all the hash values in the meta data and align them to the key value 'hash'
@@ -214,7 +213,6 @@ def align_yara_rule_hashes(rule_meta_data):
     return rule_meta_data
 
 
-# Modify the quality score of a YARA rule
 def modify_yara_rule_quality(rule_meta_data, reduction_value):
     """
     Modifies the quality score of a YARA rule.
@@ -230,7 +228,7 @@ def modify_yara_rule_quality(rule_meta_data, reduction_value):
                 return meta_data_copy
     return rule_meta_data
 
-# Modify a value in the meta data, if it exists, otherwise add it
+
 def modify_meta_data_value(rule_meta_data, key, value):
     """
     Modify a value in the meta data, if it exists, otherwise add it
@@ -264,7 +262,7 @@ def evaluate_yara_rule_score(rule):
     rule_score = base_rule_score + meta_data_modifier
     return rule_score
 
-# Evaluate the score modifier based on the rule meta data
+
 def evaluate_yara_rule_meta_data(rule):
     """
     Evaluate the score modifier based on the rule meta data
@@ -282,7 +280,7 @@ def evaluate_yara_rule_meta_data(rule):
             return -15
     return 0
 
-# Change YARA rule author
+
 def align_yara_rule_author(rule_meta_data, repo_author):
     """
     Change YARA rule author
@@ -312,7 +310,6 @@ def align_yara_rule_author(rule_meta_data, repo_author):
     return rule_meta_data
 
 
-# Change YARA rule name
 def align_yara_rule_name(rule_name, rule_set_id):
     """
     Change YARA rule name
@@ -335,7 +332,6 @@ def align_yara_rule_name(rule_name, rule_set_id):
     return "_".join(new_name_elements)
 
 
-# Modify the YARA rule references
 def align_yara_rule_reference(rule_meta_data, rule_set_url):
     """
     Modify the YARA rule references
@@ -372,7 +368,6 @@ def align_yara_rule_reference(rule_meta_data, rule_set_url):
     return rule_meta_data
 
 
-# Modify the YARA rule date
 def align_yara_rule_date(rule_meta_data, repo_path, file_path):
     """
     Modify the YARA rule date
@@ -453,7 +448,6 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
     return rule_meta_data
 
 
-# Get the last modification date of the rule file from the git log
 def get_rule_age_git(repo_path, file_path):
     """
     Get the last modification date of the rule file from the git log

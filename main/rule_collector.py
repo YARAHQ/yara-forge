@@ -8,7 +8,7 @@ import logging
 import plyara
 from git import Repo
 
-# Retrieve YARA rules from online repositories
+
 def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
     """
     Retrieves YARA rules from online repositories.

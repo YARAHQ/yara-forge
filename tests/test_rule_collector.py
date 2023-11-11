@@ -4,6 +4,7 @@ Test the rule collector.
 import unittest
 from main.rule_collector import retrieve_yara_rule_sets
 
+
 class TestRuleCollector(unittest.TestCase):
     """
     Test the rule collector.
@@ -24,6 +25,7 @@ class TestRuleCollector(unittest.TestCase):
         self.assertEqual(result[0]['name'], 'test')
         self.assertEqual(len(result[0]['rules_sets']), 6)
         self.assertEqual(len(result[0]['rules_sets'][0]['rules']), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

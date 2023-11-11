@@ -29,17 +29,17 @@ def write_section_header(title, divider_with=72):
 
 if __name__ == "__main__":
 
-    print(r'  __  _____    ____  ___       ______                     ');
-    print(r'  \ \/ /   |  / __ \/   |     / ____/___  _________ ____  ');
-    print(r'   \  / /| | / /_/ / /| |    / /_  / __ \/ ___/ __ `/ _ \ ');
-    print(r'   / / ___ |/ _, _/ ___ |   / __/ / /_/ / /  / /_/ /  __/ ');
-    print(r'  /_/_/  |_/_/ |_/_/  |_|  /_/    \____/_/   \__, /\___/  ');
-    print(r'                                            /____/        ');
-    print(r'  YARA Forge                                              ');
-    print(r'  Aligning hundreds of YARA rules to a common standard    ');
-    print(r'                                                          ');
+    print(r'  __  _____    ____  ___       ______                     ')
+    print(r'  \ \/ /   |  / __ \/   |     / ____/___  _________ ____  ')
+    print(r'   \  / /| | / /_/ / /| |    / /_  / __ \/ ___/ __ `/ _ \ ')
+    print(r'   / / ___ |/ _, _/ ___ |   / __/ / /_/ / /  / /_/ /  __/ ')
+    print(r'  /_/_/  |_/_/ |_/_/  |_|  /_/    \____/_/   \__, /\___/  ')
+    print(r'                                            /____/        ')
+    print(r'  YARA Forge                                              ')
+    print(r'  Aligning hundreds of YARA rules to a common standard    ')
+    print(r'                                                          ')
     print(r'  Version %s                                              ' % __version__)
-    print(r'  Florian Roth, November 2023                             ');
+    print(r'  Florian Roth, November 2023                             ')
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", help="enable debug output", action="store_true")
@@ -97,4 +97,3 @@ if __name__ == "__main__":
         logging.log(logging.INFO, "Quality check finished successfully")
     else:
         logging.log(logging.ERROR, "Quality check failed")
-

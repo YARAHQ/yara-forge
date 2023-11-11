@@ -1,26 +1,26 @@
 # Collection -------------------------------------------------------------------
 repo_staging_dir: "./repos"
 yara_repositories:
-	- name: "YARA Style Guide"
-		url: "https://github.com/Neo23x0/YARA-Style-Guide"
-		author: "Florian Roth"
-		quality: 80
-		branch: "master"
-	- name: "AvastTI"
-		url: "https://github.com/avast/ioc"
-		author: "Avast Threat Intel Team"
-		quality: 90
-		branch: "master"
-	- name: "ReversingLabs"
-		url: "https://github.com/reversinglabs/reversinglabs-yara-rules/"
-		author: "ReversingLabs"
-		quality: 90
-		branch: "develop"
-	- name: "Elastic"
-		url: "https://github.com/elastic/protections-artifacts/"
-		author: "Elastic"
-		quality: 90
-		branch: "main"
+  - name: "YARA Style Guide"
+    url: "https://github.com/Neo23x0/YARA-Style-Guide"
+    author: "Florian Roth"
+    quality: 80
+    branch: "master"
+  - name: "AvastTI"
+    url: "https://github.com/avast/ioc"
+    author: "Avast Threat Intel Team"
+    quality: 90
+    branch: "master"
+  - name: "ReversingLabs"
+    url: "https://github.com/reversinglabs/reversinglabs-yara-rules/"
+    author: "ReversingLabs"
+    quality: 90
+    branch: "develop"
+  - name: "Elastic"
+    url: "https://github.com/elastic/protections-artifacts/"
+    author: "Elastic"
+    quality: 90
+    branch: "main"
 
 # Quality Checks ---------------------------------------------------------------
 # Explanations for the different issue levels used in the rule quality analysis
@@ -31,41 +31,41 @@ yara_repositories:
 
 # Levels and quality score reduction
 issue_levels:
-	 1: 5
-	 2: 20
-	 3: 40
-	 4: 100
+   1: 5
+   2: 20
+   3: 40
+   4: 100
 
 # Rule Package Output ----------------------------------------------------------
 yara_rule_packages:
-	- name: "core"
-		description: "Default YARA Rule Package - Core"
-		minimum_quality: 50
-		minimum_age: 0
+  - name: "core"
+    description: "Default YARA Rule Package - Core"
+    minimum_quality: 50
+    minimum_age: 0
 
 rule_set_header: |
-	/*
-	 * YARA-Forge YARA Rule Package
-	 * https://github.com/NextronSystems/yara-forge
-	 * 
-	 * Rule Package Information
-	 * Name: {rule_package_name} 
-	 * Description: {rule_package_description}
-	 * YARA-Forge Version: {program_version}
-	 * Minimum Quality: {rule_package_minimum_quality}
-	 * Minimum Age (in days): {rule_package_minimum_age}
-	 * Creation Date: {retrieval_date}
-	 * Skipped: {total_rules_skipped_age} (age), {total_rules_skipped_quality} (quality)
-	 */
+  /*
+   * YARA-Forge YARA Rule Package
+   * https://github.com/NextronSystems/yara-forge
+   * 
+   * Rule Package Information
+   * Name: {rule_package_name} 
+   * Description: {rule_package_description}
+   * YARA-Forge Version: {program_version}
+   * Minimum Quality: {rule_package_minimum_quality}
+   * Minimum Age (in days): {rule_package_minimum_age}
+   * Creation Date: {retrieval_date}
+   * Skipped: {total_rules_skipped_age} (age), {total_rules_skipped_quality} (quality)
+   */
 repo_header: |
-	/*
-	 * YARA Rule Set
-	 * Repository Name: {repo_name}
-	 * Repository: {repo_url}
-	 * Retrieval Date: {retrieval_date}
-	 * Skipped: {total_rules_skipped_age} (age), {total_rules_skipped_quality} (quality)
-	 * 
-	 * LICENSE
-	 * 
-	 * {repo_license}
-	 */
+  /*
+   * YARA Rule Set
+   * Repository Name: {repo_name}
+   * Repository: {repo_url}
+   * Retrieval Date: {retrieval_date}
+   * Skipped: {total_rules_skipped_age} (age), {total_rules_skipped_quality} (quality)
+   * 
+   * LICENSE
+   * 
+   * {repo_license}
+   */
