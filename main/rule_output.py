@@ -81,7 +81,7 @@ def write_yara_packages(processed_yara_repos, program_version, config):
                             # Check if the rule is old enough
                             if (datetime.datetime.now() - rule_date).days < rule_package['minimum_age']:
                                 logging.debug("Skipping rule %s because it is too young: %s",
-                                              rule['rule_name'], metadata['date'])
+                                              rule['rule_name'], metadata['modified'])
                                 skip_rule = True
                                 rule_set_statistics['total_rules_skipped_age'] += 1
 
