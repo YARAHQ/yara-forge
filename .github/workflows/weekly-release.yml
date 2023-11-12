@@ -59,8 +59,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ env.CURRENT_DATE }}
-        release_name: Release ${{ env.CURRENT_DATE }}
-        body: This release contains the latest YARA rule sets from YARA Forge.
+        release_name: YARA Forge Rule Set Release ${{ env.CURRENT_DATE }}
+        body: |
+          :sparkles: This release contains the latest YARA rule sets from YARA Forge :hammer:
         draft: false
         prerelease: false
 
