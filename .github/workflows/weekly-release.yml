@@ -41,7 +41,7 @@ jobs:
         for folder in packages/*; do
           if [ -d "$folder" ]; then
             foldername=$(basename "$folder")
-            zipfile="${foldername}-${{ env.CURRENT_DATE }}.zip"
+            zipfile="yara-forge-rules-${foldername}-${{ env.CURRENT_DATE }}.zip"
             zip -r "$zipfile" "$folder"
             echo "::set-output name=${foldername}_zip_path::$zipfile"
           fi
@@ -68,8 +68,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./core-${{ env.CURRENT_DATE }}.zip
-        asset_name: core-${{ env.CURRENT_DATE }}.zip
+        asset_path: ./yara-forge-rules-core-${{ env.CURRENT_DATE }}.zip
+        asset_name: yara-forge-rules-core-${{ env.CURRENT_DATE }}.zip
         asset_content_type: application/zip
 
     - name: Upload extended asset
@@ -79,8 +79,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./extended-${{ env.CURRENT_DATE }}.zip
-        asset_name: extended-${{ env.CURRENT_DATE }}.zip
+        asset_path: ./yara-forge-rules-extended-${{ env.CURRENT_DATE }}.zip
+        asset_name: yara-forge-rules-extended-${{ env.CURRENT_DATE }}.zip
         asset_content_type: application/zip
 
     - name: Upload full asset
@@ -90,6 +90,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./full-${{ env.CURRENT_DATE }}.zip
-        asset_name: full-${{ env.CURRENT_DATE }}.zip
+        asset_path: ./yara-forge-rules-full-${{ env.CURRENT_DATE }}.zip
+        asset_name: yara-forge-rules-full-${{ env.CURRENT_DATE }}.zip
         asset_content_type: application/zip
