@@ -32,8 +32,8 @@ yara_repositories:
 # Levels and quality score reduction
 issue_levels:
    1: 5
-   2: 20
-   3: 40
+   2: 25
+   3: 70
    4: 100
 
 # Rule Package Output ----------------------------------------------------------
@@ -45,7 +45,7 @@ yara_rule_packages:
   - name: "extended"
     description: "Default YARA Rule Package - Extended"
     minimum_quality: 50
-    minimum_age: 3
+    minimum_age: 1
   - name: "full"
     description: "Default YARA Rule Package - Full"
     minimum_quality: 20
