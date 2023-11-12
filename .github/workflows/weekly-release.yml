@@ -43,11 +43,14 @@ jobs:
             foldername=$(basename "$folder")
             zipfile="yara-forge-rules-${foldername}-${{ env.CURRENT_DATE }}.zip"
             zip -r "$zipfile" "$folder"
-            echo "::set-output name=${foldername}_zip_path::$zipfile"
+            echo "${foldername}_zip_path=${zipfile}" >> zip_paths.env
           fi
         done
       id: zip_files
       shell: bash
+
+    - name: Set zip paths as env
+      run: cat zip_paths.env >> $GITHUB_ENV
 
     - name: Create Release
       id: create_release
@@ -68,7 +71,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./yara-forge-rules-core-${{ env.CURRENT_DATE }}.zip
+        asset_path: ${{ env.core_zip_path }}
         asset_name: yara-forge-rules-core-${{ env.CURRENT_DATE }}.zip
         asset_content_type: application/zip
 
@@ -79,7 +82,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./yara-forge-rules-extended-${{ env.CURRENT_DATE }}.zip
+        asset_path: ${{ env.extended_zip_path }}
         asset_name: yara-forge-rules-extended-${{ env.CURRENT_DATE }}.zip
         asset_content_type: application/zip
 
@@ -90,6 +93,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./yara-forge-rules-full-${{ env.CURRENT_DATE }}.zip
+        asset_path: ${{ env.full_zip_path }}
         asset_name: yara-forge-rules-full-${{ env.CURRENT_DATE }}.zip
         asset_content_type: application/zip
