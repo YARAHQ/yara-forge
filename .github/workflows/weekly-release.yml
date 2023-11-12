@@ -41,7 +41,7 @@ jobs:
         for folder in packages/*; do
           if [ -d "$folder" ]; then
             foldername=$(basename "$folder")
-            zipfile="yara-forge-rules-${foldername}-${{ env.CURRENT_DATE }}.zip"
+            zipfile="yara-forge-rules-${foldername}.zip"
             zip -r "$zipfile" "$folder"
             echo "${foldername}_zip_path=${zipfile}" >> zip_paths.env
           fi
@@ -73,7 +73,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ env.core_zip_path }}
-        asset_name: yara-forge-rules-core-${{ env.CURRENT_DATE }}.zip
+        asset_name: yara-forge-rules-core.zip
         asset_content_type: application/zip
 
     - name: Upload extended asset
@@ -84,7 +84,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ env.extended_zip_path }}
-        asset_name: yara-forge-rules-extended-${{ env.CURRENT_DATE }}.zip
+        asset_name: yara-forge-rules-extended.zip
         asset_content_type: application/zip
 
     - name: Upload full asset
@@ -95,5 +95,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ env.full_zip_path }}
-        asset_name: yara-forge-rules-full-${{ env.CURRENT_DATE }}.zip
+        asset_name: yara-forge-rules-full.zip
         asset_content_type: application/zip
