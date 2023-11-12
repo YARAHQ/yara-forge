@@ -72,6 +72,17 @@ jobs:
         asset_name: core-${{ env.CURRENT_DATE }}.zip
         asset_content_type: application/zip
 
+    - name: Upload extended asset
+      if: always()
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./extended-${{ env.CURRENT_DATE }}.zip
+        asset_name: extended-${{ env.CURRENT_DATE }}.zip
+        asset_content_type: application/zip
+
     - name: Upload full asset
       if: always()
       uses: actions/upload-release-asset@v1
