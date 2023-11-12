@@ -66,6 +66,8 @@ def write_yara_packages(processed_yara_repos, program_version, config):
             for rule_sets in repo['rules_sets']:
                 # Debug output
                 logging.debug("Writing YARA rules from rule set: %s", rule_sets['file_path'])
+                # List of required private rules
+                required_private_rules = []
                 # Loop over the rules in the rule set
                 for rule in rule_sets['rules']:
 
@@ -94,11 +96,31 @@ def write_yara_packages(processed_yara_repos, program_version, config):
                                 skip_rule = True
                                 rule_set_statistics['total_rules_skipped_quality'] += 1
 
+                    # We skip private rules and add them only if other rules require them
+                    if 'scopes' in rule:
+                        if 'private' in rule['scopes']:
+                            skip_rule = True
+
                     if skip_rule:
                         continue
+                    else:
+                        # Collect all private rules used in the accepted rules
+                        if 'private_rules_used' in rule:
+                            for priv_rule in rule['private_rules_used']:
+                                if priv_rule not in required_private_rules:
+                                    required_private_rules.append(priv_rule)
 
                     # Write the rule into the output file
                     repo_rules_strings.append(rebuild_yara_rule(rule))
+                    rule_set_statistics['total_rules'] += 1
+                
+                # Now we prepare the private rules
+                # Loop over the required private rules
+                for priv_rule in required_private_rules:
+                    # Get the rule from the plyara object
+                    priv_rule_string = rebuild_yara_rule(priv_rule["rule"])
+                    # Prepend the rule to the output string
+                    repo_rules_strings.insert(0, priv_rule_string)
                     rule_set_statistics['total_rules'] += 1
 
             # Only write the rule set if there's at least one rule in the set
@@ -164,4 +186,4 @@ def write_yara_packages(processed_yara_repos, program_version, config):
             "file_path": rule_file_path,
         })
 
-        return package_files
+    return package_files

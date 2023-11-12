@@ -65,6 +65,7 @@ rule_set_header: |
    * Creation Date: {retrieval_date}
    * Skipped: {total_rules_skipped_age} (age), {total_rules_skipped_quality} (quality)
    */
+
 repo_header: |
   /*
    * YARA Rule Set

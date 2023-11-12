@@ -88,6 +88,7 @@ def process_yara_rules(yara_rule_repo_sets):
                     rule_name_new = f"{rule_name_new}_PRIVATE"
                     # Add the rule to the private rule mapping
                     private_rule_mapping.append({
+                        "repo": repo['name'],
                         "old_name": rule_name_old,
                         "new_name": rule_name_new,
                         "rule": rule
@@ -96,11 +97,12 @@ def process_yara_rules(yara_rule_repo_sets):
                 rule['rule_name'] = rule_name_new
 
                 # Check if the rule uses private rules
-                private_rules_used = check_rule_uses_private_rules(rule, private_rule_mapping)
+                private_rules_used = check_rule_uses_private_rules(repo['name'], rule, private_rule_mapping)
                 if private_rules_used:
                     # Change the condition terms of the rule to align them with
                     # the new private rule names
                     rule['condition_terms'] = adjust_identifier_names(
+                        repo['name'],
                         rule['condition_terms'],
                         private_rules_used)
                 # Add the private rules used to the rule
@@ -116,7 +118,7 @@ def process_yara_rules(yara_rule_repo_sets):
     return yara_rule_repo_sets
 
 
-def adjust_identifier_names(condition_terms, private_rules_used):
+def adjust_identifier_names(repo_name, condition_terms, private_rules_used):
     """
     Adjust the identifier names of a rule to align them with the new private rule names
     """
@@ -125,13 +127,13 @@ def adjust_identifier_names(condition_terms, private_rules_used):
         # Loop over the condition terms
         for i, condition_term in enumerate(condition_terms):
             # Check if the condition term is the private rule
-            if condition_term == private_rule['old_name']:
+            if condition_term == private_rule['old_name'] and private_rule['repo'] == repo_name:
                 # Replace the condition term with the new private rule name
                 condition_terms[i] = private_rule['new_name']
     return condition_terms
 
 
-def check_rule_uses_private_rules(rule, ext_private_rule_mapping):
+def check_rule_uses_private_rules(repo_name, rule, ext_private_rule_mapping):
     """
     Check if the rule uses private rules
     """
@@ -140,7 +142,7 @@ def check_rule_uses_private_rules(rule, ext_private_rule_mapping):
     # Loop over the private rules
     for private_rule in ext_private_rule_mapping:
         # Check if the rule uses the private rule
-        if private_rule['old_name'] in rule['condition_terms']:
+        if private_rule['old_name'] in rule['condition_terms'] and private_rule['repo'] == repo_name:
             # Add the private rule to the list of private rules used
             private_rules_used.append(private_rule)
     return private_rules_used
