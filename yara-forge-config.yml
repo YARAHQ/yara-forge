@@ -54,7 +54,7 @@ yara_rule_packages:
 rule_set_header: |
   /*
    * YARA-Forge YARA Rule Package
-   * https://github.com/NextronSystems/yara-forge
+   * https://github.com/YARAHQ/yara-forge
    * 
    * Rule Package Information
    * Name: {rule_package_name} 
