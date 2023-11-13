@@ -50,9 +50,6 @@ def process_yara_rules(yara_rule_repo_sets):
                 # Adding additional meta data values ----------------------------------------
                 # Add a quality value based on the original repo
                 modify_meta_data_value(rule['metadata'], 'quality', repo['quality'])
-                # Add a rule source URL to the original file
-                modify_meta_data_value(rule['metadata'], 'source_url', 
-                                       f'{repo["url"]}/blob/{repo["branch"]}/{rules["file_path"]}')
 
                 # Modifying existing meta data values ---------------------------------------
 
@@ -108,6 +105,15 @@ def process_yara_rules(yara_rule_repo_sets):
                 # Add the private rules used to the rule
                 rule['private_rules_used'] = private_rules_used
                 logging.debug("Private rules used: %s", private_rules_used)
+
+                # Add a rule source URL to the original file
+                modify_meta_data_value(
+                    rule['metadata'], 'source_url',
+                    (
+                        f'{repo["url"]}/blob/{repo["branch"]}/{rules["file_path"]}'
+                        f'#L{rule["start_line"]}-L{rule["stop_line"]}'
+                    )
+                )
 
                 # Count the number of rules
                 num_rules += 1

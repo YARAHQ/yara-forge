@@ -5,6 +5,7 @@ import os
 import shutil
 import datetime
 import logging
+#from pprint import pprint
 import plyara
 from git import Repo
 
@@ -76,6 +77,7 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
                                           len(yara_rules), file_path)
                             # Append to list of YARA rule sets
                             yara_rule_sets.append(yara_rule_set)
+                            #pprint(yara_rule_set)
 
                         except Exception as e:
                             print(e)
