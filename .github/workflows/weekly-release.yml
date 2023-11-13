@@ -65,6 +65,17 @@ jobs:
         draft: false
         prerelease: false
 
+    - name: Upload build log file
+      if: always()
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: yara-forge.log
+        asset_name: yara-forge-log.txt
+        asset_content_type: application/zip
+
     - name: Upload core asset
       if: always()
       uses: actions/upload-release-asset@v1
