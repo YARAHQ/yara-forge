@@ -19,7 +19,7 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
     yara_rule_repo_sets = []
 
     # Remove the existing repo directory and all its contents
-    shutil.rmtree(os.path.join(repo_staging_dir), ignore_errors=True)
+    shutil.rmtree(os.path.join(repo_staging_dir), ignore_errors=False)
 
     # Loop over the repositories
     for repo in yara_repos:
@@ -34,7 +34,7 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
 
         # Clone the repository
         repo_folder = os.path.join(repo_staging_dir, repo['repo'])
-        Repo.clone_from(repo['url'], repo_folder, branch=repo['branch'])
+        repo['commit_hash'] = Repo.clone_from(repo['url'], repo_folder, branch=repo['branch']).head.commit.hexsha
 
         # Walk through the extracted folders and find a LICENSE file
         # and save it into the repository object
@@ -49,7 +49,12 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
 
         # Walk through the extracted folders and find all YARA files
         yara_rule_sets = []
-        for root, _, files in os.walk(repo_folder):
+        # Walk a sub folder if one is set in the config
+        walk_folder = repo_folder
+        if 'path' in repo:
+            walk_folder = os.path.join(repo_folder, repo['path'])
+        # Walk the folder and find all YARA files
+        for root, _, files in os.walk(walk_folder):
             for file in files:
                 if file.endswith(".yar") or file.endswith(".yara"):
                     file_path = os.path.join(root, file)
@@ -95,6 +100,7 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
             "rules_sets": yara_rule_sets,
             "quality": repo['quality'],
             "license": repo['license'],
+            "commit_hash": repo['commit_hash'],
             "retrieval_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "repo_path": repo_folder,
         }

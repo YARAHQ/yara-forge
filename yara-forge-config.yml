@@ -6,11 +6,12 @@ yara_repositories:
     author: "Florian Roth"
     quality: 80
     branch: "master"
-  - name: "AvastTI"
-    url: "https://github.com/avast/ioc"
-    author: "Avast Threat Intel Team"
-    quality: 90
-    branch: "master"
+# License prevents the integration of the rules into the YARA-Forge
+#  - name: "AvastTI"
+#    url: "https://github.com/avast/ioc"
+#    author: "Avast Threat Intel Team"
+#    quality: 90
+#    branch: "master"
   - name: "ReversingLabs"
     url: "https://github.com/reversinglabs/reversinglabs-yara-rules/"
     author: "ReversingLabs"
@@ -21,6 +22,17 @@ yara_repositories:
     author: "Elastic"
     quality: 90
     branch: "main"
+  - name: "R3c0nst"
+    url: "https://github.com/fboldewin/YARA-rules/"
+    author: "Frank Boldewin"
+    quality: 90
+    branch: "master"
+  - name: "CAPE"
+    url: "https://github.com/kevoreilly/CAPEv2"
+    author: "Kevin O'Reilly"
+    quality: 90
+    branch: "master"
+    path: "data/yara"
 
 # Quality Checks ---------------------------------------------------------------
 # Explanations for the different issue levels used in the rule quality analysis
@@ -60,6 +72,7 @@ rule_set_header: |
    * Name: {rule_package_name} 
    * Description: {rule_package_description}
    * YARA-Forge Version: {program_version}
+   * YARA-QA Commit: {yaraqa_commit}
    * Minimum Quality: {rule_package_minimum_quality}
    * Minimum Age (in days): {rule_package_minimum_age}
    * Creation Date: {retrieval_date}
@@ -72,6 +85,7 @@ repo_header: |
    * Repository Name: {repo_name}
    * Repository: {repo_url}
    * Retrieval Date: {retrieval_date}
+   * Git Commit: {repo_commit}
    * Skipped: {total_rules_skipped_age} (age), {total_rules_skipped_quality} (quality)
    * 
    * LICENSE

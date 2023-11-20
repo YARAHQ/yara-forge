@@ -153,3 +153,16 @@ def check_yara_packages(repo_files):
             logging.error("The rule set didn't compile without errors: %s", e)
             return False
     return True
+
+
+def get_yara_qa_commit_hash():
+    """
+    Returns the current commit hash of the lst commit of the YARA QA sub repository.
+    """
+    # Get the current commit hash of the YARA QA sub repository
+    try:
+        with open("qa/yaraQA/.git/refs/heads/master", "r", encoding="utf-8") as f:
+            return f.read().strip()
+    except Exception as e:
+        logging.warning("Couldn't get the commit hash of the YARA QA repository: %s", e)
+        return "unknown"

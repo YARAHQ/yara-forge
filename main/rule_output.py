@@ -8,7 +8,7 @@ import dateparser
 from plyara.utils import rebuild_yara_rule
 
 
-def write_yara_packages(processed_yara_repos, program_version, config):
+def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, config):
     """
     Writes YARA rules into separate files.
     """
@@ -130,6 +130,7 @@ def write_yara_packages(processed_yara_repos, program_version, config):
                     repo_name=repo['name'],
                     repo_url=repo['url'],
                     retrieval_date=datetime.datetime.now().strftime("%Y-%m-%d"),
+                    repo_commit=repo['commit_hash'],
                     total_rules_skipped_age=rule_set_statistics['total_rules_skipped_age'],
                     total_rules_skipped_quality=rule_set_statistics['total_rules_skipped_quality'],
                     repo_license=repo['license']
@@ -147,7 +148,7 @@ def write_yara_packages(processed_yara_repos, program_version, config):
         # Add the repo statistics to the the rule package statistics
         rule_package_statistics = {key: rule_package_statistics[key] + rule_set_statistics.get(key, 0) for key in rule_package_statistics}
 
-        # Write the rule package statistics including total and skipped rules to the console
+        # Print the rule package statistics including total and skipped rules to the console
         logging.log(logging.INFO, "-------------------------------------------------------")
         logging.info("Rule package: '%s' Total rules: %d, Skipped: %d (age), %d (quality)",
                      rule_package['name'],
@@ -164,6 +165,7 @@ def write_yara_packages(processed_yara_repos, program_version, config):
                     rule_package_name=rule_package['name'],
                     rule_package_description=rule_package['description'],
                     program_version=program_version,
+                    yaraqa_commit=yaraqa_commit,
                     rule_package_minimum_quality=rule_package['minimum_quality'],
                     rule_package_minimum_age=rule_package['minimum_age'],
                     retrieval_date=datetime.datetime.now().strftime("%Y-%m-%d"),

@@ -17,7 +17,7 @@ import yaml
 from main.rule_collector import retrieve_yara_rule_sets
 from main.rule_processors import process_yara_rules
 from main.rule_output import write_yara_packages
-from qa.rule_qa import evaluate_rules_quality, check_yara_packages
+from qa.rule_qa import evaluate_rules_quality, check_yara_packages, get_yara_qa_commit_hash
 
 
 # Write a section header with dividers
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     print(r'  /_/_/  |_/_/ |_/_/  |_|  /_/    \____/_/   \__, /\___/  ')
     print(r'                                            /____/        ')
     print(r'  YARA Forge                                              ')
-    print(r'  Aligning hundreds of YARA rules to a common standard    ')
+    print(r'  Brining Order to Chaos                                  ')
     print(r'                                                          ')
     print(r'  Version %s                                              ' % __version__)
     print(r'  Florian Roth, November 2023                             ')
@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
     # Write the YARA packages
     write_section_header("Writing YARA packages")
-    repo_files = write_yara_packages(processed_yara_repos, program_version=__version__, config=YARA_FORGE_CONFIG)
+    repo_files = write_yara_packages(processed_yara_repos, program_version=__version__, yaraqa_commit=get_yara_qa_commit_hash(), config=YARA_FORGE_CONFIG)
 
     # We quality check the output files and look for errors
     write_section_header("Quality checking YARA packages")

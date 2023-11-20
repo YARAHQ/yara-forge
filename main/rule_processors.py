@@ -3,6 +3,7 @@ This file contains functions that process the YARA rules.
 """
 import logging
 import dateparser
+from pprint import pprint
 from git import Repo
 
 # Date Lookup Cache
@@ -110,7 +111,7 @@ def process_yara_rules(yara_rule_repo_sets):
                 modify_meta_data_value(
                     rule['metadata'], 'source_url',
                     (
-                        f'{repo["url"]}/blob/{repo["branch"]}/{rules["file_path"]}'
+                        f'{repo["url"]}/blob/{repo["commit_hash"]}/{rules["file_path"]}'
                         f'#L{rule["start_line"]}-L{rule["stop_line"]}'
                     )
                 )
@@ -454,6 +455,8 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
         rule_meta_data.append({'date': git_creation_date.strftime("%Y-%m-%d")})
 
     # MODIFICATION DATE -----------------------------------------------------------
+    # We create a copy so that we can delete elements from the original
+    meta_data_copy = rule_meta_data.copy()
     # Now we check for a modification date
     modified_found = False
     for meta_data in meta_data_copy:
