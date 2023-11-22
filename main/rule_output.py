@@ -6,7 +6,7 @@ import logging
 import datetime
 import dateparser
 from plyara.utils import rebuild_yara_rule
-
+from pprint import pprint
 
 def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, config):
     """
@@ -56,7 +56,7 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
             repo_rules_strings = []
 
             # Statistics for the rule package
-            rule_set_statistics = {
+            rule_repo_statistics = {
                 "total_rules": 0,
                 "total_rules_skipped_age": 0,
                 "total_rules_skipped_quality": 0,
@@ -85,7 +85,7 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
                                 logging.debug("Skipping rule %s because it is too young: %s",
                                               rule['rule_name'], metadata['modified'])
                                 skip_rule = True
-                                rule_set_statistics['total_rules_skipped_age'] += 1
+                                rule_repo_statistics['total_rules_skipped_age'] += 1
 
                         # Quality check --------------------------------------------------
                         if "quality" in metadata:
@@ -94,7 +94,7 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
                                 logging.debug("Skipping rule %s because of insufficient quality score: %d",
                                               rule['rule_name'], metadata['quality'])
                                 skip_rule = True
-                                rule_set_statistics['total_rules_skipped_quality'] += 1
+                                rule_repo_statistics['total_rules_skipped_quality'] += 1
 
                     # We skip private rules and add them only if other rules require them
                     if 'scopes' in rule:
@@ -112,7 +112,7 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
 
                     # Write the rule into the output file
                     repo_rules_strings.append(rebuild_yara_rule(rule))
-                    rule_set_statistics['total_rules'] += 1
+                    rule_repo_statistics['total_rules'] += 1
                 
                 # Now we prepare the private rules
                 # Loop over the required private rules
@@ -121,7 +121,7 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
                     priv_rule_string = rebuild_yara_rule(priv_rule["rule"])
                     # Prepend the rule to the output string
                     repo_rules_strings.insert(0, priv_rule_string)
-                    rule_set_statistics['total_rules'] += 1
+                    rule_repo_statistics['total_rules'] += 1
 
             # Only write the rule set if there's at least one rule in the set
             if len(repo_rules_strings) > 0:
@@ -131,22 +131,23 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
                     repo_url=repo['url'],
                     retrieval_date=datetime.datetime.now().strftime("%Y-%m-%d"),
                     repo_commit=repo['commit_hash'],
-                    total_rules_skipped_age=rule_set_statistics['total_rules_skipped_age'],
-                    total_rules_skipped_quality=rule_set_statistics['total_rules_skipped_quality'],
+                    total_rules_skipped_age=rule_repo_statistics['total_rules_skipped_age'],
+                    total_rules_skipped_quality=rule_repo_statistics['total_rules_skipped_quality'],
                     repo_license=repo['license']
                 )
                 # Append the rule set string to the list of rule set strings
                 output_rule_set_strings.append(repo_rule_set_header)
                 output_rule_set_strings.extend(repo_rules_strings)
-                # Write the rule set statistics including total and skipped rules to the console
-                logging.info("Rule set: '%s' Total rules: %d, Skipped: %d (age), %d (quality)",
-                             repo['name'],
-                             rule_set_statistics['total_rules'],
-                             rule_set_statistics['total_rules_skipped_age'],
-                             rule_set_statistics['total_rules_skipped_quality'])
+            
+            # Write the rule set statistics including total and skipped rules to the console
+            logging.info("Rule set: '%s' Total rules: %d, Skipped: %d (age), %d (quality)",
+                            repo['name'],
+                            rule_repo_statistics['total_rules'],
+                            rule_repo_statistics['total_rules_skipped_age'],
+                            rule_repo_statistics['total_rules_skipped_quality'])
 
-        # Add the repo statistics to the the rule package statistics
-        rule_package_statistics = {key: rule_package_statistics[key] + rule_set_statistics.get(key, 0) for key in rule_package_statistics}
+            # Add the repo statistics to the the rule package statistics
+            rule_package_statistics = {key: rule_package_statistics.get(key, 0) + rule_repo_statistics.get(key, 0) for key in rule_package_statistics}
 
         # Print the rule package statistics including total and skipped rules to the console
         logging.log(logging.INFO, "-------------------------------------------------------")
@@ -156,7 +157,7 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
                      rule_package_statistics['total_rules_skipped_age'],
                      rule_package_statistics['total_rules_skipped_quality'])
 
-        # Only write the rule file if there's at least one rule in the set
+        # Only write the rule file if there's at least one rule in all sets in the package
         if rule_package_statistics['total_rules'] > 0:
             with open(rule_file_path, "w", encoding="utf-8") as f:
 
@@ -181,6 +182,11 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
 
                 # Write the output rule set strings to the file
                 f.write("".join(output_rule_set_strings))
+
+        else:
+            # remove the output file if it exists
+            if os.path.exists(rule_file_path):
+                os.remove(rule_file_path)
 
         # Add the name of the repo and the file path to the output file to the list
         package_files.append({

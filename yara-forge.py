@@ -7,7 +7,7 @@
 # Florian Roth
 # November 2023
 
-__version__ = '0.3.1'
+__version__ = '0.4.0'
 
 import argparse
 import pprint
@@ -18,6 +18,7 @@ from main.rule_collector import retrieve_yara_rule_sets
 from main.rule_processors import process_yara_rules
 from main.rule_output import write_yara_packages
 from qa.rule_qa import evaluate_rules_quality, check_yara_packages, get_yara_qa_commit_hash
+
 
 
 # Write a section header with dividers
@@ -86,11 +87,11 @@ if __name__ == "__main__":
 
     # Evaluate the quality of the rules
     write_section_header("Evaluating YARA rules")
-    evaluate_rules_quality(processed_yara_repos, YARA_FORGE_CONFIG)
+    evaluated_yara_repos = evaluate_rules_quality(processed_yara_repos, YARA_FORGE_CONFIG)
 
     # Write the YARA packages
     write_section_header("Writing YARA packages")
-    repo_files = write_yara_packages(processed_yara_repos, program_version=__version__, yaraqa_commit=get_yara_qa_commit_hash(), config=YARA_FORGE_CONFIG)
+    repo_files = write_yara_packages(evaluated_yara_repos, program_version=__version__, yaraqa_commit=get_yara_qa_commit_hash(), config=YARA_FORGE_CONFIG)
 
     # We quality check the output files and look for errors
     write_section_header("Quality checking YARA packages")

@@ -3,7 +3,7 @@ This file contains functions that process the YARA rules.
 """
 import logging
 import dateparser
-from pprint import pprint
+#from pprint import pprint
 from git import Repo
 
 # Date Lookup Cache
@@ -116,6 +116,12 @@ def process_yara_rules(yara_rule_repo_sets):
                     )
                 )
 
+                # Add license URL
+                modify_meta_data_value(rule['metadata'], 'license_url', repo['license_url'])
+
+                # Sort the meta data values
+                rule['metadata'] = sort_meta_data_values(rule['metadata'])
+
                 # Count the number of rules
                 num_rules += 1
 
@@ -124,6 +130,19 @@ def process_yara_rules(yara_rule_repo_sets):
 
     return yara_rule_repo_sets
 
+
+def sort_meta_data_values(rule_meta_data):
+    """
+    Sort the meta data values
+    """
+    # Fixed order of meta data values
+    fixed_order = ['description', 'author', 'date', 'modified', 'reference',
+                   'old_rule_name', 'source_url', 'hash', 'score', 'quality']
+
+    # We loop over the list of dicts and sort them by key according to our fixed_order
+    rule_meta_data.sort(key=lambda x: fixed_order.index(list(x.keys())[0]) if list(x.keys())[0] in fixed_order else len(fixed_order))
+
+    return rule_meta_data
 
 def adjust_identifier_names(repo_name, condition_terms, private_rules_used):
     """
@@ -463,10 +482,11 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
         for key, value in meta_data.items():
             # If the key is in the list of possible date names, then we found the date
             if key in modified_names:
-                modified_found = True
                 modified_value = dateparser.parse(value)
-                # Remove the date from the original meta data
-                rule_meta_data.remove(meta_data)
+                if modified_value:
+                    modified_found = True
+                    # Remove the date from the original meta data
+                    rule_meta_data.remove(meta_data)
     # If the modified date was found and removed, add the new streamlined date value
     if modified_found:
         rule_meta_data.append({'modified': modified_value.strftime("%Y-%m-%d")})

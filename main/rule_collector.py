@@ -33,16 +33,19 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
         repo['repo'] = repo_url_parts[4].split(".")[0]
 
         # Clone the repository
-        repo_folder = os.path.join(repo_staging_dir, repo['repo'])
+        repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'])
         repo['commit_hash'] = Repo.clone_from(repo['url'], repo_folder, branch=repo['branch']).head.commit.hexsha
 
         # Walk through the extracted folders and find a LICENSE file
         # and save it into the repository object
         repo['license'] = "NO LICENSE SET"
-        for root, _, files in os.walk(os.path.join(repo_staging_dir, repo['repo'])):
+        repo['license_url'] = "N/A"
+        for root, dir, files in os.walk(repo_folder):
             for file in files:
                 if file == "LICENSE" or file == "LICENSE.txt" or file == "LICENSE.md":
                     file_path = os.path.join(root, file)
+                    url_path = os.path.relpath(file_path, start=repo_folder)
+                    repo['license_url'] = f'{repo["url"]}/blob/{repo["commit_hash"]}/{url_path}'
                     with open(file_path, "r", encoding="utf-8") as f:
                         repo['license'] = f.read()
                         break
@@ -91,7 +94,7 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
 
         # Append the YARA rule repository
         yara_rule_repo = {
-            "name": repo['name'],
+            "name": repo['name'].replace(" ", "_").replace("-", "_"),
             "url": repo['url'],
             "author": repo['author'],
             "owner": repo['owner'],
@@ -100,12 +103,14 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
             "rules_sets": yara_rule_sets,
             "quality": repo['quality'],
             "license": repo['license'],
+            "license_url": repo['license_url'],
             "commit_hash": repo['commit_hash'],
             "retrieval_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "repo_path": repo_folder,
         }
         yara_rule_repo_sets.append(yara_rule_repo)
 
+        # Output the number of YARA rules retrieved from the repository
         logging.info("Retrieved %d YARA rules from repository: %s",
                      len(yara_rule_sets), repo['name'])
 

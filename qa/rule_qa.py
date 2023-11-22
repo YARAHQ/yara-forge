@@ -6,9 +6,11 @@ and for reducing the quality score of a rule based on the issues found.
 """
 
 import logging
+import yaml
 import yara
 from plyara.utils import rebuild_yara_rule
 from qa.yaraQA.main.core import YaraQA
+#from pprint import pprint
 
 
 def evaluate_rules_quality(processed_yara_repos, config):
@@ -19,8 +21,11 @@ def evaluate_rules_quality(processed_yara_repos, config):
     # Create a yaraQA object
     yara_qa = YaraQA()
 
+    # Create a copy of the the repos to work with
+    processed_yara_repos_copy = processed_yara_repos.copy()
+
     # Loop over the repositories
-    for repo_rule_sets in processed_yara_repos:
+    for repo_rule_sets in processed_yara_repos_copy:
         # Analyze the rule sets
         logging.info("Evaluating rules from repository: %s", repo_rule_sets['name'])
         # Issue statistics 
@@ -64,13 +69,36 @@ def evaluate_rules_quality(processed_yara_repos, config):
                     issue['score'] = config['issue_levels'][issue['level']]
                 # Calculate the total score
                 total_score = sum(issue['score'] for issue in issues)
+
+                # Apply a custom quality reduction if the rule has shown to be
+                # prone to false positives
+                custom_score_reduction = retrieve_custom_score_reduction(rule)
+                total_score += custom_score_reduction
+
                 # Add the total score to the rule's quality score
-                rule['metadata'] = modify_yara_rule_quality(rule['metadata'], -total_score)
+                rule['metadata'] = modify_yara_rule_quality(rule['metadata'], total_score)
 
         # Print the issues statistics
         logging.info("Issues statistics: %d syntax issues, %d efficiency issues", 
                      issue_statistics['issues_syntax'], issue_statistics['issues_efficiency'])
 
+    return processed_yara_repos_copy
+
+
+def retrieve_custom_score_reduction(rule):
+    """
+    Retrieves a custom score reduction for a rule.
+    """
+    # Read the scores from the YAML file named custom-score-reductions.yml
+    with open('custom-score-reductions.yml', 'r', encoding='utf-8') as f:
+        custom_score_reductions = yaml.safe_load(f)
+        # Loop over the rules in the YAML file
+        for custom_score_reduction in custom_score_reductions['noisy-rules']:
+            # Check if the rule name matches
+            if custom_score_reduction['name'] == rule['rule_name']:
+                # Return the score reduction
+                return custom_score_reduction['quality']
+    return 0
 
 def check_syntax_issues(rule):
     """
