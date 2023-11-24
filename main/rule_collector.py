@@ -18,8 +18,10 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
     # The list of YARA rule sets of all repositories
     yara_rule_repo_sets = []
 
-    # Remove the existing repo directory and all its contents
-    shutil.rmtree(os.path.join(repo_staging_dir), ignore_errors=False)
+    # Check if the directory exists
+    if os.path.exists(repo_staging_dir):
+        # Remove the existing repo directory and all its contents
+        shutil.rmtree(os.path.join(repo_staging_dir), ignore_errors=False)
 
     # Loop over the repositories
     for repo in yara_repos:
