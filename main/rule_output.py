@@ -8,7 +8,7 @@ import dateparser
 from plyara.utils import rebuild_yara_rule
 from pprint import pprint
 
-def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, config):
+def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YARA_FORGE_CONFIG):
     """
     Writes YARA rules into separate files.
     """
@@ -17,13 +17,15 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
     package_files = []
 
     # Loop over the rule packages
-    for rule_package in config['yara_rule_packages']:
+    for rule_package in YARA_FORGE_CONFIG['yara_rule_packages']:
 
         # Statistics for the rule package
         rule_package_statistics = {
             "total_rules": 0,
             "total_rules_skipped_age": 0,
             "total_rules_skipped_quality": 0,
+            "total_rules_skipped_importance": 0,
+            "total_rules_skipped_score": 0,
         }
 
         # Create the directory for the rule package
@@ -54,12 +56,15 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
 
             # Repo rule set string
             repo_rules_strings = []
+            already_added_priv_rules = []
 
             # Statistics for the rule package
             rule_repo_statistics = {
                 "total_rules": 0,
                 "total_rules_skipped_age": 0,
                 "total_rules_skipped_quality": 0,
+                "total_rules_skipped_importance": 0,
+                "total_rules_skipped_score": 0,
             }
 
             # Loop over the rule sets in the repository and modify the rules
@@ -73,6 +78,9 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
 
                     # Perform some check based on the meta data of the rule
                     skip_rule = False
+                    skip_rule_reason = None
+                    # Some values that will help with the decision whether to skip the rule
+                    importance = None
                     # Loop over the metadata
                     for metadata in rule['metadata']:
 
@@ -82,26 +90,62 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
                             rule_date = dateparser.parse(metadata['modified'])
                             # Check if the rule is old enough
                             if (datetime.datetime.now() - rule_date).days < rule_package['minimum_age']:
-                                logging.debug("Skipping rule %s because it is too young: %s",
-                                              rule['rule_name'], metadata['modified'])
                                 skip_rule = True
-                                rule_repo_statistics['total_rules_skipped_age'] += 1
+                                skip_rule_reason = "age"
+                        # Check if the rule is younger than the maximum age
+                        if "created" in metadata:
+                            rule_date = dateparser.parse(metadata['created'])
+                            # Check if the rule is old enough
+                            if (datetime.datetime.now() - rule_date).days > rule_package['max_age']:
+                                skip_rule = True
+                                skip_rule_reason = "age"
+
+                        # Score check ----------------------------------------------------
+                        if "score" in metadata:
+                            # Check if the rule has the require score
+                            if metadata['score'] < rule_package['minimum_score']:
+                                skip_rule = True
+                                skip_rule_reason = "score"
 
                         # Quality check --------------------------------------------------
                         if "quality" in metadata:
                             # Check if the rule has the require quality
                             if metadata['quality'] < rule_package['minimum_quality']:
-                                logging.debug("Skipping rule %s because of insufficient quality score: %d",
-                                              rule['rule_name'], metadata['quality'])
                                 skip_rule = True
-                                rule_repo_statistics['total_rules_skipped_quality'] += 1
+                                skip_rule_reason = "quality"
+                        
+                        # Importance check -----------------------------------------------
+                        if "importance" in metadata:
+                            importance = metadata['importance']
+
+                    # If importance is set, check the importance level defined for the repo and overwrite
+                    # the skip_rule variable if the importance of the rule is higher than the importance
+                    # defined for the rule package
+                    if importance is not None:
+                        if importance > rule_package['force_include_importance_level']:
+                            skip_rule = False
+                            skip_rule_reason = None
+                            logging.debug("Forcing rule '%s' because of importance", rule['rule_name'])
+                        if importance < rule_package['force_exclude_importance_level']:
+                            skip_rule = True
+                            skip_rule_reason = "importance"
 
                     # We skip private rules and add them only if other rules require them
                     if 'scopes' in rule:
                         if 'private' in rule['scopes']:
                             skip_rule = True
 
+                    # Skip the rule if it doesn't match the minimum quality or age
                     if skip_rule:
+                        logging.debug("Skipping rule '%s' because of %s", rule['rule_name'], skip_rule_reason)
+                        if skip_rule_reason == "age":
+                            rule_repo_statistics['total_rules_skipped_age'] += 1
+                        elif skip_rule_reason == "quality":
+                            rule_repo_statistics['total_rules_skipped_quality'] += 1
+                        elif skip_rule_reason == "importance":
+                            rule_repo_statistics['total_rules_skipped_importance'] += 1
+                        elif skip_rule_reason == "score":
+                            rule_repo_statistics['total_rules_skipped_score'] += 1
                         continue
                     else:
                         # Collect all private rules used in the accepted rules
@@ -119,14 +163,18 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
                 for priv_rule in required_private_rules:
                     # Get the rule from the plyara object
                     priv_rule_string = rebuild_yara_rule(priv_rule["rule"])
-                    # Prepend the rule to the output string
-                    repo_rules_strings.insert(0, priv_rule_string)
-                    rule_repo_statistics['total_rules'] += 1
+                    # Append rule if it hasn't been added yet
+                    if priv_rule["rule"]["rule_name"] not in already_added_priv_rules:
+                        # Prepend the rule to the output string
+                        repo_rules_strings.insert(0, priv_rule_string)
+                        # Add the rule to the list of already added rules
+                        already_added_priv_rules.append(priv_rule["rule"]["rule_name"])
+                        rule_repo_statistics['total_rules'] += 1
 
             # Only write the rule set if there's at least one rule in the set
             if len(repo_rules_strings) > 0:
                 # Prepend header to the output string
-                repo_rule_set_header = config['repo_header'].format(
+                repo_rule_set_header = YARA_FORGE_CONFIG['repo_header'].format(
                     repo_name=repo['name'],
                     repo_url=repo['url'],
                     retrieval_date=datetime.datetime.now().strftime("%Y-%m-%d"),
@@ -140,35 +188,42 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, co
                 output_rule_set_strings.extend(repo_rules_strings)
             
             # Write the rule set statistics including total and skipped rules to the console
-            logging.info("Rule set: '%s' Total rules: %d, Skipped: %d (age), %d (quality)",
+            logging.info("Rule set: '%s' Total rules: %d, Skipped: %d (age), %d (quality), %d (importance), %d (score)",
                             repo['name'],
                             rule_repo_statistics['total_rules'],
                             rule_repo_statistics['total_rules_skipped_age'],
-                            rule_repo_statistics['total_rules_skipped_quality'])
+                            rule_repo_statistics['total_rules_skipped_quality'],
+                            rule_repo_statistics['total_rules_skipped_importance'],
+                            rule_repo_statistics['total_rules_skipped_score'])
 
             # Add the repo statistics to the the rule package statistics
             rule_package_statistics = {key: rule_package_statistics.get(key, 0) + rule_repo_statistics.get(key, 0) for key in rule_package_statistics}
 
         # Print the rule package statistics including total and skipped rules to the console
         logging.log(logging.INFO, "-------------------------------------------------------")
-        logging.info("Rule package: '%s' Total rules: %d, Skipped: %d (age), %d (quality)",
+        logging.info("Rule package: '%s' Total rules: %d, Skipped: %d (age), %d (quality), %d (importance), %d (score)",
                      rule_package['name'],
                      rule_package_statistics['total_rules'],
                      rule_package_statistics['total_rules_skipped_age'],
-                     rule_package_statistics['total_rules_skipped_quality'])
+                     rule_package_statistics['total_rules_skipped_quality'],
+                     rule_package_statistics['total_rules_skipped_importance'],
+                     rule_package_statistics['total_rules_skipped_score'])
 
         # Only write the rule file if there's at least one rule in all sets in the package
         if rule_package_statistics['total_rules'] > 0:
             with open(rule_file_path, "w", encoding="utf-8") as f:
 
                 # Compose the package header and add the statistics on total rules and skipped rules
-                rule_set_header = config['rule_set_header'].format(
+                rule_set_header = YARA_FORGE_CONFIG['rule_set_header'].format(
                     rule_package_name=rule_package['name'],
                     rule_package_description=rule_package['description'],
                     program_version=program_version,
                     yaraqa_commit=yaraqa_commit,
                     rule_package_minimum_quality=rule_package['minimum_quality'],
+                    rule_package_force_include_importance_level=rule_package['force_include_importance_level'],
+                    rule_package_force_exclude_importance_level=rule_package['force_exclude_importance_level'],
                     rule_package_minimum_age=rule_package['minimum_age'],
+                    rule_package_minimum_score=rule_package['minimum_score'],
                     retrieval_date=datetime.datetime.now().strftime("%Y-%m-%d"),
                     total_rules_skipped_age=rule_package_statistics['total_rules_skipped_age'],
                     total_rules_skipped_quality=rule_package_statistics['total_rules_skipped_quality'],

@@ -1,0 +1,131 @@
+# Description: Custom scoring configuration file for YARA rules
+
+# Importance score configuration
+# repo - the name of the repository used in the configuration - checked as equals
+# file - the name of the file used in the configuration - checked as endswith
+# name - the name of the rule used in the configuration - checked as startswith
+# importance - the importance score of the rule
+importance-scores:
+  - rule:
+      repo: "ReversingLabs"
+    importance: 25
+  - rule:
+      repo: "Signature Base"
+      file: "gen_webshells.yar"
+    importance: 100
+  - rule:
+      repo: "YARA Style Guide"
+      file: "gen_webshells.yar"
+    importance: 100
+
+# FALSE POSITIVES
+# Rules that are prone to false positives
+# The level of the value indicates the amount of false positives caused by the rule
+noisy-rules:
+    # CAPE
+    - name: "CAPE_Cobaltstrikebeacon"
+      quality: -90
+    - name: "CAPE_Emotet"
+      quality: -100
+    - name: "CAPE_Pafish"
+      quality: -60
+    - name: "CAPE_Bumblebeeloader"
+      quality: -80
+    - name: "CAPE_Bumblebeeshellcode"
+      quality: -80
+    - name: "CAPE_Heavensgate"
+      quality: -80
+    - name: "CAPE_Origin"
+      quality: -80
+    # Elastic
+    - name: "ELASTIC_Multi_EICAR_Ac8F42D6"
+      quality: -50
+    - name: "ELASTIC_Linux_Trojan_Torii_Fa253F2A"
+      quality: -50
+    - name: "ELASTIC_Windows_Hacktool_Cheatengine_Fedac96D"
+      quality: -40
+    - name: "ELASTIC_Linux_Worm_Generic_98Efcd38"
+      quality: -50
+    - name: "ELASTIC_Linux_Trojan_Torii_Fa253F2A"
+      quality: -50
+    - name: "ELASTIC_Linux_Trojan_Iroffer_53692410"
+      quality: -30
+    - name: "ELASTIC_Linux_Trojan_Iroffer_013E07De"
+      quality: -30
+    - name: "ELASTIC_Windows_Trojan_Bruteratel_Ade6C9D5"
+      quality: -30
+    - name: "ELASTIC_Linux_Hacktool_Earthworm_E3Da43E2"
+      quality: -30
+    # FireEye
+    - name: "FIREEYE_RT_Hunting_Dotnettojscript_Functions"
+      quality: -80
+    # McAfee
+    - name: "MCAFEE_ATR_Vbs_Mykins_Botnet"
+      quality: -30
+    # Telekom Security
+    - name: "TELEKOM_SECURITY_Allow_Rdp_Session_Without_Password"
+      quality: -60
+    - name: "TELEKOM_SECURITY_Cn_Utf8_Windows_Terminal"
+      quality: -50
+    - name: "TELEKOM_SECURITY_Potential_Termserv_Dll_Replacement"
+      quality: -70
+    - name: "TELEKOM_SECURITY_Rdp_Change_Port_Number"
+      quality: -60
+    - name: "TELEKOM_SECURITY_Rdp_Enable_Multiple_Sessions"
+      quality: -60
+    # ESET
+    - name: "ESET_Skip20_Sqllang_Hook"
+      quality: -80
+    # Arkbird SOLG
+    - name: "ARKBIRD_SOLG_APT_Lazarus_Loader_Dec_2020_1"
+      quality: -70
+    - name: "MALPEDIA_Win_Aresloader_Auto"
+      quality: -30
+    - name: "ARKBIRD_SOLG_APT_Dustsquad_PE_Nov19_1"
+      quality: -70
+    - name: "ARKBIRD_SOLG_APT_Dustsquad_PE_Nov19_2"
+      quality: -70
+    - name: "ARKBIRD_SOLG_SR_APT_Dustsquad_PE_Nov19"
+      quality: -70
+    - name: "ARKBIRD_SOLG_APT_APT27_Hyperbro_Apr_2021_1"
+      quality: -40
+    - name: "ARKBIRD_SOLG_Loader_Buer_Nov_2020_1" # strings with too many matches in large files
+      quality: -20
+    # Malpedia
+    - name: "MALPEDIA_Win_Xtunnel_Auto"
+      quality: -60
+    - name: "MALPEDIA_Win_Telebot_Auto"
+      quality: -30
+    - name: "MALPEDIA_Win_Flawedammyy_Auto"
+      quality: -30
+    - name: "MALPEDIA_Win_Hookinjex_Auto"
+      quality: -30
+    - name: "MALPEDIA_Win_R980_Auto"
+      quality: -30
+    - name: "MALPEDIA_Win_Velso_Auto"
+      quality: -60
+    - name: "MALPEDIA_Win_Rdat_Auto"
+      quality: -30
+    - name: "MALPEDIA_Win_Qtbot_Auto"
+      quality: -50
+    - name: "MALPEDIA_Win_Strongpity_Auto"
+      quality: -30
+    - name: "MALPEDIA_Win_Synccrypt_Auto"
+      quality: -30
+    - name: "MALPEDIA_Win_Lorenz_Auto"
+      quality: -30
+    - name: "MALPEDIA_Win_Gauss_Auto"
+      quality: -30
+    # Signature Base
+    - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
+      quality: -20
+    - name: "SIGNATURE_BASE_APT_Lazarus_Dropper_Jun18_1" # strings with too many matches in large files
+      quality: -20
+    # DeadBits
+    - name: "DEADBITS_APT32_Kerrdown"
+      quality: -100
+    - name: "DEADBITS_Glupteba"
+      quality: -40
+    # BinaryAlert
+    - name: "BINARYALERT_Ransomware_Windows_Wannacry"
+      quality: -30

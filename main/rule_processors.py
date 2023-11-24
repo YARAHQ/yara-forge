@@ -3,6 +3,8 @@ This file contains functions that process the YARA rules.
 """
 import logging
 import dateparser
+import yaml
+from plyara.utils import generate_logic_hash
 #from pprint import pprint
 from git import Repo
 
@@ -12,16 +14,19 @@ date_lookup_cache = {}
 # Private YARA rules
 private_rule_mapping = []
 
-
-def process_yara_rules(yara_rule_repo_sets):
+def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
     """
     Processes the YARA rules
     """
+
+    # Logic hash list to avoid duplicates
+    logic_hash_list = {}
+
     # Loop over the repositories
     for repo in yara_rule_repo_sets:
 
         # Rule set identifier
-        rule_set_id = repo['name'].replace(" ", "_").upper()
+        rule_set_id = repo['name'].replace(" ", "_").replace("-", "_").upper()
 
         # Debug output
         logging.info("Processing YARA rules from repository: %s", repo['name'])
@@ -31,6 +36,8 @@ def process_yara_rules(yara_rule_repo_sets):
         for rules in repo['rules_sets']:
             # Debug output
             logging.debug("Processing YARA rules from rule set: %s", rules['file_path'])
+            # Rules that we want to keep
+            kept_rules = []
             # Loop over each of the rules and modify them
             for rule in rules['rules']:
                 # Debug output
@@ -48,9 +55,15 @@ def process_yara_rules(yara_rule_repo_sets):
                 if 'metadata' not in rule:
                     rule['metadata'] = []
 
-                # Adding additional meta data values ----------------------------------------
-                # Add a quality value based on the original repo
-                modify_meta_data_value(rule['metadata'], 'quality', repo['quality'])
+                # Calculate the logic hash
+                logic_hash = generate_logic_hash(rule)
+                # Check if the rule is a duplicate  (based on the logic hash)
+                if logic_hash in logic_hash_list and not is_private_rule:
+                    logging.info("Skipping rule '%s > %s' because it has the same logic hash as '%s'", 
+                                 repo['name'], rule['rule_name'], logic_hash_list[logic_hash])
+                    continue
+                # Add the logic hash to the list
+                logic_hash_list[logic_hash] = rule['rule_name']
 
                 # Modifying existing meta data values ---------------------------------------
 
@@ -65,9 +78,6 @@ def process_yara_rules(yara_rule_repo_sets):
                 # Modify the rule hashes
                 rule['metadata'] = align_yara_rule_hashes(rule['metadata'])
 
-                # # Modify the rule tags
-                # rule['metadata'] = process_yara_rule_tags(rule['metadata'], repo['tags'])
-
                 # # Modify the rule description
                 rule['metadata'] = align_yara_rule_description(rule['metadata'], repo['name'])
 
@@ -75,8 +85,20 @@ def process_yara_rules(yara_rule_repo_sets):
                 rule['metadata'] = align_yara_rule_author(rule['metadata'], repo['author'])
 
                 # Add a score based on the rule quality and meta data keywords
-                rule_score = evaluate_yara_rule_score(rule)
+                rule_score = evaluate_yara_rule_score(rule, YARA_FORGE_CONFIG)
                 modify_meta_data_value(rule['metadata'], 'score', rule_score)
+
+                # Get a custom importance score if available
+                custom_importance_score = retrieve_custom_importance_score(repo['name'], rules['file_path'], rule['rule_name'])
+                if custom_importance_score:
+                    modify_meta_data_value(rule['metadata'], 'importance', custom_importance_score)
+                    logging.debug("Custom importance score for rule %s is %d", rule['rule_name'], custom_importance_score)
+
+                # Adding additional meta data values ----------------------------------------
+                # Add a quality value based on the original repo
+                # if there is a score, use that for the quality, otherwise use the quality value of the repo
+
+                modify_meta_data_value(rule['metadata'], 'quality', repo['quality'])
 
                 # Modify the rule name
                 rule_name_old = rule['rule_name']
@@ -86,7 +108,7 @@ def process_yara_rules(yara_rule_repo_sets):
                     rule_name_new = f"{rule_name_new}_PRIVATE"
                     # Add the rule to the private rule mapping
                     private_rule_mapping.append({
-                        "repo": repo['name'],
+                        "repo": rule_set_id,
                         "old_name": rule_name_old,
                         "new_name": rule_name_new,
                         "rule": rule
@@ -95,12 +117,12 @@ def process_yara_rules(yara_rule_repo_sets):
                 rule['rule_name'] = rule_name_new
 
                 # Check if the rule uses private rules
-                private_rules_used = check_rule_uses_private_rules(repo['name'], rule, private_rule_mapping)
+                private_rules_used = check_rule_uses_private_rules(rule_set_id, rule, private_rule_mapping)
                 if private_rules_used:
                     # Change the condition terms of the rule to align them with
                     # the new private rule names
                     rule['condition_terms'] = adjust_identifier_names(
-                        repo['name'],
+                        rule_set_id,
                         rule['condition_terms'],
                         private_rules_used)
                 # Add the private rules used to the rule
@@ -122,13 +144,60 @@ def process_yara_rules(yara_rule_repo_sets):
                 # Sort the meta data values
                 rule['metadata'] = sort_meta_data_values(rule['metadata'])
 
-                # Count the number of rules
-                num_rules += 1
+                # We keep the rule
+                kept_rules.append(rule)
+
+            # Count the number of rules
+            num_rules += len(kept_rules)
+            # Now we replace the rules
+            rules['rules'] = kept_rules
 
         # Info output about the number of rules in the repository
         logging.info("Normalized %d rules from repository: %s", num_rules, repo['name'])
 
     return yara_rule_repo_sets
+
+
+def retrieve_custom_importance_score(repo_name, file_path, rule_name):
+    """
+    Retrieves a custom importance score for a rule
+    """
+    # Read the scores from the YAML file named custom-scoring.yml
+    with open('custom-scoring.yml', 'r', encoding='utf-8') as f:
+        custom_scoring = yaml.safe_load(f)
+
+        logging.debug("Checking custom importance score for rule %s in file %s in repo %s", rule_name, file_path, repo_name)
+        
+        # Loop over the rules in the YAML file
+        for importance_score in custom_scoring['importance-scores']:
+            # Marker that indicates if every element of the rule matched
+            rule_elements_matched = False
+            for rule_field, rule_value in importance_score['rule'].items():
+                if rule_field == "name":
+                    if rule_name.startswith(rule_value):
+                        logging.debug("Rule name %s starts with %s", rule_name, rule_value)
+                        rule_elements_matched = True
+                    else:
+                        rule_elements_matched = False
+                        break
+                elif rule_field == "file":
+                    if file_path.endswith(rule_value):
+                        logging.debug("File path %s ends with %s", file_path, rule_value)
+                        rule_elements_matched = True
+                    else:
+                        rule_elements_matched = False
+                        break
+                elif rule_field == "repo":
+                    if repo_name == rule_value:
+                        logging.debug("Repo name %s matches %s", repo_name, rule_value)
+                        rule_elements_matched = True
+                    else:
+                        rule_elements_matched = False
+                        break
+            # If all elements of the rule matched, we return the importance score
+            if rule_elements_matched:
+                return importance_score['importance']
+    return None
 
 
 def sort_meta_data_values(rule_meta_data):
@@ -169,8 +238,10 @@ def check_rule_uses_private_rules(repo_name, rule, ext_private_rule_mapping):
     for private_rule in ext_private_rule_mapping:
         # Check if the rule uses the private rule
         if private_rule['old_name'] in rule['condition_terms'] and private_rule['repo'] == repo_name:
-            # Add the private rule to the list of private rules used
-            private_rules_used.append(private_rule)
+            # Only add that rule as long as it is not already in the list
+            if private_rule not in private_rules_used:
+                # Add the private rule to the list of private rules used
+                private_rules_used.append(private_rule)
     return private_rules_used
 
 
@@ -288,18 +359,21 @@ def modify_meta_data_value(rule_meta_data, key, value):
 
 
 # Evaluate the YARA rule score
-def evaluate_yara_rule_score(rule):
+def evaluate_yara_rule_score(rule, YARA_FORGE_CONFIG):
     """
     Evaluate the YARA rule score
     """
     # Score for the rule quality
-    base_rule_score = 75
-    # Score for the rule quality
-    #quality_modifier = evaluate_yara_rule_quality(rule)
+    rule_base_score = YARA_FORGE_CONFIG['rule_base_score']
+    # Check if the rule already has a score
+    for meta_data in rule['metadata']:
+        for key, value in meta_data.items():
+            if key == 'score':
+                rule_base_score = value
     # Score for the rule meta data
     meta_data_modifier = evaluate_yara_rule_meta_data(rule)
     # Score for the rule strings
-    rule_score = base_rule_score + meta_data_modifier
+    rule_score = rule_base_score + meta_data_modifier
     return rule_score
 
 
@@ -451,9 +525,10 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
             if key in date_names:
                 date_found = True
                 date_created = dateparser.parse(value)
-                # Remove the date from the original meta data
-                rule_meta_data.remove(meta_data)
-                rule_meta_data.append({'date': date_created.strftime("%Y-%m-%d")})
+                if date_created:
+                    # Remove the date from the original meta data
+                    rule_meta_data.remove(meta_data)
+                    rule_meta_data.append({'date': date_created.strftime("%Y-%m-%d")})
 
     # If the date is not found, try to get it from any of the meta data fields
     if not date_found:
@@ -464,9 +539,10 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
                 if isinstance(value, str) and dateparser.parse(value):
                     date_found = True
                     date_created = dateparser.parse(value)
-                    # Remove the date from the original meta data
-                    rule_meta_data.remove(meta_data)
-                    rule_meta_data.append({'date': date_created.strftime("%Y-%m-%d")})
+                    if date_created:
+                        # Remove the date from the original meta data
+                        rule_meta_data.remove(meta_data)
+                        rule_meta_data.append({'date': date_created.strftime("%Y-%m-%d")})
 
     # If the date was still not found, we try to get the date from the git log
     if not date_found:

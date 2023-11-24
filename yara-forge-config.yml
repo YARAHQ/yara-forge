@@ -7,62 +7,56 @@ yara_repositories:
   #  author: "Florian Roth"
   #  quality: 80
   #  branch: "master"
-#  - name: "Signature Base"
-#    url: "https://github.com/Neo23x0/signature-base"
-#    author: "Florian Roth"
-#    quality: 85
-#    branch: "master"
-#    path: "yara"
-  # License prevents the integration of the rules into the YARA-Forge
-  #- name: "AvastTI"
-  #  url: "https://github.com/avast/ioc"
-  #  author: "Avast Threat Intel Team"
-  #  quality: 90
-  #  branch: "master"
-#  - name: "ReversingLabs"
-#    url: "https://github.com/reversinglabs/reversinglabs-yara-rules/"
-#    author: "ReversingLabs"
-#    quality: 90
-#    branch: "develop"
-#  - name: "Elastic"
-#    url: "https://github.com/elastic/protections-artifacts/"
-#    author: "Elastic"
-#    quality: 75
-#    branch: "main"
-#  - name: "R3c0nst"
-#    url: "https://github.com/fboldewin/YARA-rules/"
-#    author: "Frank Boldewin"
-#    quality: 90
-#    branch: "master"
-#  - name: "CAPE"
-#    url: "https://github.com/kevoreilly/CAPEv2"
-#    author: "Kevin O'Reilly"
-#    quality: 65
-#    branch: "master"
-#    path: "data/yara"
-#  - name: "BinaryAlert"
-#    url: "https://github.com/airbnb/binaryalert/"
-#    author: "Airbnb"
-#    quality: 80
-#    branch: "master"
-#    path: "rules/public"
-#  - name: "DeadBits"
-#    url: "https://github.com/deadbits/yara-rules/"
-#    author: "Adam Swanda"
-#    quality: 80
-#    branch: "master"
-#    path: "rules"
-#  - name: "DelivrTo"
-#    url: "https://github.com/delivr-to/detections"
-#    author: "Delivr.To"
-#    quality: 80
-#    branch: "main"
-#    path: "yara-rules"
-#  - name: "ESET"
-#    url: "https://github.com/eset/malware-ioc"
-#    author: "ESET TI"
-#    quality: 80
-#    branch: "master"
+  - name: "Signature Base"
+    url: "https://github.com/Neo23x0/signature-base"
+    author: "Florian Roth"
+    quality: 85
+    branch: "master"
+    path: "yara"
+  - name: "ReversingLabs"
+    url: "https://github.com/reversinglabs/reversinglabs-yara-rules/"
+    author: "ReversingLabs"
+    quality: 90
+    branch: "develop"
+  - name: "Elastic"
+    url: "https://github.com/elastic/protections-artifacts/"
+    author: "Elastic"
+    quality: 75
+    branch: "main"
+  - name: "R3c0nst"
+    url: "https://github.com/fboldewin/YARA-rules/"
+    author: "Frank Boldewin"
+    quality: 90
+    branch: "master"
+  - name: "CAPE"
+    url: "https://github.com/kevoreilly/CAPEv2"
+    author: "Kevin O'Reilly"
+    quality: 65
+    branch: "master"
+    path: "data/yara"
+  - name: "BinaryAlert"
+    url: "https://github.com/airbnb/binaryalert/"
+    author: "Airbnb"
+    quality: 80
+    branch: "master"
+    path: "rules/public"
+  - name: "DeadBits"
+    url: "https://github.com/deadbits/yara-rules/"
+    author: "Adam Swanda"
+    quality: 80
+    branch: "master"
+    path: "rules"
+  - name: "DelivrTo"
+    url: "https://github.com/delivr-to/detections"
+    author: "Delivr.To"
+    quality: 80
+    branch: "main"
+    path: "yara-rules"
+  - name: "ESET"
+    url: "https://github.com/eset/malware-ioc"
+    author: "ESET TI"
+    quality: 80
+    branch: "master"
   - name: "FireEye-RT"
     url: "https://github.com/mandiant/red_team_tool_countermeasures/"
     author: "FireEye"
@@ -91,8 +85,33 @@ yara_repositories:
     author: "Arkbird_SOLG"
     quality: 75
     branch: "master"
+  - name: "Telekom Security"
+    url: "https://github.com/telekom-security/malware_analysis/"
+    author: "Telekom Security"
+    quality: 70
+    branch: "main"
+  - name: "Volexity"
+    url: "https://github.com/volexity/threat-intel"
+    author: "threatintel@volexity.com"
+    quality: 80
+    branch: "main"
+  - name: "JPCERTCC"
+    url: "https://github.com/JPCERTCC/MalConfScan/"
+    author: "JPCERT/CC Incident Response Group"
+    quality: 80
+    branch: "master"
+    path: "yara"
+
+  # License prevents the integration of the rules into the YARA-Forge
+  #- name: "AvastTI"
+  #  url: "https://github.com/avast/ioc"
+  #  author: "Avast Threat Intel Team"
+  #  quality: 90
+  #  branch: "master"
 
 
+# Rule Processing --------------------------------------------------------------
+rule_base_score: 75
 
 # Quality Checks ---------------------------------------------------------------
 # Explanations for the different issue levels used in the rule quality analysis
@@ -106,22 +125,43 @@ issue_levels:
    1: -5
    2: -25
    3: -70
-   4: -100
+   4: -1000
+
+# Default importance of rules
+# 0 - no importance
+# 100 - high importance
+default_importance: 50
+# Default quality of rules
+# 0 - no quality
+# 100 - high quality
+default_quality: 75
 
 # Rule Package Output ----------------------------------------------------------
 yara_rule_packages:
   - name: "core"
     description: "Default YARA Rule Package - Core"
     minimum_quality: 70
+    force_include_importance_level: 70
+    force_exclude_importance_level: 50
     minimum_age: 7
+    minimum_score: 65
+    max_age: 2500 # ~ 7 years
   - name: "extended"
     description: "Default YARA Rule Package - Extended"
     minimum_quality: 50
+    force_include_importance_level: 70
+    force_exclude_importance_level: 20
     minimum_age: 1
+    minimum_score: 60
+    max_age: 5000 # ~ 14 years
   - name: "full"
     description: "Default YARA Rule Package - Full"
     minimum_quality: 20
+    force_include_importance_level: 70
+    force_exclude_importance_level: 0
     minimum_age: 0
+    minimum_score: 40
+    max_age: 10000 # ~ 30 years
 
 rule_set_header: |
   /*
@@ -134,7 +174,10 @@ rule_set_header: |
    * YARA-Forge Version: {program_version}
    * YARA-QA Commit: {yaraqa_commit}
    * Minimum Quality: {rule_package_minimum_quality}
+   * Force Include Importance Level: {rule_package_force_include_importance_level}
+   * Force Exclude Importance Level: {rule_package_force_exclude_importance_level}
    * Minimum Age (in days): {rule_package_minimum_age}
+   * Minimum Score: {rule_package_minimum_score}
    * Creation Date: {retrieval_date}
    * Skipped: {total_rules_skipped_age} (age), {total_rules_skipped_quality} (quality)
    */

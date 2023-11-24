@@ -94,7 +94,7 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
 
         # Append the YARA rule repository
         yara_rule_repo = {
-            "name": repo['name'].replace(" ", "_").replace("-", "_"),
+            "name": repo['name'],
             "url": repo['url'],
             "author": repo['author'],
             "owner": repo['owner'],
