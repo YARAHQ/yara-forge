@@ -12,7 +12,7 @@ importance-scores:
   - rule:
       repo: "Signature Base"
       file: "gen_webshells.yar"
-    importance: 100
+    importance: 70
   - rule:
       repo: "YARA Style Guide"
       file: "gen_webshells.yar"
@@ -56,6 +56,8 @@ noisy-rules:
       quality: -30
     - name: "ELASTIC_Linux_Hacktool_Earthworm_E3Da43E2"
       quality: -30
+    - name: "ELASTIC_Linux_Exploit_Lotoor_F8E9F93C"
+      quality: -50
     # FireEye
     - name: "FIREEYE_RT_Hunting_Dotnettojscript_Functions"
       quality: -80
@@ -116,11 +118,19 @@ noisy-rules:
       quality: -30
     - name: "MALPEDIA_Win_Gauss_Auto"
       quality: -30
+    - name: "MALPEDIA_Win_Kleptoparasite_Stealer_Auto"
+      quality: -40
+    - name: "MALPEDIA_Elf_Gobrat_Auto"
+      quality: -40
+    - name: "MALPEDIA_Win_Neutrino_Auto"
+      quality: -30
     # Signature Base
     - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
       quality: -20
     - name: "SIGNATURE_BASE_APT_Lazarus_Dropper_Jun18_1" # strings with too many matches in large files
       quality: -20
+    - name: "SIGNATURE_BASE_M_APT_VIRTUALPITA_1"
+      quality: -40
     # DeadBits
     - name: "DEADBITS_APT32_Kerrdown"
       quality: -100
@@ -129,3 +139,13 @@ noisy-rules:
     # BinaryAlert
     - name: "BINARYALERT_Ransomware_Windows_Wannacry"
       quality: -30
+    # JPCERT
+    - name: "JPCERTCC_Plugx"
+      quality: -70
+    - name: "JPCERTCC_Ursnif"
+      quality: -50
+    - name: "JPCERTCC_Cobaltstrike"
+      quality: -40
+    # Binary Alert
+    - name: "BINARYALERT_Hacktool_Windows_Mimikatz_Modules"
+      quality: -50

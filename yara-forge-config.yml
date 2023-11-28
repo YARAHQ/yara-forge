@@ -141,7 +141,7 @@ yara_rule_packages:
   - name: "core"
     description: "Default YARA Rule Package - Core"
     minimum_quality: 70
-    force_include_importance_level: 70
+    force_include_importance_level: 80
     force_exclude_importance_level: 50
     minimum_age: 7
     minimum_score: 65

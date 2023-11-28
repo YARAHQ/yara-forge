@@ -4,9 +4,10 @@ This module contains functions for writing YARA rules into separate files.
 import os
 import logging
 import datetime
+from pprint import pprint
 import dateparser
 from plyara.utils import rebuild_yara_rule
-from pprint import pprint
+
 
 def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YARA_FORGE_CONFIG):
     """
