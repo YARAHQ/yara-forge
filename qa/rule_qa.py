@@ -114,8 +114,8 @@ def retrieve_custom_score_reduction(rule):
     """
     Retrieves a custom score reduction for a rule.
     """
-    # Read the scores from the YAML file named custom-scoring.yml
-    with open('custom-scoring.yml', 'r', encoding='utf-8') as f:
+    # Read the scores from the YAML file named yara-forge-custom-scoring.yml
+    with open('yara-forge-custom-scoring.yml', 'r', encoding='utf-8') as f:
         custom_scoring = yaml.safe_load(f)
         # Loop over the rules in the YAML file
         for custom_score_reduction in custom_scoring['noisy-rules']:

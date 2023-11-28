@@ -127,14 +127,10 @@ issue_levels:
    3: -70
    4: -1000
 
-# Default importance of rules
-# 0 - no importance
-# 100 - high importance
-default_importance: 50
 # Default quality of rules
 # 0 - no quality
 # 100 - high quality
-default_quality: 75
+#default_quality: 75 # not used anymore
 
 # Rule Package Output ----------------------------------------------------------
 yara_rule_packages:
@@ -143,7 +139,7 @@ yara_rule_packages:
     minimum_quality: 70
     force_include_importance_level: 80
     force_exclude_importance_level: 50
-    minimum_age: 7
+    minimum_age: 1
     minimum_score: 65
     max_age: 2500 # ~ 7 years
   - name: "extended"

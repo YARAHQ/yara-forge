@@ -162,8 +162,8 @@ def retrieve_custom_importance_score(repo_name, file_path, rule_name):
     """
     Retrieves a custom importance score for a rule
     """
-    # Read the scores from the YAML file named custom-scoring.yml
-    with open('custom-scoring.yml', 'r', encoding='utf-8') as f:
+    # Read the scores from the YAML file named yara-forge-custom-scoring.yml
+    with open('yara-forge-custom-scoring.yml', 'r', encoding='utf-8') as f:
         custom_scoring = yaml.safe_load(f)
 
         logging.debug("Checking custom importance score for rule %s in file %s in repo %s", rule_name, file_path, repo_name)
