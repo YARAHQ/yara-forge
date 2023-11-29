@@ -180,6 +180,7 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                     repo_url=repo['url'],
                     retrieval_date=datetime.datetime.now().strftime("%Y-%m-%d"),
                     repo_commit=repo['commit_hash'],
+                    total_rules=rule_repo_statistics['total_rules'],
                     total_rules_skipped_age=rule_repo_statistics['total_rules_skipped_age'],
                     total_rules_skipped_quality=rule_repo_statistics['total_rules_skipped_quality'],
                     repo_license=repo['license']
