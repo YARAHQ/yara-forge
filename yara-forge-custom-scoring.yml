@@ -93,13 +93,15 @@ noisy-rules:
       quality: -40
     - name: "ARKBIRD_SOLG_Loader_Buer_Nov_2020_1" # strings with too many matches in large files
       quality: -20
+    - name: "ARKBIRD_SOLG_Ins_NSIS_Buer_Nov_2020_1"
+      quality: -60
     # Malpedia
     - name: "MALPEDIA_Win_Xtunnel_Auto"
       quality: -60
     - name: "MALPEDIA_Win_Telebot_Auto"
-      quality: -30
+      quality: -50
     - name: "MALPEDIA_Win_Flawedammyy_Auto"
-      quality: -30
+      quality: -40
     - name: "MALPEDIA_Win_Hookinjex_Auto"
       quality: -30
     - name: "MALPEDIA_Win_R980_Auto"
@@ -124,6 +126,8 @@ noisy-rules:
       quality: -40
     - name: "MALPEDIA_Win_Neutrino_Auto"
       quality: -30
+    - name: "MALPEDIA_Win_Alina_Pos_Auto"
+      quality: -30
     # Signature Base
     - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
       quality: -20
@@ -135,7 +139,7 @@ noisy-rules:
     - name: "DEADBITS_APT32_Kerrdown"
       quality: -100
     - name: "DEADBITS_Glupteba"
-      quality: -40
+      quality: -70
     # BinaryAlert
     - name: "BINARYALERT_Ransomware_Windows_Wannacry"
       quality: -30
@@ -143,9 +147,12 @@ noisy-rules:
     - name: "JPCERTCC_Plugx"
       quality: -70
     - name: "JPCERTCC_Ursnif"
-      quality: -50
+      quality: -70
     - name: "JPCERTCC_Cobaltstrike"
       quality: -40
     # Binary Alert
     - name: "BINARYALERT_Hacktool_Windows_Mimikatz_Modules"
       quality: -50
+    # Delivr.to
+    - name: "DELIVRTO_SUSP_SVG_Onload_Onerror_Jul23"
+      quality: -100
