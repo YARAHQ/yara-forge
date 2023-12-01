@@ -6,6 +6,7 @@ and for reducing the quality score of a rule based on the issues found.
 """
 
 import logging
+import datetime
 import yaml
 import yara
 from plyara.utils import rebuild_yara_rule
@@ -21,6 +22,9 @@ def evaluate_rules_quality(processed_yara_repos, config):
     # Create a yaraQA object
     yara_qa = YaraQA()
 
+    # Rule issues list
+    repo_issues = {}
+
     # Create a copy of the the repos to work with
     processed_yara_repos_copy = processed_yara_repos.copy()
 
@@ -31,7 +35,9 @@ def evaluate_rules_quality(processed_yara_repos, config):
         # Issue statistics 
         issue_statistics = {
             "issues_syntax": 0,
-            "issues_efficiency": 0
+            "issues_efficiency": 0,
+            "issues_performance": 0,
+            "issues_critical": 0,
         }
 
         # Loop over the rule sets in the repository
@@ -43,13 +49,19 @@ def evaluate_rules_quality(processed_yara_repos, config):
             # Now we do stuff with each rule
             for rule in rule_set['rules']:
 
+                # Skip the rule if it has critical issues
+                skip_rule = False
+
                 # Analyze the rule syntax
                 # - Critical errors
                 # - Compile issues
                 issues_critical = check_issues_critical(rule)
+                # Rule has critical issues
                 if issues_critical:
+                    # Adding the values to the statistics
+                    issue_statistics['issues_critical'] += len(issues_critical)
                     logging.warning("Rule %s has critical issues and cannot be used: %s", rule['rule_name'], issues_critical)
-                    continue
+                    skip_rule = True
 
                 # Analyze the rule syntax
                 # - Syntactical issues
@@ -73,10 +85,12 @@ def evaluate_rules_quality(processed_yara_repos, config):
                 # Checks for 
                 # - Performance issues with live tests
                 issues_performance = yara_qa.analyze_live_rule_performance(rule)
+                # Add the values to the statistics
+                issue_statistics['issues_performance'] += len(issues_performance)
 
                 # Reduce the rule's quality score based on the levels of 
                 # the issues found in the rules
-                issues = issues_syntax + issues_efficiency + issues_performance
+                issues = issues_syntax + issues_efficiency + issues_performance + issues_critical
                 # Adding the values to the statistics
                 issue_statistics['issues_syntax'] += len(issues_syntax)
                 issue_statistics['issues_efficiency'] += len(issues_efficiency)
@@ -97,17 +111,54 @@ def evaluate_rules_quality(processed_yara_repos, config):
                 # Add the total score to the rule's quality score
                 rule['metadata'] = modify_yara_rule_quality(rule['metadata'], total_score)
 
+                # Add all issues to the big list of issues
+                if repo_rule_sets['name'] in repo_issues:
+                    repo_issues[repo_rule_sets['name']].extend(issues)
+                else:
+                    repo_issues[repo_rule_sets['name']] = issues
+
                 # Add the rule to the list of rules without errors
-                rules_without_errors.append(rule)
+                if not skip_rule:
+                    rules_without_errors.append(rule)
 
             # Replace the rules in the rule set with the rules without errors
             rule_set['rules'] = rules_without_errors
 
         # Print the issues statistics
-        logging.info("Issues statistics: %d syntax issues, %d efficiency issues", 
-                     issue_statistics['issues_syntax'], issue_statistics['issues_efficiency'])
+        logging.info("Issues statistics: %d syntax issues, %d efficiency issues, " +
+                     "%d performance issues, %d critical issues",
+                     issue_statistics['issues_syntax'],
+                     issue_statistics['issues_efficiency'],
+                     issue_statistics['issues_performance'],
+                     issue_statistics['issues_critical'])
 
+    # Log the issues found in the rules to a separate file
+    write_issues_to_file(repo_issues)
+
+    # Return the processed repos
     return processed_yara_repos_copy
+
+
+def write_issues_to_file(rule_issues):
+    """
+    Writes the issues found in the rules to a separate file.
+    """
+    # Write the issues to a file
+    with open("yara-forge-rule-issues.yml", "w", encoding="utf-8") as f:
+        # Write a comment on top of the YAML file that explains what the file contains
+        f.write("# This file contains the issues found in the YARA rules during the QA checks\n")
+        f.write("# The issues are grouped by repository\n")
+        f.write("# Important: remember that the issues have different severity levels (1-4)\n")
+        f.write("# - 1: only cosmetic or minor issues\n")
+        f.write("# - 2: issues that have a minor impact on performance / resource usage\n")
+        f.write("# - 3: issues that have a major impact on performance / resource usage and show a lack of care\n")
+        f.write("# - 4: issues that are critical; mostly it's a broken rule or rules that use external variables (not available in every tool)\n")
+        # Write a timestamp and some statistics
+        f.write(f"# Timestamp: {datetime.datetime.now()}\n")
+        f.write(f"# Total number of issues: {sum(len(v) for v in rule_issues.values())}\n")
+        f.write(f"# Total number of repositories: {len(rule_issues)}\n")
+        # Write the issues to the file
+        yaml.dump(rule_issues, f, sort_keys=False, allow_unicode=True)
 
 
 def retrieve_custom_score_reduction(rule):

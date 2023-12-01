@@ -82,7 +82,18 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: yara-forge.log
         asset_name: yara-forge-log.txt
-        asset_content_type: application/zip
+        asset_content_type: text/plain
+
+    - name: Upload rule issues log file
+      if: always()
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: yara-forge-rule-issues.yml
+        asset_name: yara-forge-rule-issues.yml
+        asset_content_type: text/plain
 
     - name: Upload core asset
       if: always()

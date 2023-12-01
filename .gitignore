@@ -3,3 +3,4 @@ packages/*
 *.pyc
 yara-forge.log
 repos/*
+yara-forge-rule-issues.yml
