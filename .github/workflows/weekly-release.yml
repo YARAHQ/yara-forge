@@ -69,7 +69,7 @@ jobs:
         tag_name: ${{ env.CURRENT_DATE }}
         release_name: YARA Forge Rule Set Release ${{ env.CURRENT_DATE }}
         body: |
-          :sparkles: This release contains the latest YARA rule sets from YARA Forge :hammer:
+          ✨ This release contains the latest YARA rule sets from YARA Forge 🔨
         draft: false
         prerelease: false
 
