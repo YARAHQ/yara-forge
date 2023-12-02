@@ -62,7 +62,7 @@ jobs:
 
     - name: Read statistics file contents
       id: build_statistics
-      run: echo "contents=$(cat build_statistics.md)" >> $GITHUB_ENV
+      run: echo "contents=$(cat build_stats.md)" >> $GITHUB_ENV
       shell: bash
 
     - name: Create Release
