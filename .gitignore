@@ -4,3 +4,4 @@ packages/*
 yara-forge.log
 repos/*
 yara-forge-rule-issues.yml
+build_stats.md

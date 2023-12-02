@@ -27,6 +27,8 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
             "total_rules_skipped_quality": 0,
             "total_rules_skipped_importance": 0,
             "total_rules_skipped_score": 0,
+            "repo_statistics": [],
+            "name": rule_package['name'],
         }
 
         # Create the directory for the rule package
@@ -198,8 +200,22 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                             rule_repo_statistics['total_rules_skipped_importance'],
                             rule_repo_statistics['total_rules_skipped_score'])
 
-            # Add the repo statistics to the the rule package statistics
-            rule_package_statistics = {key: rule_package_statistics.get(key, 0) + rule_repo_statistics.get(key, 0) for key in rule_package_statistics}
+            # Add the repo statistics to the rule package statistics
+            rule_package_statistics['repo_statistics'].append({
+                "name": repo['name'],
+                "total_rules": rule_repo_statistics['total_rules'],
+                "total_rules_skipped_age": rule_repo_statistics['total_rules_skipped_age'],
+                "total_rules_skipped_quality": rule_repo_statistics['total_rules_skipped_quality'],
+                "total_rules_skipped_importance": rule_repo_statistics['total_rules_skipped_importance'],
+                "total_rules_skipped_score": rule_repo_statistics['total_rules_skipped_score'],
+            })
+
+            # Add the repo statistics counters to the the rule package statistics
+            rule_package_statistics['total_rules'] += rule_repo_statistics['total_rules']
+            rule_package_statistics['total_rules_skipped_age'] += rule_repo_statistics['total_rules_skipped_age']
+            rule_package_statistics['total_rules_skipped_quality'] += rule_repo_statistics['total_rules_skipped_quality']
+            rule_package_statistics['total_rules_skipped_importance'] += rule_repo_statistics['total_rules_skipped_importance']
+            rule_package_statistics['total_rules_skipped_score'] += rule_repo_statistics['total_rules_skipped_score']
 
         # Print the rule package statistics including total and skipped rules to the console
         logging.log(logging.INFO, "-------------------------------------------------------")
@@ -210,6 +226,9 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                      rule_package_statistics['total_rules_skipped_quality'],
                      rule_package_statistics['total_rules_skipped_importance'],
                      rule_package_statistics['total_rules_skipped_score'])
+        
+        # Write the rule package statistics as a markdown table to the build_stats.md file
+        write_build_stats(rule_package_statistics)
 
         # Only write the rule file if there's at least one rule in all sets in the package
         if rule_package_statistics['total_rules'] > 0:
@@ -252,3 +271,19 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
         })
 
     return package_files
+
+
+def write_build_stats(rule_package_statistics):
+    """
+    Writes the rule package statistics as a markdown table to the build_stats.md file.
+    """
+    # Create the build_stats.md file if it doesn't exist
+    if not os.path.exists("build_stats.md"):
+        with open("build_stats.md", "w", encoding="utf-8") as f:
+            f.write("# Build Statistics\n\n")
+            f.write("| Rule Package | Total Rules | Skipped (age) | Skipped (quality) | Skipped (importance) | Skipped (score) |\n")
+            f.write("| ------------ | ----------- | ------------- | ----------------- | -------------------- | --------------- |\n")
+
+    # Append the rule package statistics to the build_stats.md file
+    with open("build_stats.md", "a", encoding="utf-8") as f:
+        f.write(f"| {rule_package_statistics['name']} | {rule_package_statistics['total_rules']} | {rule_package_statistics['total_rules_skipped_age']} | {rule_package_statistics['total_rules_skipped_quality']} | {rule_package_statistics['total_rules_skipped_importance']} | {rule_package_statistics['total_rules_skipped_score']} |\n")
