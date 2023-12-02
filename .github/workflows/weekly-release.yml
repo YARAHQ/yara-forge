@@ -60,10 +60,10 @@ jobs:
     - name: Set zip paths as env
       run: cat zip_paths.env >> $GITHUB_ENV
 
-    - name: Read statistics file contents
-      id: build_statistics
-      run: echo "::set-output name=contents::$(cat build_statistics.md)"
-      shell: bash
+- name: Read statistics file contents
+  id: build_statistics
+  run: echo "contents=$(cat build_statistics.md)" >> $GITHUB_ENV
+  shell: bash
 
     - name: Create Release
       id: create_release
@@ -76,7 +76,7 @@ jobs:
         body: |
           ✨ This release contains the latest YARA rule sets from YARA Forge 🔨
 
-          ${{ steps.build_statistics.outputs.contents }}
+          ${{ env.contents }}
         draft: false
         prerelease: false
 
