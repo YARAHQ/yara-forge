@@ -60,10 +60,10 @@ jobs:
     - name: Set zip paths as env
       run: cat zip_paths.env >> $GITHUB_ENV
 
-- name: Read statistics file contents
-  id: build_statistics
-  run: echo "contents=$(cat build_statistics.md)" >> $GITHUB_ENV
-  shell: bash
+    - name: Read statistics file contents
+      id: build_statistics
+      run: echo "contents=$(cat build_statistics.md)" >> $GITHUB_ENV
+      shell: bash
 
     - name: Create Release
       id: create_release
