@@ -127,7 +127,7 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                     # the skip_rule variable if the importance of the rule is higher than the importance
                     # defined for the rule package
                     if importance is not None:
-                        if importance > rule_package['force_include_importance_level']:
+                        if importance >= rule_package['force_include_importance_level']:
                             skip_rule = False
                             skip_rule_reason = None
                             logging.debug("Forcing rule '%s' because of importance", rule['rule_name'])
