@@ -17,6 +17,8 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
     # List of files that were written
     package_files = []
 
+    rule_package_statistics_set = []
+
     # Loop over the rule packages
     for rule_package in YARA_FORGE_CONFIG['yara_rule_packages']:
 
@@ -226,9 +228,9 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                      rule_package_statistics['total_rules_skipped_quality'],
                      rule_package_statistics['total_rules_skipped_importance'],
                      rule_package_statistics['total_rules_skipped_score'])
-        
-        # Write the rule package statistics as a markdown table to the build_stats.md file
-        write_build_stats(rule_package_statistics)
+
+        # Add the rule package statistics to the list of rule package statistics
+        rule_package_statistics_set.append(rule_package_statistics)
 
         # Only write the rule file if there's at least one rule in all sets in the package
         if rule_package_statistics['total_rules'] > 0:
@@ -270,20 +272,33 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
             "file_path": rule_file_path,
         })
 
+    # Write the rule package statistics as a markdown table to the build_stats.md file
+    write_build_stats(rule_package_statistics_set)
+
     return package_files
 
 
-def write_build_stats(rule_package_statistics):
+def write_build_stats(rule_package_statistics_set):
     """
-    Writes the rule package statistics as a markdown table to the build_stats.md file.
-    """
-    # Create the build_stats.md file if it doesn't exist
-    if not os.path.exists("build_stats.md"):
-        with open("build_stats.md", "w", encoding="utf-8") as f:
-            f.write("# Build Statistics\n\n")
-            f.write("| Rule Package | Total Rules | Skipped (age) | Skipped (quality) | Skipped (importance) | Skipped (score) |\n")
-            f.write("| ------------ | ----------- | ------------- | ----------------- | -------------------- | --------------- |\n")
+    Writes the rule package statistics as a markdown table to the build_stats.md file
 
-    # Append the rule package statistics to the build_stats.md file
-    with open("build_stats.md", "a", encoding="utf-8") as f:
-        f.write(f"| {rule_package_statistics['name']} | {rule_package_statistics['total_rules']} | {rule_package_statistics['total_rules_skipped_age']} | {rule_package_statistics['total_rules_skipped_quality']} | {rule_package_statistics['total_rules_skipped_importance']} | {rule_package_statistics['total_rules_skipped_score']} |\n")
+    Create sections for each rule package.
+    Then include a table and list each repo with the statistics.
+    """
+
+    # Create the build_stats.md file
+    with open("build_stats.md", "w", encoding="utf-8") as f:
+        # Write the header
+        f.write("# Build Statistics\n\n")
+        # Loop over the rule packages
+        for rule_package_statistics in rule_package_statistics_set:
+            # Write the rule package name as a header
+            f.write(f"## {rule_package_statistics['name']}\n\n")
+            # Write the rule package statistics as a table
+            f.write("| Repo | Total Rules | Skipped (Age) | Skipped (Quality) | Skipped (Importance) | Skipped (Score) |\n")
+            f.write("| ---- | ----------- | ------------- | ----------------- | -------------------- | --------------- |\n")
+            # Loop over the repos
+            for repo_statistics in rule_package_statistics['repo_statistics']:
+                f.write(f"| {repo_statistics['name']} | {repo_statistics['total_rules']} | {repo_statistics['total_rules_skipped_age']} | {repo_statistics['total_rules_skipped_quality']} | {repo_statistics['total_rules_skipped_importance']} | {repo_statistics['total_rules_skipped_score']} |\n")
+            f.write("\n")
+

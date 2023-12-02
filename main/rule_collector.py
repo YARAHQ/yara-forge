@@ -47,10 +47,15 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
                 if file == "LICENSE" or file == "LICENSE.txt" or file == "LICENSE.md":
                     file_path = os.path.join(root, file)
                     url_path = os.path.relpath(file_path, start=repo_folder)
-                    repo['license_url'] = f'{repo["url"]}/blob/{repo["commit_hash"]}/{url_path}'
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        repo['license'] = f.read()
-                        break
+                    if root == repo_folder:  # Check if the file is in the root directory
+                        repo['license_url'] = f'{repo["url"]}/blob/{repo["commit_hash"]}/{url_path}'
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            repo['license'] = f.read()
+                        break # if we found the license in the root directory, we don't need to look further
+                    elif 'license_url' not in repo:  # If the file is not in the root directory and no license has been found yet
+                        repo['license_url'] = f'{repo["url"]}/blob/{repo["commit_hash"]}/{url_path}'
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            repo['license'] = f.read()
 
         # Walk through the extracted folders and find all YARA files
         yara_rule_sets = []
