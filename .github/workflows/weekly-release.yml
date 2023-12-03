@@ -62,7 +62,7 @@ jobs:
 
     - name: Read statistics file contents
       id: build_statistics
-      run: echo "contents=$(cat build_stats.md)" >> $GITHUB_ENV
+      run: echo "contents=$(cat build_stats.md | base64)" >> $GITHUB_ENV
       shell: bash
 
     - name: Create Release
@@ -76,7 +76,7 @@ jobs:
         body: |
           ✨ This release contains the latest YARA rule sets from YARA Forge 🔨
 
-          ${{ env.contents }}
+            ${{ env.contents | base64 -d }}
         draft: false
         prerelease: false
 
