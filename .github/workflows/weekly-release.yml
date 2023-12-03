@@ -80,7 +80,7 @@ jobs:
         body: |
           ✨ This release contains the latest YARA rule sets from YARA Forge 🔨
 
-            ${{ env.contents | base64 -d }}
+            ${{ env.contents }}
         draft: false
         prerelease: false
 
