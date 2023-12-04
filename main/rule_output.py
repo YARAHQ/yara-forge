@@ -250,6 +250,7 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                     rule_package_minimum_age=rule_package['minimum_age'],
                     rule_package_minimum_score=rule_package['minimum_score'],
                     retrieval_date=datetime.datetime.now().strftime("%Y-%m-%d"),
+                    total_rules=rule_package_statistics['total_rules'],
                     total_rules_skipped_age=rule_package_statistics['total_rules_skipped_age'],
                     total_rules_skipped_quality=rule_package_statistics['total_rules_skipped_quality'],
                     total_rules_skipped_importance=rule_package_statistics['total_rules_skipped_importance'],
@@ -293,6 +294,7 @@ def write_build_stats(rule_package_statistics_set):
     # Create the build_stats.md file
     with open("build_stats.md", "w", encoding="utf-8") as f:
         # Write the header
+        f.write("✨ This release contains the latest YARA rule sets from YARA Forge 🔨\n\n")
         f.write("# Build Statistics\n\n")
         # Loop over the rule packages
         for rule_package_statistics in rule_package_statistics_set:

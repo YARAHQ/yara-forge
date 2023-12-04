@@ -175,6 +175,7 @@ rule_set_header: |
    * Minimum Age (in days): {rule_package_minimum_age}
    * Minimum Score: {rule_package_minimum_score}
    * Creation Date: {retrieval_date}
+   * Number of Rules: {total_rules}
    * Skipped: {total_rules_skipped_age} (age), {total_rules_skipped_quality} (quality), {total_rules_skipped_score} (score), {total_rules_skipped_importance} (importance)
    */
 
