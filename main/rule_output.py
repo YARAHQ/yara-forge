@@ -187,6 +187,8 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                     total_rules=rule_repo_statistics['total_rules'],
                     total_rules_skipped_age=rule_repo_statistics['total_rules_skipped_age'],
                     total_rules_skipped_quality=rule_repo_statistics['total_rules_skipped_quality'],
+                    total_rules_skipped_importance=rule_repo_statistics['total_rules_skipped_importance'],
+                    total_rules_skipped_score=rule_repo_statistics['total_rules_skipped_score'],
                     repo_license=repo['license']
                 )
                 # Append the rule set string to the list of rule set strings
@@ -250,6 +252,8 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                     retrieval_date=datetime.datetime.now().strftime("%Y-%m-%d"),
                     total_rules_skipped_age=rule_package_statistics['total_rules_skipped_age'],
                     total_rules_skipped_quality=rule_package_statistics['total_rules_skipped_quality'],
+                    total_rules_skipped_importance=rule_package_statistics['total_rules_skipped_importance'],
+                    total_rules_skipped_score=rule_package_statistics['total_rules_skipped_score'],
                 )
 
                 logging.log(logging.INFO, "You can find more information about skipped files " \
