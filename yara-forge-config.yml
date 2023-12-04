@@ -1,18 +1,6 @@
 # Collection -------------------------------------------------------------------
 repo_staging_dir: "./repos"
 yara_repositories:
-  # Just for testing
-  #- name: "YARA Style Guide"
-  #  url: "https://github.com/Neo23x0/YARA-Style-Guide"
-  #  author: "Florian Roth"
-  #  quality: 80
-  #  branch: "master"
-  - name: "Signature Base"
-    url: "https://github.com/Neo23x0/signature-base"
-    author: "Florian Roth"
-    quality: 85
-    branch: "master"
-    path: "yara"
   - name: "ReversingLabs"
     url: "https://github.com/reversinglabs/reversinglabs-yara-rules/"
     author: "ReversingLabs"
@@ -99,6 +87,12 @@ yara_repositories:
     url: "https://github.com/JPCERTCC/MalConfScan/"
     author: "JPCERT/CC Incident Response Group"
     quality: 80
+    branch: "master"
+    path: "yara"
+  - name: "Signature Base"
+    url: "https://github.com/Neo23x0/signature-base"
+    author: "Florian Roth"
+    quality: 85
     branch: "master"
     path: "yara"
 
