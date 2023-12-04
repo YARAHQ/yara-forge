@@ -4,7 +4,8 @@ This file contains functions that process the YARA rules.
 import logging
 import dateparser
 import yaml
-from plyara.utils import generate_logic_hash
+import uuid
+from plyara.utils import generate_hash
 #from pprint import pprint
 from git import Repo
 
@@ -56,7 +57,7 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
                     rule['metadata'] = []
 
                 # Calculate the logic hash
-                logic_hash = generate_logic_hash(rule)
+                logic_hash = generate_hash(rule)
                 # Check if the rule is a duplicate  (based on the logic hash)
                 if logic_hash in logic_hash_list and not is_private_rule:
                     logging.info("Skipping rule '%s > %s' because it has the same logic hash as '%s'", 
@@ -64,6 +65,10 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
                     continue
                 # Add the logic hash to the list
                 logic_hash_list[logic_hash] = rule['rule_name']
+
+                # Calculate a UUID for the rule hash
+                rule_uuid = generate_uuid_from_hash(logic_hash)
+                modify_meta_data_value(rule['metadata'], 'uuid', rule_uuid)
 
                 # Modifying existing meta data values ---------------------------------------
 
@@ -602,3 +607,9 @@ def get_rule_age_git(repo_path, file_path):
         return (creation_date, modification_date)
     print(f"No commits found for the file {file_path}.")
     return None
+
+def generate_uuid_from_hash(hash):
+    """
+    Generate a UUID from a hash
+    """
+    return uuid.uuid5(uuid.NAMESPACE_DNS, hash)
