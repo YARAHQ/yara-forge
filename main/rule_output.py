@@ -17,7 +17,7 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
     # List of files that were written
     package_files = []
 
-    rule_package_statistics_set = []
+    rule_package_statistics_sets = []
 
     # Loop over the rule packages
     for rule_package in YARA_FORGE_CONFIG['yara_rule_packages']:
@@ -232,7 +232,7 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                      rule_package_statistics['total_rules_skipped_score'])
 
         # Add the rule package statistics to the list of rule package statistics
-        rule_package_statistics_set.append(rule_package_statistics)
+        rule_package_statistics_sets.append(rule_package_statistics)
 
         # Only write the rule file if there's at least one rule in all sets in the package
         if rule_package_statistics['total_rules'] > 0:
@@ -278,12 +278,12 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
         })
 
     # Write the rule package statistics as a markdown table to the build_stats.md file
-    write_build_stats(rule_package_statistics_set)
+    write_build_stats(rule_package_statistics_sets)
 
     return package_files
 
 
-def write_build_stats(rule_package_statistics_set):
+def write_build_stats(rule_package_statistics_sets):
     """
     Writes the rule package statistics as a markdown table to the build_stats.md file
 
@@ -296,8 +296,20 @@ def write_build_stats(rule_package_statistics_set):
         # Write the header
         f.write("✨ This release contains the latest YARA rule sets from YARA Forge 🔨\n\n")
         f.write("# Build Statistics\n\n")
+
+        # Write the statistics for the rule packages
+        f.write("## Rule Packages\n\n")
+        # Write the rule package statistics as a table
+        f.write("| Package | Total Rules | Skipped (Age) | Skipped (Quality) | Skipped (Importance) | Skipped (Score) |\n")
+        f.write("| ------- | ----------- | ------------- | ----------------- | -------------------- | --------------- |\n")
+        for rule_package_stats in rule_package_statistics_sets:
+            f.write(f"| {rule_package_stats['name']} | {rule_package_stats['total_rules']} | {rule_package_stats['total_rules_skipped_age']} | {rule_package_stats['total_rules_skipped_quality']} | {rule_package_stats['total_rules_skipped_importance']} | {rule_package_stats['total_rules_skipped_score']} |\n")
+
+        # Write the statistics for the repos
+        f.write("\n## Package Repo Statistics\n\n")
+
         # Loop over the rule packages
-        for rule_package_statistics in rule_package_statistics_set:
+        for rule_package_statistics in rule_package_statistics_sets:
             # Write the rule package name as a header
             f.write(f"## {rule_package_statistics['name']}\n\n")
             # Write the rule package statistics as a table
