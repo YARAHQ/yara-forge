@@ -103,6 +103,12 @@ yara_repositories:
   #  quality: 90
   #  branch: "master"
 
+  # Testing Purposes
+  #- name: "YARA Style Guide"
+  #  url: "https://github.com/Neo23x0/YARA-Style-Guide"
+  #  author: "Florian Roth"
+  #  quality: 70
+  #  branch: "master"
 
 # Rule Processing --------------------------------------------------------------
 rule_base_score: 75

@@ -68,7 +68,7 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
 
                 # Calculate a UUID for the rule hash
                 rule_uuid = generate_uuid_from_hash(logic_hash)
-                modify_meta_data_value(rule['metadata'], 'uuid', rule_uuid)
+                align_yara_rule_uuid(rule['metadata'], rule_uuid)
 
                 # Modifying existing meta data values ---------------------------------------
 
@@ -432,6 +432,55 @@ def align_yara_rule_author(rule_meta_data, repo_author):
     return rule_meta_data
 
 
+def align_yara_rule_uuid(rule_meta_data, uuid):
+    """
+    Change YARA rule UUID
+    """
+    # List of possible author names
+    uuid_names = ['uuid', 'id', 'rid', 'rule_id', 'rule_uuid', 'ruleid',
+                  'ruleuuid', 'identifier', 'rule_identifier']
+    # Look for the author in the rule meta data
+    uuid_value = uuid
+    # We create a copy so that we can delete elements from the original
+    meta_data_copy = rule_meta_data.copy()
+    # Now we loop over the copy
+    for meta_data in meta_data_copy:
+        for key, value in meta_data.items():
+            # If the key is in the list of possible author names, then we found the author
+            if key in uuid_names:
+                # Check if the value is a valid UUIDv5
+                if is_valid_uuidv5(value):
+                    # If the value is a valid UUID, we use it
+                    uuid_value = value
+                    # Remove the author from the original meta data
+                    rule_meta_data.remove(meta_data)
+                else:
+                    # If the value is not a valid UUID, we use the hash of the rule
+                    logging.debug("The value '%s' is not a valid UUID. Using our UUID instead "
+                                  "and renaming the old ID to 'orig_id' if the field was 'id'.", 
+                                  value)
+                    # If the field was 'id', we rename it to 'orig-id'
+                    if key == 'id':
+                        logging.debug("Renaming the old ID to 'orig_id'.")
+                        modify_meta_data_value(rule_meta_data, 'orig_id', value)
+                        rule_meta_data.remove(meta_data)
+                    # else, we just leave everything as it is and do nothing with the value
+
+    # We add the UUID to the rule meta data
+    rule_meta_data.append({'id': uuid_value})
+    return rule_meta_data
+
+
+def is_valid_uuidv5(value):
+    """
+    Check if the value is a valid UUID
+    """
+    try:
+        uuid.UUID(value)
+        return True
+    except ValueError:
+        return False
+
 def align_yara_rule_name(rule_name, rule_set_id):
     """
     Change YARA rule name
@@ -607,6 +656,7 @@ def get_rule_age_git(repo_path, file_path):
         return (creation_date, modification_date)
     print(f"No commits found for the file {file_path}.")
     return None
+
 
 def generate_uuid_from_hash(hash):
     """
