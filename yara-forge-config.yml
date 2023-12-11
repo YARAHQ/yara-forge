@@ -1,100 +1,157 @@
 # Collection -------------------------------------------------------------------
 repo_staging_dir: "./repos"
 yara_repositories:
-  - name: "ReversingLabs"
-    url: "https://github.com/reversinglabs/reversinglabs-yara-rules/"
-    author: "ReversingLabs"
-    quality: 90
-    branch: "develop"
-  - name: "Elastic"
-    url: "https://github.com/elastic/protections-artifacts/"
-    author: "Elastic"
-    quality: 75
-    branch: "main"
-  - name: "R3c0nst"
-    url: "https://github.com/fboldewin/YARA-rules/"
-    author: "Frank Boldewin"
-    quality: 90
-    branch: "master"
-  - name: "CAPE"
-    url: "https://github.com/kevoreilly/CAPEv2"
-    author: "Kevin O'Reilly"
-    quality: 65
-    branch: "master"
-    path: "data/yara"
-  - name: "BinaryAlert"
-    url: "https://github.com/airbnb/binaryalert/"
-    author: "Airbnb"
-    quality: 80
-    branch: "master"
-    path: "rules/public"
-  - name: "DeadBits"
-    url: "https://github.com/deadbits/yara-rules/"
-    author: "Adam Swanda"
-    quality: 80
-    branch: "master"
-    path: "rules"
-  - name: "DelivrTo"
-    url: "https://github.com/delivr-to/detections"
-    author: "Delivr.To"
-    quality: 80
-    branch: "main"
-    path: "yara-rules"
-  - name: "ESET"
-    url: "https://github.com/eset/malware-ioc"
-    author: "ESET TI"
-    quality: 80
-    branch: "master"
-  - name: "FireEye-RT"
-    url: "https://github.com/mandiant/red_team_tool_countermeasures/"
-    author: "FireEye"
-    quality: 75
-    branch: "master"
-    path: "rules"
-  - name: "GCTI"
-    url: "https://github.com/chronicle/GCTI"
-    author: "gssincla@google.com"
-    quality: 85
-    branch: "main"
-    path: "YARA"
-  - name: "Malpedia"
-    url: "https://github.com/malpedia/signator-rules/"
-    author: "Felix Bilstein - yara-signator at cocacoding dot com"
-    quality: 75
-    branch: "main"
-    path: "rules"
-  - name: "McAfee ATR"
-    url: "https://github.com/advanced-threat-research/Yara-Rules/"
-    author: "McAfee ATR Team"
-    quality: 70
-    branch: "master"
-  - name: "Arkbird SOLG"
-    url: "https://github.com/StrangerealIntel/DailyIOC"
-    author: "Arkbird_SOLG"
-    quality: 75
-    branch: "master"
-  - name: "Telekom Security"
-    url: "https://github.com/telekom-security/malware_analysis/"
-    author: "Telekom Security"
-    quality: 70
-    branch: "main"
-  - name: "Volexity"
-    url: "https://github.com/volexity/threat-intel"
-    author: "threatintel@volexity.com"
-    quality: 80
-    branch: "main"
-  - name: "JPCERTCC"
-    url: "https://github.com/JPCERTCC/MalConfScan/"
-    author: "JPCERT/CC Incident Response Group"
-    quality: 80
-    branch: "master"
-    path: "yara"
-  - name: "Signature Base"
-    url: "https://github.com/Neo23x0/signature-base"
-    author: "Florian Roth"
-    quality: 85
-    branch: "master"
-    path: "yara"
+   - name: "ReversingLabs"
+     url: "https://github.com/reversinglabs/reversinglabs-yara-rules/"
+     author: "ReversingLabs"
+     quality: 90
+     branch: "develop"
+   - name: "Elastic"
+     url: "https://github.com/elastic/protections-artifacts/"
+     author: "Elastic"
+     quality: 75
+     branch: "main"
+   - name: "R3c0nst"
+     url: "https://github.com/fboldewin/YARA-rules/"
+     author: "Frank Boldewin"
+     quality: 90
+     branch: "master"
+   - name: "CAPE"
+     url: "https://github.com/kevoreilly/CAPEv2"
+     author: "Kevin O'Reilly"
+     quality: 65
+     branch: "master"
+     path: "data/yara"
+   - name: "BinaryAlert"
+     url: "https://github.com/airbnb/binaryalert/"
+     author: "Airbnb"
+     quality: 80
+     branch: "master"
+     path: "rules/public"
+   - name: "DeadBits"
+     url: "https://github.com/deadbits/yara-rules/"
+     author: "Adam Swanda"
+     quality: 80
+     branch: "master"
+     path: "rules"
+   - name: "DelivrTo"
+     url: "https://github.com/delivr-to/detections"
+     author: "Delivr.To"
+     quality: 80
+     branch: "main"
+     path: "yara-rules"
+   - name: "ESET"
+     url: "https://github.com/eset/malware-ioc"
+     author: "ESET TI"
+     quality: 80
+     branch: "master"
+   - name: "FireEye-RT"
+     url: "https://github.com/mandiant/red_team_tool_countermeasures/"
+     author: "FireEye"
+     quality: 75
+     branch: "master"
+     path: "rules"
+   - name: "GCTI"
+     url: "https://github.com/chronicle/GCTI"
+     author: "gssincla@google.com"
+     quality: 85
+     branch: "main"
+     path: "YARA"
+   - name: "Malpedia"
+     url: "https://github.com/malpedia/signator-rules/"
+     author: "Felix Bilstein - yara-signator at cocacoding dot com"
+     quality: 75
+     branch: "main"
+     path: "rules"
+   - name: "McAfee ATR"
+     url: "https://github.com/advanced-threat-research/Yara-Rules/"
+     author: "McAfee ATR Team"
+     quality: 70
+     branch: "master"
+   - name: "Arkbird SOLG"
+     url: "https://github.com/StrangerealIntel/DailyIOC"
+     author: "Arkbird_SOLG"
+     quality: 75
+     branch: "master"
+   - name: "Telekom Security"
+     url: "https://github.com/telekom-security/malware_analysis/"
+     author: "Telekom Security"
+     quality: 70
+     branch: "main"
+   - name: "Volexity"
+     url: "https://github.com/volexity/threat-intel"
+     author: "threatintel@volexity.com"
+     quality: 80
+     branch: "main"
+   - name: "JPCERTCC"
+     url: "https://github.com/JPCERTCC/MalConfScan/"
+     author: "JPCERT/CC Incident Response Group"
+     quality: 80
+     branch: "master"
+     path: "yara"
+   - name: "SecuInfra"
+     url: "https://github.com/SIFalcon/Detection"
+     author: "SIFalcon"
+     quality: 70
+     branch: "main"
+     path: "Yara"
+   - name: "RussianPanda"
+     url: "https://github.com/RussianPanda95/Yara-Rules"
+     author: "RussianPanda"
+     quality: 85
+     branch: "main"
+
+   # Open Source YARA Rules collection by Michael Worth
+   - name: "CadoSecurity"
+     url: "https://github.com/mikesxrs/Open-Source-YARA-rules"
+     author: "CadoSecurity"
+     quality: 80
+     branch: "master"
+     path: "Cado%20Security"
+   - name: "Check Point"
+     url: "https://github.com/mikesxrs/Open-Source-YARA-rules"
+     author: "CheckPoint Research"
+     quality: 85
+     branch: "master"
+     path: "Checkpoint"
+   - name: "BlackBerry"
+     url: "https://github.com/mikesxrs/Open-Source-YARA-rules"
+     author: "BlackBerry Threat Research Team"
+     quality: 85
+     branch: "master"
+     path: "BlackBerry"
+   - name: "Cluster25"
+     url: "https://github.com/mikesxrs/Open-Source-YARA-rules"
+     author: "Cluster25"
+     quality: 75
+     branch: "master"
+     path: "Cluster%2025"
+   - name: "Dragon Threat Labs"
+     url: "https://github.com/mikesxrs/Open-Source-YARA-rules"
+     author: "@dragonthreatlab"
+     quality: 80
+     branch: "master"
+     path: "Dragonthreatlabs"
+   - name: "Microsoft"
+     url: "https://github.com/mikesxrs/Open-Source-YARA-rules"
+     author: "Microsoft"
+     quality: 80
+     branch: "master"
+     path: "Microsoft"
+   - name: "NCSC"
+     url: "https://github.com/mikesxrs/Open-Source-YARA-rules"
+     author: "NCSC"
+     quality: 80
+     branch: "master"
+     path: "NCSC"
+
+   # My own YARA rule collection used for our free scanners
+   - name: "Signature Base"
+     url: "https://github.com/Neo23x0/signature-base"
+     author: "Florian Roth"
+     quality: 85
+     branch: "master"
+     path: "yara"
 
   # License prevents the integration of the rules into the YARA-Forge
   #- name: "AvastTI"
@@ -107,7 +164,7 @@ yara_repositories:
   #- name: "YARA Style Guide"
   #  url: "https://github.com/Neo23x0/YARA-Style-Guide"
   #  author: "Florian Roth"
-  #  quality: 70
+  #  quality: 80
   #  branch: "master"
 
 # Rule Processing --------------------------------------------------------------
@@ -131,6 +188,23 @@ issue_levels:
 # 0 - no quality
 # 100 - high quality
 #default_quality: 75 # not used anymore
+
+# Fixed order in the meta data values
+meta_data_order:
+  - description
+  - author
+  - id
+  - date
+  - modified
+  - old_rule_name
+  - reference
+  - source_url
+  - license_url
+  - hash
+  - logic_hash
+  - score
+  - quality
+  - tags
 
 # Rule Package Output ----------------------------------------------------------
 yara_rule_packages:

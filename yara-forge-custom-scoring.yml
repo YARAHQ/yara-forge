@@ -41,26 +41,57 @@ noisy-rules:
     - name: "ELASTIC_Multi_EICAR_Ac8F42D6"
       quality: -50
     - name: "ELASTIC_Linux_Trojan_Torii_Fa253F2A"
-      quality: -50
+      quality: -80
     - name: "ELASTIC_Windows_Hacktool_Cheatengine_Fedac96D"
       quality: -40
     - name: "ELASTIC_Linux_Worm_Generic_98Efcd38"
       quality: -50
+      score: 60
     - name: "ELASTIC_Linux_Trojan_Torii_Fa253F2A"
       quality: -50
     - name: "ELASTIC_Linux_Trojan_Iroffer_53692410"
-      quality: -30
+      quality: -50
+      score: 60
     - name: "ELASTIC_Linux_Trojan_Iroffer_013E07De"
-      quality: -30
+      quality: -50
+      score: 60
     - name: "ELASTIC_Windows_Trojan_Bruteratel_Ade6C9D5"
       quality: -30
+      score: 60
     - name: "ELASTIC_Linux_Hacktool_Earthworm_E3Da43E2"
       quality: -30
+      score: 60
     - name: "ELASTIC_Linux_Exploit_Lotoor_F8E9F93C"
-      quality: -50
+      quality: -80
+    - name: "ELASTIC_Linux_Trojan_Generic_D3Fe3Fae"
+      quality: -30
+      score: 60
+    - name: "ELASTIC_Windows_Vulndriver_Iqvw_B8B45E6B"
+      quality: -20
+      score: 60
+    - name: "ELASTIC_Windows_Vulndriver_Amifldrv_E387D5Ad"
+      quality: -20
+      score: 60
+    - name: "ELASTIC_Linux_Hacktool_Earthworm_82D5C4Cf"
+      quality: -30
+      score: 60
+    - name: "ELASTIC_Linux_Hacktool_Flooder_678C1145"
+      quality: -30
+      score: 60
+    - name: "ELASTIC_Linux_Trojan_Chinaz_A2140Ca1"
+      quality: -30
+      score: 60
+    - name: "ELASTIC_Linux_Trojan_Gafgyt_94A44Aa5"
+      quality: -30
+      score: 60
+    - name: "ELASTIC_Linux_Trojan_Tsunami_47F93Be2"
+      quality: -70
+      score: 60
     # FireEye
     - name: "FIREEYE_RT_Hunting_Dotnettojscript_Functions"
       quality: -80
+    - name: "FIREEYE_RT_Hunting_LNK_Win_Genericlauncher"
+      score: 60
     # McAfee
     - name: "MCAFEE_ATR_Vbs_Mykins_Botnet"
       quality: -30
@@ -75,9 +106,14 @@ noisy-rules:
       quality: -60
     - name: "TELEKOM_SECURITY_Rdp_Enable_Multiple_Sessions"
       quality: -60
+    - name: "TELEKOM_SECURITY_Cn_Utf8_Windows_Terminal"
+      quality: -50
     # ESET
     - name: "ESET_Skip20_Sqllang_Hook"
       quality: -80
+    - name: "ESET_Turla_Outlook_Pdf"
+      quality: -60
+      score: 60
     # Arkbird SOLG
     - name: "ARKBIRD_SOLG_APT_Lazarus_Loader_Dec_2020_1"
       quality: -70
@@ -95,6 +131,14 @@ noisy-rules:
       quality: -20
     - name: "ARKBIRD_SOLG_Ins_NSIS_Buer_Nov_2020_1"
       quality: -60
+    - name: "ARKBIRD_SOLG_Ins_NSIS_Buer_Nov_2020_2"
+      quality: -60
+    - name: "ARKBIRD_SOLG_APT_APT28_Zekapab_Mar_2021_1"
+      quality: -40
+      score: 60
+    - name: "ARKBIRD_SOLG_RAN_ELF_Hive_Oct_2021_1"
+      quality: -40
+      score: 60
     # Malpedia
     - name: "MALPEDIA_Win_Xtunnel_Auto"
       quality: -60
@@ -110,33 +154,51 @@ noisy-rules:
       quality: -60
     - name: "MALPEDIA_Win_Rdat_Auto"
       quality: -30
+      score: 60
     - name: "MALPEDIA_Win_Qtbot_Auto"
       quality: -50
     - name: "MALPEDIA_Win_Strongpity_Auto"
       quality: -30
+      score: 60
     - name: "MALPEDIA_Win_Synccrypt_Auto"
       quality: -30
     - name: "MALPEDIA_Win_Lorenz_Auto"
       quality: -30
+      score: 60
     - name: "MALPEDIA_Win_Gauss_Auto"
       quality: -30
+      score: 60
     - name: "MALPEDIA_Win_Kleptoparasite_Stealer_Auto"
       quality: -40
+      score: 60
     - name: "MALPEDIA_Elf_Gobrat_Auto"
       quality: -40
+      score: 60
     - name: "MALPEDIA_Win_Neutrino_Auto"
       quality: -30
+      score: 60
     - name: "MALPEDIA_Win_Alina_Pos_Auto"
       quality: -30
+      score: 60
     - name: "MALPEDIA_Elf_Blackcat_Auto"
       quality: -30
+      score: 60
+    - name: "MALPEDIA_Win_Valley_Rat_Auto"
+      quality: -30
+      score: 60
+    - name: "MALPEDIA_Win_Epsilon_Red_Auto"
+      quality: -30
+      score: 60
     # Signature Base
     - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
       quality: -20
+      score: 60
     - name: "SIGNATURE_BASE_APT_Lazarus_Dropper_Jun18_1" # strings with too many matches in large files
       quality: -20
+      score: 60
     - name: "SIGNATURE_BASE_M_APT_VIRTUALPITA_1"
       quality: -40
+      score: 60
     # DeadBits
     - name: "DEADBITS_APT32_Kerrdown"
       quality: -100
@@ -145,16 +207,64 @@ noisy-rules:
     # BinaryAlert
     - name: "BINARYALERT_Ransomware_Windows_Wannacry"
       quality: -30
+    - name: "BINARYALERT_Eicar_Substring_Test"
+      quality: -40
+      score: 50
     # JPCERT
     - name: "JPCERTCC_Plugx"
       quality: -70
     - name: "JPCERTCC_Ursnif"
       quality: -70
     - name: "JPCERTCC_Cobaltstrike"
-      quality: -40
+      quality: -70
+      score: 60
+    - name: "JPCERTCC_Datper"
+      quality: -50
+      score: 60
     # Binary Alert
     - name: "BINARYALERT_Hacktool_Windows_Mimikatz_Modules"
       quality: -50
     # Delivr.to
     - name: "DELIVRTO_SUSP_SVG_Onload_Onerror_Jul23"
       quality: -100
+    # SecuInfra
+    - name: "SECUINFRA_OBFUS_Powershell_Common_Replace"
+      quality: -100
+    - name: "SECUINFRA_SUSP_Websites"
+      quality: -80
+    - name: "SECUINFRA_SUSP_EXE_In_ISO"
+      quality: -80
+    - name: "SECUINFRA_SUSP_VBS_In_ISO"
+      quality: -60
+    - name: "SECUINFRA_APT_Bitter_Zxxz_Downloader"
+      quality: -50
+    - name: "SECUINFRA_SUSP_Reverse_DOS_Header"
+      quality: -80
+    - name: "SECUINFRA_SUSP_LNK_Powershell"
+      quality: -80
+      score: 40
+    - name: "SECUINFRA_SUSP_LNK_CMD"
+      quality: -80
+      score: 40
+    - name: "SECUINFRA_SUSP_Ngrok_URL"
+      quality: -80
+      score: 40
+    - name: "SECUINFRA_SUSP_Powershell_Base64_Decode"
+      quality: -20
+      score: 60
+    - name: "SECUINFRA_SUSP_Scheduled_Tasks_Create_From_Susp_Dir"
+      quality: -20
+      score: 60
+    - name: "SECUINFRA_SUSP_VBS_Wscript_Shell"
+      quality: -40
+      score: 45
+    - name: "SECUINFRA_SUS_Unsigned_APPX_MSIX_Installer_Feb23"
+      quality: -40
+      score: 50
+    # BlackBerry
+    - name: "BLACKBERRY_Mal_Infostealer_Win32_Jupyter_Infostealer_Module"
+      quality: -80
+    # GCTI
+    - name: "GCTI_Sliver_Implant_32Bit"
+      quality: -50
+      score: 60
