@@ -2,11 +2,12 @@
 This file contains functions that process the YARA rules.
 """
 import logging
-import dateparser
-import yaml
+import re
 import uuid
+from pprint import pprint
+import yaml
+import dateparser
 from plyara.utils import generate_hash
-#from pprint import pprint
 from git import Repo
 
 # Date Lookup Cache
@@ -58,13 +59,24 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
 
                 # Calculate the logic hash
                 logic_hash = generate_hash(rule)
+
+                # Duplicate Name Check
+                # If the rule name already exists in the list, append a number to it
+                if rule['rule_name'] in logic_hash_list.values():
+                    # Get the number of times the rule name already exists in the list
+                    num_rule_name = list(logic_hash_list.values()).count(rule['rule_name'])
+                    # Append the number to the rule name
+                    rule['rule_name'] = f"{rule['rule_name']}_{num_rule_name}"
+
+                # Duplicate Content Check
                 # Check if the rule is a duplicate  (based on the logic hash)
                 if logic_hash in logic_hash_list and not is_private_rule:
                     logging.info("Skipping rule '%s > %s' because it has the same logic hash as '%s'", 
                                  repo['name'], rule['rule_name'], logic_hash_list[logic_hash])
                     continue
-                # Add the logic hash to the list
+                # Register the logic hash
                 logic_hash_list[logic_hash] = rule['rule_name']
+                modify_meta_data_value(rule['metadata'], 'logic_hash', logic_hash)
 
                 # Calculate a UUID for the rule hash
                 rule_uuid = generate_uuid_from_hash(logic_hash)
@@ -89,6 +101,9 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
                 # Modify the rule author
                 rule['metadata'] = align_yara_rule_author(rule['metadata'], repo['author'])
 
+                # Add tags based on meta data values and condition elements
+                rule = add_tags_to_rule(rule)
+
                 # Add a score based on the rule quality and meta data keywords
                 rule_score = evaluate_yara_rule_score(rule, YARA_FORGE_CONFIG)
                 modify_meta_data_value(rule['metadata'], 'score', rule_score)
@@ -101,8 +116,8 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
 
                 # Adding additional meta data values ----------------------------------------
                 # Add a quality value based on the original repo
-                # if there is a score, use that for the quality, otherwise use the quality value of the repo
-
+                # a quality reduction is evaluated later in the process - this is just the base value
+                # for that calculation
                 modify_meta_data_value(rule['metadata'], 'quality', repo['quality'])
 
                 # Modify the rule name
@@ -147,7 +162,7 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
                 modify_meta_data_value(rule['metadata'], 'license_url', repo['license_url'])
 
                 # Sort the meta data values
-                rule['metadata'] = sort_meta_data_values(rule['metadata'])
+                rule['metadata'] = sort_meta_data_values(rule['metadata'], YARA_FORGE_CONFIG)
 
                 # We keep the rule
                 kept_rules.append(rule)
@@ -162,6 +177,121 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
 
     return yara_rule_repo_sets
 
+
+def add_tags_to_rule(rule):
+    """
+    Add tags to a rule based on meta data values and condition elements
+    """
+    # List of tags to add
+    tags_to_add = []
+    # List of possible tags
+    tag_names = ['tag', 'tags', 'category', 'categories', 'type', 'types', 'family', 'families',
+                 'malware', 'threat', 'threats', 'threat_type', 'actor', 'threat_actor', 'threat_actors',
+                 'threat_types', 'threat_category', 'threat_categories', 'threat_family',
+                 'threat_families', 'threat_group', 'threat_groups', 'scan_context',
+                 'malware_type', 'mitre_attack', 'mitre_attack_technique', 'mitre_attack_techniques'
+                 'attack_technique', 'attack_techniques', 'attack', 'attacks', 'attack_type']
+    # Regular expressions to extract other tags from the description
+    tag_regexes = [
+        r'CVE-\d{4}-\d{4,7}', # CVE IDs
+        r'T[0-9]{4}', # MITRE ATT&CK Technique IDs
+    ]
+    # Join the list of regexes with an OR operator and compile the regex
+    tag_regex = re.compile(r'(?i)\b(%s)\b' % "|".join(tag_regexes))
+    # List of values to ignore
+    ignore_values = ['N/A', 'n/a', 'na', 'NA', 'unknown', 'Unknown', '', ' ']
+    # List of possible condition elements
+    condition_contents = {
+        "FILE": ['uint8(0)', 'uint16(0)', 'uint32(0)', 'uint16be(0)', 'uint32be(0)', 
+                 ' at 0 ', 'filesize'],
+        # "MEMORY": [' or all of them']
+    }
+    condition_ends = {
+        "FILE": [' at 0'],
+        # "MEMORY": [' or any of them', ' or all of them', ' or 1 of them'],
+    }
+    # We create a copy so that we can delete elements from the original
+    meta_data_copy = rule['metadata'].copy()
+    # Now we loop over the copy
+    for meta_data in meta_data_copy:
+        for key, value in meta_data.items():
+            # If the key is in the list of possible tag names, then we found the tag
+            if key.lower() in tag_names:
+                # Check if the value is a list
+                if isinstance(value, list):
+                    # Loop over the list
+                    for tag in value:
+                        # Add the tag to the list of tags to add
+                        tags_to_add.append(tag)
+                # If the value is not a list, we just add it
+                else:
+                    # If the value contains a comma, we split it
+                    if "," in value:
+                        # Split the value
+                        value = value.split(",")
+                        # Loop over the values
+                        for tag in value:
+                            # Add the tag to the list of tags to add
+                            tags_to_add.append(tag.strip())
+                    # Add the tag to the list of tags to add
+                    else:
+                        tags_to_add.append(value)
+
+    # Remove tags that are in the ignore list
+    tags_to_add = [tag for tag in tags_to_add if tag not in ignore_values]
+
+    # Extractions from meta data ----------------------------------------------
+    # Extract tags from the description
+    for meta_data in meta_data_copy:
+        for key, value in meta_data.items():
+            # If the key is in the list of possible tag names, then we found the tag
+            if key.lower() == "description":
+                # Extract the tags from the description
+                tags_from_description = tag_regex.findall(value)
+                # Add the tags to the list of tags to add
+                tags_to_add.extend(tags_from_description)
+
+    # Condition tags ----------------------------------------------------------
+    # If one of the values is in the condition contents we add a specific tag
+    for condition_mapping in condition_contents.items():
+        # Get the element
+        tag = condition_mapping[0]
+        # Get the condition terms
+        condition_terms = condition_mapping[1]
+        # Check if the element is in the condition terms
+        for term in condition_terms:
+            if term in rule['raw_condition']:
+                # Add the element to the list of tags to add
+                tags_to_add.append(tag)
+    # If one of the is how the condition ends we add a specific tag
+    for condition_mapping in condition_ends.items():
+        # Get the element
+        tag = condition_mapping[0]
+        # Get the condition terms
+        condition_terms = condition_mapping[1]
+        # Check if the element is in the condition terms
+        for term in condition_terms:
+            if rule['raw_condition'].endswith(term):
+                # Add the element to the list of tags to add
+                tags_to_add.append(tag)
+
+    # Clean up the tags ----------------------------------------------------------
+    # Remove all duplicates from the tags list 
+    tags_to_add = list(dict.fromkeys(tags_to_add))
+    # We uppercase all the tags
+    tags_to_add = [tag.upper() for tag in tags_to_add]
+    # We also modify the existing tags field in the meta data
+    rule['metadata'] = modify_meta_data_value(rule['metadata'], 'tags', ", ".join(tags_to_add))
+    # Remove symbols that are not allowed in tags (only alphanumeric characters and
+    # underscores are allowed), replace every other character with an underscore using a regex
+    tags_to_add = [re.sub(r'[^a-zA-Z0-9_]', '_', tag) for tag in tags_to_add]
+    # Add the tags to the rule if the field already exist
+    if 'tags' in rule:
+        rule['tags'].extend(tags_to_add)
+    # If the field doesn't exist, we create it
+    else:
+        rule['tags'] = tags_to_add
+    return rule
 
 def retrieve_custom_importance_score(repo_name, file_path, rule_name):
     """
@@ -205,13 +335,12 @@ def retrieve_custom_importance_score(repo_name, file_path, rule_name):
     return None
 
 
-def sort_meta_data_values(rule_meta_data):
+def sort_meta_data_values(rule_meta_data, YARA_FORGE_CONFIG):
     """
     Sort the meta data values
     """
     # Fixed order of meta data values
-    fixed_order = ['description', 'author', 'date', 'modified', 'reference',
-                   'old_rule_name', 'source_url', 'hash', 'score', 'quality']
+    fixed_order = YARA_FORGE_CONFIG['meta_data_order']
 
     # We loop over the list of dicts and sort them by key according to our fixed_order
     rule_meta_data.sort(key=lambda x: fixed_order.index(list(x.keys())[0]) if list(x.keys())[0] in fixed_order else len(fixed_order))
@@ -307,7 +436,7 @@ def align_yara_rule_hashes(rule_meta_data):
     hash_names = ['hash', 'hashes', 'md5', 'sha1', 'sha256', 'sha512', 'sha-1',
                   'sha-256', 'sha-512', 'sha_256', 'sha_1', 'sha_512', 'md5sum',
                   'sha1sum', 'sha256sum', 'sha512sum', 'md5sums', 'sha1sums', 'sha256sums',
-                  'sha512sums', 'reference_sample', 'sample']
+                  'sha512sums', 'reference_sample', 'sample', 'original_sample_sha1']
     # Look for the hashes in the rule meta data
     hashes_found = False
     hashes_values = []
@@ -367,19 +496,56 @@ def modify_meta_data_value(rule_meta_data, key, value):
 def evaluate_yara_rule_score(rule, YARA_FORGE_CONFIG):
     """
     Evaluate the YARA rule score
+    
+    We fist set the base score from the config
+    
+    We then take the next best score based on this order:
+    - Custom score from the YAML file
+    - Predefined score from the meta data
+    - Meta data score based on keywords
+
+    If we can't find a score, we use the base score
     """
     # Score for the rule quality
-    rule_base_score = YARA_FORGE_CONFIG['rule_base_score']
+    rule_score = YARA_FORGE_CONFIG['rule_base_score']
+
+    # If a manual score has been set in the YAML file we use that
+    custom_score = retrieve_custom_score(rule)
+    if custom_score > 0:
+        logging.debug("Rule '%s' has a custom score of %d", rule['rule_name'], custom_score)
+        return custom_score
+
     # Check if the rule already has a score
     for meta_data in rule['metadata']:
         for key, value in meta_data.items():
             if key == 'score':
-                rule_base_score = value
+                # If the rule already has a score, we use that
+                return value
+
     # Score for the rule meta data
-    meta_data_modifier = evaluate_yara_rule_meta_data(rule)
-    # Score for the rule strings
-    rule_score = rule_base_score + meta_data_modifier
+    meta_data_rule_score = evaluate_yara_rule_meta_data(rule)
+    if meta_data_rule_score > 0:
+        logging.debug("Rule '%s' has a meta data score of %d", rule['rule_name'], meta_data_rule_score)
+        return meta_data_rule_score
+    
     return rule_score
+
+
+def retrieve_custom_score(rule):
+    """
+    Retrieves a custom score for a rule.
+    """
+    # Read the scores from the YAML file named yara-forge-custom-scoring.yml
+    with open('yara-forge-custom-scoring.yml', 'r', encoding='utf-8') as f:
+        custom_scoring = yaml.safe_load(f)
+        # Loop over the rules in the YAML file
+        for custom_score in custom_scoring['noisy-rules']:
+            # Check if the rule name matches
+            if custom_score['name'] == rule['rule_name']:
+                if 'score' in custom_score:
+                    # Return the score reduction
+                    return custom_score['score']
+    return 0
 
 
 def evaluate_yara_rule_meta_data(rule):
@@ -387,18 +553,25 @@ def evaluate_yara_rule_meta_data(rule):
     Evaluate the score modifier based on the rule meta data
     """
     # List of possible meta data keywords
-    meta_data_keywords_suspicious = ['hunting', 'experimental', 'test', 'testing', 'false positive',
+    meta_data_keywords_suspicious = ['suspicious']
+    # List of possible meta data keywords
+    meta_data_keywords_hunting = ['hunting', 'experimental', 'test', 'testing', 'false positive',
                                      'unstable', 'untested', 'unverified', 'unreliable', 
                                      'unconfirmed']
     # Check if one of the keywords appears in the meta data values
     for meta_data in rule['metadata']:
         for _, value in meta_data.items():
             if isinstance(value, str) and value.lower() in meta_data_keywords_suspicious:
-                return -15
+                return 65
+            if isinstance(value, str) and value.lower() in meta_data_keywords_hunting:
+                return 50
     # Check if one of the keywords appears in the rule name
     for keyword in meta_data_keywords_suspicious:
         if keyword in rule['rule_name'].lower():
-            return -15
+            return 65
+    for keyword in meta_data_keywords_hunting:
+        if keyword in rule['rule_name'].lower():
+            return 50
     return 0
 
 
@@ -508,7 +681,7 @@ def align_yara_rule_reference(rule_meta_data, rule_set_url):
     """
     # List of possible reference names
     other_ref_names = ['reference', 'references', 'ref', 'url', 'source', 'link',
-                       'website', 'webpage']
+                       'website', 'webpage', 'report']
     other_indicators = ['http://', 'https://']
     # Look for the reference in the rule meta data
     reference_found = False
@@ -655,7 +828,9 @@ def get_rule_age_git(repo_path, file_path):
         # Return the date in the format YYYY-MM-DD
         return (creation_date, modification_date)
     print(f"No commits found for the file {file_path}.")
-    return None
+    # If we couldn't find any commits, we return the creation date of the repository
+    repo_creation_date = list(repo.iter_commits(max_count=1))[-1].committed_datetime
+    return (repo_creation_date, repo_creation_date)
 
 
 def generate_uuid_from_hash(hash):

@@ -34,9 +34,15 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
         repo['owner'] = repo_url_parts[3]
         repo['repo'] = repo_url_parts[4].split(".")[0]
 
-        # Clone the repository
-        repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'])
-        repo['commit_hash'] = Repo.clone_from(repo['url'], repo_folder, branch=repo['branch']).head.commit.hexsha
+        # If the repository hasn't not been cloned yet, clone it
+        if not os.path.exists(os.path.join(repo_staging_dir, repo['owner'], repo['repo'])):
+            # Clone the repository
+            repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'])
+            repo['commit_hash'] = Repo.clone_from(repo['url'], repo_folder, branch=repo['branch']).head.commit.hexsha
+        else:
+            # Get the latest commit hash
+            repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'])
+            repo['commit_hash'] = Repo(repo_folder).head.commit.hexsha
 
         # Walk through the extracted folders and find a LICENSE file
         # and save it into the repository object

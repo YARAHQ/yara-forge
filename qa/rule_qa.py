@@ -11,7 +11,7 @@ import yaml
 import yara
 from plyara.utils import rebuild_yara_rule
 from qa.yaraQA.main.core import YaraQA
-#from pprint import pprint
+from pprint import pprint
 
 
 def evaluate_rules_quality(processed_yara_repos, config):
@@ -98,18 +98,18 @@ def evaluate_rules_quality(processed_yara_repos, config):
                 for issue in issues:
                     issue['score'] = config['issue_levels'][issue['level']]
                 # Calculate the total score
-                total_score = sum(issue['score'] for issue in issues)
+                total_quality_score = sum(issue['score'] for issue in issues)
 
                 # Apply a custom quality reduction if the rule has shown to be
                 # prone to false positives
-                custom_score_reduction = retrieve_custom_score_reduction(rule)
-                total_score += custom_score_reduction
+                custom_score_reduction = retrieve_custom_quality_reduction(rule)
+                total_quality_score += custom_score_reduction
 
                 # Debug output report the total score of a rule
-                logging.debug("Rule %s total score: %d", rule['rule_name'], total_score)
+                logging.debug("Rule %s total score: %d", rule['rule_name'], total_quality_score)
 
                 # Add the total score to the rule's quality score
-                rule['metadata'] = modify_yara_rule_quality(rule['metadata'], total_score)
+                rule['metadata'] = modify_yara_rule_quality(rule['metadata'], total_quality_score)
 
                 # Add all issues to the big list of issues
                 if repo_rule_sets['name'] in repo_issues:
@@ -161,9 +161,9 @@ def write_issues_to_file(rule_issues):
         yaml.dump(rule_issues, f, sort_keys=False, allow_unicode=True)
 
 
-def retrieve_custom_score_reduction(rule):
+def retrieve_custom_quality_reduction(rule):
     """
-    Retrieves a custom score reduction for a rule.
+    Retrieves a custom quality score reduction for a rule.
     """
     # Read the scores from the YAML file named yara-forge-custom-scoring.yml
     with open('yara-forge-custom-scoring.yml', 'r', encoding='utf-8') as f:
@@ -172,9 +172,11 @@ def retrieve_custom_score_reduction(rule):
         for custom_score_reduction in custom_scoring['noisy-rules']:
             # Check if the rule name matches
             if custom_score_reduction['name'] == rule['rule_name']:
-                # Return the score reduction
-                return custom_score_reduction['quality']
+                if 'quality' in custom_score_reduction:
+                    # Return the score reduction
+                    return custom_score_reduction['quality']
     return 0
+
 
 def check_syntax_issues(rule):
     """
@@ -245,6 +247,7 @@ def check_issues_critical(rule):
                 "type": "logic",
                 "recommendation": "Fix the rule syntax and try again",
             })
+        logging.debug("Rule %s has critical issues and cannot be used: %s", rule['rule_name'], yara_rule_string)
     return issues
 
 
