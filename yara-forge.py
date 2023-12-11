@@ -5,9 +5,9 @@
 # YARA Forge
 # A YARA Rule Concentrator
 # Florian Roth
-# November 2023
+# December 2023
 
-__version__ = '0.6.0'
+__version__ = '0.7.0'
 
 import argparse
 #import pprint
