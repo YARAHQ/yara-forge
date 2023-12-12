@@ -558,12 +558,17 @@ def evaluate_yara_rule_meta_data(rule):
     meta_data_keywords_hunting = ['hunting', 'experimental', 'test', 'testing', 'false positive',
                                      'unstable', 'untested', 'unverified', 'unreliable', 
                                      'unconfirmed']
+    # Exclude some meta data values
+    exclude_meta_data_values = ['reference']
     # Check if one of the keywords appears in the meta data values
     for meta_data in rule['metadata']:
-        for _, value in meta_data.items():
-            if isinstance(value, str) and value.lower() in meta_data_keywords_suspicious:
+        for field, value in meta_data.items():
+            # If the value is in the exclude list, we skip it
+            if field in exclude_meta_data_values:
+                continue
+            if isinstance(value, str) and any(keyword in value.lower() for keyword in meta_data_keywords_suspicious):
                 return 65
-            if isinstance(value, str) and value.lower() in meta_data_keywords_hunting:
+            if isinstance(value, str) and any(keyword in value.lower() for keyword in meta_data_keywords_hunting):
                 return 50
     # Check if one of the keywords appears in the rule name
     for keyword in meta_data_keywords_suspicious:
