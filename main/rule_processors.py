@@ -108,6 +108,10 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
                 rule_score = evaluate_yara_rule_score(rule, YARA_FORGE_CONFIG)
                 modify_meta_data_value(rule['metadata'], 'score', rule_score)
 
+                # Increase the quality score based on certain rule characteristics
+                quality_increase = evaluate_quality_increase(rule)
+                rule['metadata'] = modify_yara_rule_quality(rule['metadata'], quality_increase  )
+
                 # Get a custom importance score if available
                 custom_importance_score = retrieve_custom_importance_score(repo['name'], rules['file_path'], rule['rule_name'])
                 if custom_importance_score:
@@ -525,10 +529,30 @@ def evaluate_yara_rule_score(rule, YARA_FORGE_CONFIG):
     # Score for the rule meta data
     meta_data_rule_score = evaluate_yara_rule_meta_data(rule)
     if meta_data_rule_score > 0:
-        logging.debug("Rule '%s' has a meta data score of %d", rule['rule_name'], meta_data_rule_score)
+        logging.debug("Rule '%s' has a meta data score of %d", rule['rule_name'],
+                      meta_data_rule_score)
         return meta_data_rule_score
-    
+
     return rule_score
+
+
+def evaluate_quality_increase(rule):
+    """
+    Evaluate the quality increase for a rule
+    """
+    # The pure existence of these meta data values increases the quality score
+    quality_increase = 0
+    # List of possible meta data keywords
+    meta_data_keywords = ['modified', 'last_modified', 'last_modified_at', 'last_modified_date',
+                          'last_change', 'last_change_date', 'last_update', 'last_update_date',
+                          'updated', 'updated_at', 'updated_date', 'updated_timestamp',
+                          'update', 'modification_date', 'modification', 'change', 'change_date']
+    # Check if one of the keywords appears in the meta data values
+    for meta_data in rule['metadata']:
+        for field, _ in meta_data.items():
+            if field in meta_data_keywords:
+                quality_increase = 20
+    return quality_increase
 
 
 def retrieve_custom_score(rule):
@@ -553,7 +577,7 @@ def evaluate_yara_rule_meta_data(rule):
     Evaluate the score modifier based on the rule meta data
     """
     # List of possible meta data keywords
-    meta_data_keywords_suspicious = ['suspicious']
+    meta_data_keywords_suspicious = ['suspicious', 'susp_']
     # List of possible meta data keywords
     meta_data_keywords_hunting = ['hunting', 'experimental', 'test', 'testing', 'false positive',
                                      'unstable', 'untested', 'unverified', 'unreliable', 
