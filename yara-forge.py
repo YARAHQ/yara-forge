@@ -45,6 +45,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", help="enable debug output", action="store_true")
+    parser.add_argument("-c", "--config", help="specify a different config file", default="yara-forge-config.yml")
     args = parser.parse_args()
 
     # Create a new logger to log into the command line and a log file name yara-forge.log
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     logger.addHandler(fh)
 
     # Read configuration file
-    with open('yara-forge-config.yml', 'r') as f:
+    with open(args.c, 'r') as f:
         YARA_FORGE_CONFIG = yaml.safe_load(f)
 
     # Retrieve the YARA rule sets
