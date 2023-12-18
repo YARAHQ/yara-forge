@@ -92,9 +92,13 @@ noisy-rules:
       quality: -80
     - name: "FIREEYE_RT_Hunting_LNK_Win_Genericlauncher"
       score: 60
+    - name: "FIREEYE_RT_APT_Backdoor_Win_Dshell_2"
+      quality: -30
+      score: 60
     # McAfee
     - name: "MCAFEE_ATR_Vbs_Mykins_Botnet"
       quality: -30
+      score: 60
     # Telekom Security
     - name: "TELEKOM_SECURITY_Allow_Rdp_Session_Without_Password"
       quality: -60
@@ -106,8 +110,10 @@ noisy-rules:
       quality: -60
     - name: "TELEKOM_SECURITY_Rdp_Enable_Multiple_Sessions"
       quality: -60
+      score: 60
     - name: "TELEKOM_SECURITY_Cn_Utf8_Windows_Terminal"
-      quality: -50
+      quality: -90
+      score: 40
     # ESET
     - name: "ESET_Skip20_Sqllang_Hook"
       quality: -80
@@ -117,8 +123,6 @@ noisy-rules:
     # Arkbird SOLG
     - name: "ARKBIRD_SOLG_APT_Lazarus_Loader_Dec_2020_1"
       quality: -70
-    - name: "MALPEDIA_Win_Aresloader_Auto"
-      quality: -30
     - name: "ARKBIRD_SOLG_APT_Dustsquad_PE_Nov19_1"
       quality: -70
     - name: "ARKBIRD_SOLG_APT_Dustsquad_PE_Nov19_2"
@@ -143,7 +147,7 @@ noisy-rules:
     - name: "MALPEDIA_Win_Xtunnel_Auto"
       quality: -60
     - name: "MALPEDIA_Win_Telebot_Auto"
-      quality: -50
+      quality: -90
     - name: "MALPEDIA_Win_Flawedammyy_Auto"
       quality: -40
     - name: "MALPEDIA_Win_Hookinjex_Auto"
@@ -157,6 +161,7 @@ noisy-rules:
       score: 60
     - name: "MALPEDIA_Win_Qtbot_Auto"
       quality: -50
+      score: 60
     - name: "MALPEDIA_Win_Strongpity_Auto"
       quality: -30
       score: 60
@@ -189,6 +194,30 @@ noisy-rules:
     - name: "MALPEDIA_Win_Epsilon_Red_Auto"
       quality: -30
       score: 60
+    - name: "MALPEDIA_Win_Hookinjex_Auto"
+      quality: -50
+      score: 60
+    - name: "MALPEDIA_Win_Rektloader_Auto"
+      quality: -70
+      score: 60
+    - name: "MALPEDIA_Win_Xfilesstealer_Auto"
+      quality: -60
+      score: 60
+    - name: "MALPEDIA_Win_Magic_Rat_Auto"
+      quality: -30
+      score: 60
+    - name: "MALPEDIA_Win_Infy_Auto"
+      quality: -30
+      score: 60
+    - name: "MALPEDIA_Win_Goldbackdoor_Auto"
+      quality: -50
+      score: 60
+    - name: "MALPEDIA_Win_Blister_Auto"
+      quality: -30
+      score: 60
+    - name: "MALPEDIA_Win_Aresloader_Auto"
+      quality: -40
+      score: 60
     # Signature Base
     - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
       quality: -20
@@ -213,8 +242,10 @@ noisy-rules:
     # JPCERT
     - name: "JPCERTCC_Plugx"
       quality: -70
+      score: 60
     - name: "JPCERTCC_Ursnif"
       quality: -70
+      score: 60
     - name: "JPCERTCC_Cobaltstrike"
       quality: -70
       score: 60
@@ -223,7 +254,8 @@ noisy-rules:
       score: 60
     # Binary Alert
     - name: "BINARYALERT_Hacktool_Windows_Mimikatz_Modules"
-      quality: -50
+      quality: -70
+      score: 60
     # Delivr.to
     - name: "DELIVRTO_SUSP_SVG_Onload_Onerror_Jul23"
       quality: -100
