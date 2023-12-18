@@ -73,7 +73,7 @@ if __name__ == "__main__":
     logger.addHandler(fh)
 
     # Read configuration file
-    with open(args.c, 'r') as f:
+    with open(args.config, 'r') as f:
         YARA_FORGE_CONFIG = yaml.safe_load(f)
 
     # Retrieve the YARA rule sets
