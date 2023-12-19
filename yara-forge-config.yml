@@ -100,6 +100,11 @@ yara_repositories:
      author: "RussianPanda"
      quality: 85
      branch: "main"
+   - name: "Dr4k0nia"
+     url: "https://github.com/dr4k0nia/yara-rules"
+     author: "Dr4k0nia"
+     quality: 85
+     branch: "main"
 
    # Open Source YARA Rules collection by Michael Worth
    - name: "CadoSecurity"
