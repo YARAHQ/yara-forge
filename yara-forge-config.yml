@@ -172,7 +172,7 @@ rule_base_score: 75
 
 # Levels and quality score reduction
 issue_levels:
-   1: -5
+   1: -2
    2: -25
    3: -70
    4: -1000
