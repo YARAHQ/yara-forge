@@ -778,10 +778,10 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
     for meta_data in meta_data_copy:
         for key, value in meta_data.items():
             # If the key is in the list of possible date names, then we found the date
-            if key in date_names:
-                date_found = True
+            if key in date_names:                
                 date_created = dateparser.parse(value)
                 if date_created:
+                    date_found = True
                     # Remove the date from the original meta data
                     rule_meta_data.remove(meta_data)
                     rule_meta_data.append({'date': date_created.strftime("%Y-%m-%d")})
@@ -793,9 +793,9 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
             for key, value in meta_data.items():
                 # If the value contains a date, then we found the date
                 if isinstance(value, str) and dateparser.parse(value):
-                    date_found = True
                     date_created = dateparser.parse(value)
                     if date_created:
+                        date_found = True
                         # Remove the date from the original meta data
                         rule_meta_data.remove(meta_data)
                         rule_meta_data.append({'date': date_created.strftime("%Y-%m-%d")})

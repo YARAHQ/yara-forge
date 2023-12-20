@@ -81,6 +81,9 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                 # Loop over the rules in the rule set
                 for rule in rule_sets['rules']:
 
+                    # Debug output
+                    #pprint(rule)
+
                     # Perform some check based on the meta data of the rule
                     skip_rule = False
                     skip_rule_reason = None
@@ -98,8 +101,8 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                                 skip_rule = True
                                 skip_rule_reason = "age"
                         # Check if the rule is younger than the maximum age
-                        if "created" in metadata:
-                            rule_date = dateparser.parse(metadata['created'])
+                        if "date" in metadata:
+                            rule_date = dateparser.parse(metadata['date'])
                             # Check if the rule is old enough
                             if (datetime.datetime.now() - rule_date).days > rule_package['max_age']:
                                 skip_rule = True
