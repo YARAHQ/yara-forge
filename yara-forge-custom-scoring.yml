@@ -218,6 +218,12 @@ noisy-rules:
     - name: "MALPEDIA_Win_Aresloader_Auto"
       quality: -40
       score: 60
+    - name: "MALPEDIA_Win_Confucius_Auto"
+      quality: -60
+      score: 60
+    - name: "MALPEDIA_Win_Blacksoul_Auto"
+      quality: -60
+      score: 60
     # Signature Base
     - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
       quality: -20
