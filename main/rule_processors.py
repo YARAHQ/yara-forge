@@ -581,7 +581,7 @@ def evaluate_yara_rule_meta_data(rule):
     # List of possible meta data keywords
     meta_data_keywords_hunting = ['hunting', 'experimental', 'test', 'testing', 'false positive',
                                      'unstable', 'untested', 'unverified', 'unreliable', 
-                                     'unconfirmed']
+                                     'unconfirmed', 'hunt_']
     # Exclude some meta data values
     exclude_meta_data_values = ['reference']
     # Check if one of the keywords appears in the meta data values
