@@ -170,7 +170,7 @@ yara_repositories:
      url: "https://github.com/elceef/yara-rulz"
      author: "marcin@ulikowski.pl"
      quality: 75
-     branch: "master"
+     branch: "main"
 
   #  # My own YARA rule collection used for our free scanners
   #  - name: "Signature Base"
