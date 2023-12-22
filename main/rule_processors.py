@@ -785,6 +785,10 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
                     # Remove the date from the original meta data
                     rule_meta_data.remove(meta_data)
                     rule_meta_data.append({'date': date_created.strftime("%Y-%m-%d")})
+                # If the date cannot be parsed, we removed the field, because it could cause confusion
+                else:
+                    logging.debug("The date '%s' could not be parsed. Removing the field.", value)
+                    rule_meta_data.remove(meta_data)
 
     # If the date is not found, try to get it from any of the meta data fields
     if not date_found:
