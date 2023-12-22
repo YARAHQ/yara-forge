@@ -581,7 +581,7 @@ def evaluate_yara_rule_meta_data(rule):
     # List of possible meta data keywords
     meta_data_keywords_hunting = ['hunting', 'experimental', 'test', 'testing', 'false positive',
                                      'unstable', 'untested', 'unverified', 'unreliable', 
-                                     'unconfirmed']
+                                     'unconfirmed', 'hunt_']
     # Exclude some meta data values
     exclude_meta_data_values = ['reference']
     # Check if one of the keywords appears in the meta data values
@@ -785,6 +785,10 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
                     # Remove the date from the original meta data
                     rule_meta_data.remove(meta_data)
                     rule_meta_data.append({'date': date_created.strftime("%Y-%m-%d")})
+                # If the date cannot be parsed, we removed the field, because it could cause confusion
+                else:
+                    logging.debug("The date '%s' could not be parsed. Removing the field.", value)
+                    rule_meta_data.remove(meta_data)
 
     # If the date is not found, try to get it from any of the meta data fields
     if not date_found:
