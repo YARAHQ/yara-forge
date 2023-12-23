@@ -95,8 +95,11 @@ noisy-rules:
     - name: "FIREEYE_RT_APT_Backdoor_Win_Dshell_2"
       quality: -30
       score: 60
-    # McAfee
+    # Tellix / McAfee
     - name: "MCAFEE_ATR_Vbs_Mykins_Botnet"
+      quality: -30
+      score: 60
+    - name: "TRELLIX_ARC_Vbs_Mykins_Botnet"
       quality: -30
       score: 60
     # Telekom Security
@@ -151,7 +154,7 @@ noisy-rules:
     - name: "MALPEDIA_Win_Flawedammyy_Auto"
       quality: -40
     - name: "MALPEDIA_Win_Hookinjex_Auto"
-      quality: -30
+      quality: -50
     - name: "MALPEDIA_Win_R980_Auto"
       quality: -30
     - name: "MALPEDIA_Win_Velso_Auto"
@@ -171,7 +174,7 @@ noisy-rules:
       quality: -30
       score: 60
     - name: "MALPEDIA_Win_Gauss_Auto"
-      quality: -30
+      quality: -60
       score: 60
     - name: "MALPEDIA_Win_Kleptoparasite_Stealer_Auto"
       quality: -40
@@ -183,7 +186,7 @@ noisy-rules:
       quality: -30
       score: 60
     - name: "MALPEDIA_Win_Alina_Pos_Auto"
-      quality: -30
+      quality: -60
       score: 60
     - name: "MALPEDIA_Elf_Blackcat_Auto"
       quality: -30
@@ -192,7 +195,7 @@ noisy-rules:
       quality: -30
       score: 60
     - name: "MALPEDIA_Win_Epsilon_Red_Auto"
-      quality: -30
+      quality: -60
       score: 60
     - name: "MALPEDIA_Win_Hookinjex_Auto"
       quality: -50
@@ -210,13 +213,13 @@ noisy-rules:
       quality: -30
       score: 60
     - name: "MALPEDIA_Win_Goldbackdoor_Auto"
-      quality: -50
+      quality: -60
       score: 60
     - name: "MALPEDIA_Win_Blister_Auto"
-      quality: -30
+      quality: -50
       score: 60
     - name: "MALPEDIA_Win_Aresloader_Auto"
-      quality: -40
+      quality: -50
       score: 60
     - name: "MALPEDIA_Win_Confucius_Auto"
       quality: -60
@@ -251,6 +254,9 @@ noisy-rules:
       score: 60
     - name: "JPCERTCC_Ursnif"
       quality: -70
+      score: 60
+    - name: "JPCERTCC_Ursnif_1"
+      quality: -20
       score: 60
     - name: "JPCERTCC_Cobaltstrike"
       quality: -70
@@ -294,7 +300,7 @@ noisy-rules:
       quality: -20
       score: 60
     - name: "SECUINFRA_SUSP_VBS_Wscript_Shell"
-      quality: -40
+      quality: -60
       score: 45
     - name: "SECUINFRA_SUS_Unsigned_APPX_MSIX_Installer_Feb23"
       quality: -40
@@ -305,4 +311,37 @@ noisy-rules:
     # GCTI
     - name: "GCTI_Sliver_Implant_32Bit"
       quality: -50
+      score: 60
+    # EmbeeResearch
+    - name: "EMBEERESEARCH_Win_Havoc_Ntdll_Hashes_Oct_2022"
+      quality: -80
+      score: 40
+    - name: "EMBEERESEARCH_Win_Redline_Wextract_Hunting_Oct_2023"
+      quality: -60
+      score: 60
+    - name: "EMBEERESEARCH_Win_Amadey_Bytecodes_Oct_2023"
+      quality: -60
+      score: 60
+    - name: "EMBEERESEARCH_Win_Bruteratel_Syscall_Hashes_Oct_2022"
+      quality: -50
+      score: 60
+    # SBousseaden
+    - name: "SBOUSSEADEN_Truncated_Win10_X64_Nativesyscall"
+      quality: -90
+      score: 40
+    - name: "SBOUSSEADEN_Hunt_Skyproj_Backdoor"
+      quality: -70
+      score: 40
+    - name: "SBOUSSEADEN_Hunt_Multi_EDR_Discovery"
+      quality: -70
+      score: 40
+    - name: "SBOUSSEADEN_Hunt_Lsass_Ntds_Ext"
+      quality: -70
+      score: 40
+    - name: "SBOUSSEADEN_Hunt_Credaccess_Iis_Xor"
+      quality: -30
+      score: 60
+    # Dr4k0nia
+    - name: "DR4K0NIA_Msil_Suspicious_Use_Of_Strreverse"
+      quality: -30
       score: 60

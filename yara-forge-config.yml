@@ -63,9 +63,9 @@ yara_repositories:
      quality: 75
      branch: "main"
      path: "rules"
-   - name: "McAfee ATR"
+   - name: "Trellix ARC"
      url: "https://github.com/advanced-threat-research/Yara-Rules/"
-     author: "McAfee ATR Team"
+     author: "Trellix ARC Team"
      quality: 70
      branch: "master"
    - name: "Arkbird SOLG"
@@ -145,20 +145,40 @@ yara_repositories:
      branch: "master"
      path: "NCSC"
 
-   # My own YARA rule collection used for our free scanners
-   - name: "Signature Base"
-     url: "https://github.com/Neo23x0/signature-base"
-     author: "Florian Roth"
+   # Repos added after the initial release
+   - name: "Dr4k0nia"
+     url: "https://github.com/dr4k0nia/yara-rules"
+     author: "Dr4k0nia"
      quality: 85
+     branch: "main"
+   - name: "EmbeeResearch"
+     url: "https://github.com/embee-research/Yara-detection-rules/"
+     author: "Matthew Brennan"
+     quality: 75
+     branch: "main" 
+   - name: "AvastTI"
+     url: "https://github.com/avast/ioc"
+     author: "Avast Threat Intel Team"
+     quality: 90
      branch: "master"
-     path: "yara"
+   - name: "SBousseaden"
+     url: "https://github.com/sbousseaden/YaraHunts/"
+     author: "SBousseaden"
+     quality: 75
+     branch: "master"
+   - name: "Elceef"
+     url: "https://github.com/elceef/yara-rulz"
+     author: "marcin@ulikowski.pl"
+     quality: 75
+     branch: "main"
 
-  # License prevents the integration of the rules into the YARA-Forge
-  #- name: "AvastTI"
-  #  url: "https://github.com/avast/ioc"
-  #  author: "Avast Threat Intel Team"
-  #  quality: 90
-  #  branch: "master"
+  #  # My own YARA rule collection used for our free scanners
+  #  - name: "Signature Base"
+  #    url: "https://github.com/Neo23x0/signature-base"
+  #    author: "Florian Roth"
+  #    quality: 85
+  #    branch: "master"
+  #    path: "yara"
 
 # Rule Processing --------------------------------------------------------------
 rule_base_score: 75
