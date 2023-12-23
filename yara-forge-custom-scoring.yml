@@ -154,7 +154,7 @@ noisy-rules:
     - name: "MALPEDIA_Win_Flawedammyy_Auto"
       quality: -40
     - name: "MALPEDIA_Win_Hookinjex_Auto"
-      quality: -30
+      quality: -50
     - name: "MALPEDIA_Win_R980_Auto"
       quality: -30
     - name: "MALPEDIA_Win_Velso_Auto"
@@ -174,7 +174,7 @@ noisy-rules:
       quality: -30
       score: 60
     - name: "MALPEDIA_Win_Gauss_Auto"
-      quality: -30
+      quality: -60
       score: 60
     - name: "MALPEDIA_Win_Kleptoparasite_Stealer_Auto"
       quality: -40
@@ -186,7 +186,7 @@ noisy-rules:
       quality: -30
       score: 60
     - name: "MALPEDIA_Win_Alina_Pos_Auto"
-      quality: -30
+      quality: -60
       score: 60
     - name: "MALPEDIA_Elf_Blackcat_Auto"
       quality: -30
@@ -195,7 +195,7 @@ noisy-rules:
       quality: -30
       score: 60
     - name: "MALPEDIA_Win_Epsilon_Red_Auto"
-      quality: -30
+      quality: -60
       score: 60
     - name: "MALPEDIA_Win_Hookinjex_Auto"
       quality: -50
@@ -213,13 +213,13 @@ noisy-rules:
       quality: -30
       score: 60
     - name: "MALPEDIA_Win_Goldbackdoor_Auto"
-      quality: -50
+      quality: -60
       score: 60
     - name: "MALPEDIA_Win_Blister_Auto"
-      quality: -30
+      quality: -50
       score: 60
     - name: "MALPEDIA_Win_Aresloader_Auto"
-      quality: -40
+      quality: -50
       score: 60
     - name: "MALPEDIA_Win_Confucius_Auto"
       quality: -60
@@ -254,6 +254,9 @@ noisy-rules:
       score: 60
     - name: "JPCERTCC_Ursnif"
       quality: -70
+      score: 60
+    - name: "JPCERTCC_Ursnif_1"
+      quality: -20
       score: 60
     - name: "JPCERTCC_Cobaltstrike"
       quality: -70
@@ -297,7 +300,7 @@ noisy-rules:
       quality: -20
       score: 60
     - name: "SECUINFRA_SUSP_VBS_Wscript_Shell"
-      quality: -40
+      quality: -60
       score: 45
     - name: "SECUINFRA_SUS_Unsigned_APPX_MSIX_Installer_Feb23"
       quality: -40
