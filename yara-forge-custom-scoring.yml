@@ -17,6 +17,9 @@ importance-scores:
       repo: "YARA Style Guide"
       file: "gen_webshells.yar"
     importance: 100
+  - rule:
+      repo: "GodModeRules"
+    importance: 60
 
 # FALSE POSITIVES
 # Rules that are prone to false positives

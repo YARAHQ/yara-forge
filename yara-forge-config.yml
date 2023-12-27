@@ -145,7 +145,7 @@ yara_repositories:
      branch: "master"
      path: "NCSC"
 
-   # Repos added after the initial release
+   # Repos added 23.12.2023
    - name: "Dr4k0nia"
      url: "https://github.com/dr4k0nia/yara-rules"
      author: "Dr4k0nia"
@@ -172,13 +172,20 @@ yara_repositories:
      quality: 75
      branch: "main"
 
-  #  # My own YARA rule collection used for our free scanners
-  #  - name: "Signature Base"
-  #    url: "https://github.com/Neo23x0/signature-base"
-  #    author: "Florian Roth"
-  #    quality: 85
-  #    branch: "master"
-  #    path: "yara"
+   # Repos added 24.12.2023
+   - name: "GodModeRules"
+     url: "https://github.com/Neo23x0/god-mode-rules/"
+     author: "Florian Roth"
+     quality: 85
+     branch: "master"
+
+   # My own YARA rule collection used for our free scanners
+   - name: "Signature Base"
+     url: "https://github.com/Neo23x0/signature-base"
+     author: "Florian Roth"
+     quality: 85
+     branch: "master"
+     path: "yara"
 
 # Rule Processing --------------------------------------------------------------
 rule_base_score: 75
@@ -240,7 +247,7 @@ yara_rule_packages:
   - name: "full"
     description: "Default YARA Rule Package - Full"
     minimum_quality: 20
-    force_include_importance_level: 70
+    force_include_importance_level: 50
     force_exclude_importance_level: 0
     minimum_age: 0
     minimum_score: 40
