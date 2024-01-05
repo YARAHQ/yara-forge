@@ -377,3 +377,10 @@ noisy-rules:
     - name: "AVASTTI_Manjusaka_Payload_Mz"
       quality: -40
       score: 60
+    # Cod3nym
+    - name: "COD3NYM_SUSP_OBF_NET_Confuserex_Name_Pattern_Jan24"
+      quality: 0
+      score: 50
+    - name: "COD3NYM_SUSP_OBF_NET_Eazfuscator_String_Encryption_Jan24"
+      quality: 0
+      score: 50
