@@ -179,6 +179,18 @@ yara_repositories:
      quality: 85
      branch: "master"
 
+   # Repos added 05.01.2023
+   - name: "Silv0123"
+     url: "https://github.com/silv0123/yara-rules"
+     author: "@silv0123"
+     quality: 75
+     branch: "main"
+   - name: "Cod3nym"
+     url: "https://github.com/cod3nym/detection-rules/"
+     author: "Jonathan Peters"
+     quality: 80
+     branch: "main"
+
    # My own YARA rule collection used for our free scanners
    - name: "Signature Base"
      url: "https://github.com/Neo23x0/signature-base"
