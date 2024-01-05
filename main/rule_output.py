@@ -318,8 +318,10 @@ def write_build_stats(rule_package_statistics_sets):
             # Write the rule package statistics as a table
             f.write("| Repo | Total Rules | Skipped (Age) | Skipped (Quality) | Skipped (Importance) | Skipped (Score) |\n")
             f.write("| ---- | ----------- | ------------- | ----------------- | -------------------- | --------------- |\n")
+            # Sort the repos by name
+            sorted_repo_statistics = sorted(rule_package_statistics['repo_statistics'], key=lambda x: x['name'])    
             # Loop over the repos
-            for repo_statistics in rule_package_statistics['repo_statistics']:
+            for repo_statistics in sorted_repo_statistics:
                 f.write(f"| {repo_statistics['name']} | {repo_statistics['total_rules']} | {repo_statistics['total_rules_skipped_age']} | {repo_statistics['total_rules_skipped_quality']} | {repo_statistics['total_rules_skipped_importance']} | {repo_statistics['total_rules_skipped_score']} |\n")
             f.write("\n")
 
