@@ -40,6 +40,10 @@ noisy-rules:
       quality: -80
     - name: "CAPE_Origin"
       quality: -80
+    - name: "CAPE_Qakbot"
+      quality: -50
+    - name: "CAPE_Agentteslaxor"
+      quality: -50
     # Elastic
     - name: "ELASTIC_Multi_EICAR_Ac8F42D6"
       quality: -50
@@ -230,6 +234,21 @@ noisy-rules:
     - name: "MALPEDIA_Win_Blacksoul_Auto"
       quality: -60
       score: 60
+    - name: "MALPEDIA_Win_Winmm_Auto"
+      quality: -40
+      score: 60
+    - name: "MALPEDIA_Win_Blacksuit_Auto"
+      quality: -60
+      score: 60
+    - name: "MALPEDIA_Win_Subzero_Auto"
+      quality: -60
+      score: 60
+    - name: "MALPEDIA_Win_Xorist_Auto"
+      quality: -60
+      score: 60
+    - name: "MALPEDIA_Win_Unidentified_090_Auto"
+      quality: -60
+      score: 60
     # Signature Base
     - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
       quality: -20
@@ -239,6 +258,9 @@ noisy-rules:
       score: 60
     - name: "SIGNATURE_BASE_M_APT_VIRTUALPITA_1"
       quality: -40
+      score: 60
+    - name: "SIGNATURE_BASE_Hdconfig"
+      quality: -30
       score: 60
     # DeadBits
     - name: "DEADBITS_APT32_Kerrdown"
@@ -344,7 +366,14 @@ noisy-rules:
     - name: "SBOUSSEADEN_Hunt_Credaccess_Iis_Xor"
       quality: -30
       score: 60
+    - name: "SBOUSSEADEN_Mem_Webcreds_Regexp_Xor"
+      quality: -30
+      score: 60
     # Dr4k0nia
     - name: "DR4K0NIA_Msil_Suspicious_Use_Of_Strreverse"
       quality: -30
+      score: 60
+    # AvastTI 
+    - name: "AVASTTI_Manjusaka_Payload_Mz"
+      quality: -40
       score: 60
