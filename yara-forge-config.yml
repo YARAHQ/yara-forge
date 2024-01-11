@@ -19,7 +19,7 @@ yara_repositories:
    - name: "CAPE"
      url: "https://github.com/kevoreilly/CAPEv2"
      author: "Kevin O'Reilly"
-     quality: 65
+     quality: 70
      branch: "master"
      path: "data/yara"
    - name: "BinaryAlert"
