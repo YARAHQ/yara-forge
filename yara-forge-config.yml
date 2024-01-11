@@ -191,6 +191,13 @@ yara_repositories:
      quality: 80
      branch: "main"
 
+   # Repos added 11.01.2023
+   - name: "craiu"
+     url: "https://github.com/craiu/yararules"
+     author: "Costin G. Raiu, Art of Noh, craiu@noh.ro"
+     quality: 85
+     branch: "master"
+
    # My own YARA rule collection used for our free scanners
    - name: "Signature Base"
      url: "https://github.com/Neo23x0/signature-base"
