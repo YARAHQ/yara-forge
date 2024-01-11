@@ -650,6 +650,9 @@ def align_yara_rule_uuid(rule_meta_data, uuid):
         for key, value in meta_data.items():
             # If the key is in the list of possible author names, then we found the author
             if key in uuid_names:
+                # If the values is not a string but a integer value, convert it to string
+                if isinstance(value, int):
+                    value = str(value)
                 # Check if the value is a valid UUIDv5
                 if is_valid_uuidv5(value):
                     # If the value is a valid UUID, we use it
