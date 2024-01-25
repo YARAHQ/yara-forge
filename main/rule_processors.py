@@ -569,6 +569,13 @@ def retrieve_custom_score(rule):
                 if 'score' in custom_score:
                     # Return the score reduction
                     return custom_score['score']
+            # Also check other types of adjustments (prefix, contains etc.)
+            if 'type' in custom_score:
+                # Check if the rule name starts with the name in the YAML file if the type is "prefix"
+                if custom_score['type'] == 'prefix' and rule['rule_name'].startswith(custom_score['name']):
+                    if 'score' in custom_score:
+                        # Return the score reduction
+                        return custom_score['score']
     return 0
 
 
