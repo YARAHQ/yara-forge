@@ -199,6 +199,13 @@ yara_repositories:
      author: "JPCERT/CC Incident Response Group"
      quality: 75
      branch: "main"
+   - name: "DitekSHen"
+     url: "https://github.com/ditekshen/detection"
+     author: "ditekshen"
+     quality: 75
+     branch: "master"
+     path: "yara"
+
 
    # My own YARA rule collection used for our free scanners
    - name: "Signature Base"
