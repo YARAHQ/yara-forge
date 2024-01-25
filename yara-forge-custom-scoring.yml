@@ -291,10 +291,34 @@ noisy-rules:
       score: 60
     # JPCERT YARA 
     - name: "JPCERTCC_YARA_Malware_Shellcode_Hash"
+      quality: -100
+      score: 50
+    - name: "JPCERTCC_YARA_Tick_Datper"
+      quality: -50
+      score: 60
+    - name: "JPCERTCC_YARA_Malware_Plugx_Config"
+      quality: -50
+      score: 60
+    - name: "JPCERTCC_YARA_Blacktech_Tscookie_Elf"
+      quality: -50
+      score: 60
+    - name: "JPCERTCC_YARA_Upx_Antiunpack_Elf64"
+      quality: -50
+      score: 60
+    - name: "JPCERTCC_YARA_Webshell_Adminer_4_7"
+      quality: -50
+      score: 60
+    - name: "JPCERTCC_YARA_Blacktech_Hipid_Str"
+      quality: -50
+      score: 60
+    - name: "JPCERTCC_YARA_Malware_BRC4_Code"
       quality: -50
       score: 60
     - name: "JPCERTCC_YARA_Tick_Datper"
       quality: -50
+      score: 60
+    - name: "JPCERTCC_YARA_Malware_Cobaltstrike_V3V4"
+      quality: -60
       score: 60
     # Binary Alert
     - name: "BINARYALERT_Hacktool_Windows_Mimikatz_Modules"
@@ -414,7 +438,19 @@ noisy-rules:
     - name: "DITEKSHEN_INDICATOR_KB_CERT_43Bb437D609866286Dd839E1D00309F5"
       quality: -100
       score: 40
+    - name: "DITEKSHEN_INDICATOR_KB_CERT_23389161E45A218Bd24E6E859Ae11153"
+      quality: -100
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_KB_CERT_26279F0F2F11970Dccf63Eba88F2D4C4"
+      quality: -100
+      score: 40
     - name: "DITEKSHEN_INDICATOR_KB_CERT_0D07705Fa0E0C4827Cc287Cfcdec20C4"
+      quality: -100
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_KB_CERT_0F9D91C6Aba86F4E54Cbb9Ef57E68346"
+      quality: -100
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_KB_CERT_07F9D80B85Ceff7Ee3F58Dc594Fe66B6"
       quality: -100
       score: 40
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Sqlquery_Confidentialdatastore"
@@ -423,3 +459,36 @@ noisy-rules:
     - name: "DITEKSHEN_INDICATOR_KB_CERT_"
       quality: -20
       score: 50
+    - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Regkeycomb_Disablewindefender"
+      quality: -70
+      score: 50
+    - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Nonewindowsua"
+      quality: -70
+      score: 50
+    - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Reversed"
+      quality: -40
+      score: 50
+    - name: "DITEKSHEN_MALWARE_Win_Dlagent02"
+      quality: -40
+      score: 60
+    - name: "DITEKSHEN_INDICATOR_TOOL_WEDGECUT"
+      quality: -40
+      score: 50
+    - name: "DITEKSHEN_MALWARE_Win_Asyncrat"
+      quality: -40
+      score: 60
+    - name: "DITEKSHEN_MALWARE_Osx_Lamepyre"
+      quality: -40
+      score: 60
+    - name: "DITEKSHEN_MALWARE_Win_Strelastealer"
+      quality: -40
+      score: 60
+    - name: "DITEKSHEN_MALWARE_Win_Dlagent02"
+      quality: -40
+      score: 60
+    - name: "DITEKSHEN_MALWARE_Win_Avemaria"
+      quality: -60
+      score: 60
+    - name: "DITEKSHEN_MALWARE_Win_Fabookie_02"
+      quality: -70
+      score: 60
