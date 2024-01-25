@@ -179,19 +179,26 @@ yara_repositories:
      quality: 85
      branch: "master"
 
-   # Repos added 05.01.2023
+   # Repos added 05.01.2024
    - name: "Cod3nym"
      url: "https://github.com/cod3nym/detection-rules/"
      author: "Jonathan Peters"
      quality: 80
      branch: "main"
 
-   # Repos added 11.01.2023
+   # Repos added 11.01.2024
    - name: "craiu"
      url: "https://github.com/craiu/yararules"
      author: "Costin G. Raiu, Art of Noh, craiu@noh.ro"
      quality: 85
      branch: "master"
+
+   # Repos added 25.01.2024
+   - name: "JPCERTCC_YARA"
+     url: "https://github.com/JPCERTCC/jpcert-yara"
+     author: "JPCERT/CC Incident Response Group"
+     quality: 75
+     branch: "main"
 
    # My own YARA rule collection used for our free scanners
    - name: "Signature Base"
