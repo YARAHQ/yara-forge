@@ -416,7 +416,7 @@ noisy-rules:
       quality: 0
       score: 50
     # ditekShen
-    - name: "DITEKSHEN_Indicator"
+    - name: "DITEKSHEN_INDICATOR_"
       quality: -30
       score: 40
       type: "prefix"
