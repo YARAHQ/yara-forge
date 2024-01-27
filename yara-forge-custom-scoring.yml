@@ -384,3 +384,7 @@ noisy-rules:
     - name: "COD3NYM_SUSP_OBF_NET_Eazfuscator_String_Encryption_Jan24"
       quality: 0
       score: 50
+    # RussianPanda
+    - name: "RUSSIANPANDA_Check_Installed_Software"
+      quality: -50
+      score: 50
