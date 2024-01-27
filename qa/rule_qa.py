@@ -102,11 +102,17 @@ def evaluate_rules_quality(processed_yara_repos, config):
 
                 # Apply a custom quality reduction if the rule has shown to be
                 # prone to false positives
-                custom_score_reduction = retrieve_custom_quality_reduction(rule)
-                total_quality_score += custom_score_reduction
+                custom_quality_reduction = retrieve_custom_quality_reduction(rule)
+                total_quality_score += custom_quality_reduction
+
+                # Apply a custom score if the rule has shown to be
+                # prone to false positives
+                custom_score = retrieve_custom_score(rule)
+                if custom_score:
+                    modify_meta_data_value(rule['metadata'], 'score', custom_score)
 
                 # Debug output report the total score of a rule
-                logging.debug("Rule %s total score: %d", rule['rule_name'], total_quality_score)
+                logging.debug("Rule %s total quality score: %d", rule['rule_name'], total_quality_score)
 
                 # Add the total score to the rule's quality score
                 rule['metadata'] = modify_yara_rule_quality(rule['metadata'], total_quality_score)
@@ -169,13 +175,46 @@ def retrieve_custom_quality_reduction(rule):
     with open('yara-forge-custom-scoring.yml', 'r', encoding='utf-8') as f:
         custom_scoring = yaml.safe_load(f)
         # Loop over the rules in the YAML file
-        for custom_score_reduction in custom_scoring['noisy-rules']:
+        for custom_score in custom_scoring['noisy-rules']:
             # Check if the rule name matches
-            if custom_score_reduction['name'] == rule['rule_name']:
-                if 'quality' in custom_score_reduction:
+            if custom_score['name'] == rule['rule_name']:
+                if 'quality' in custom_score:
                     # Return the score reduction
-                    return custom_score_reduction['quality']
+                    return custom_score['quality']
+            # Check if the rule name starts with the name in the YAML file
+            if 'type' in custom_score:
+                if custom_score['type'] == 'prefix':
+                    if rule['rule_name'].startswith(custom_score['name']):
+                        if 'quality' in custom_score:
+                            # Return the score reduction
+                            return custom_score['quality']
     return 0
+
+
+def retrieve_custom_score(rule):
+    """
+    Retrieves a custom score for a rule.
+    """
+    # Read the scores from the YAML file named yara-forge-custom-scoring.yml
+    with open('yara-forge-custom-scoring.yml', 'r', encoding='utf-8') as f:
+        custom_scoring = yaml.safe_load(f)
+        # Loop over the rules in the YAML file
+        for custom_score in custom_scoring['noisy-rules']:
+            # Check if the rule name matches
+            if custom_score['name'] == rule['rule_name']:
+                if 'score' in custom_score:
+                    # Return the score reduction
+                    return custom_score['score']
+            # Check if the rule name starts with the name in the YAML file
+            if 'type' in custom_score:
+                if custom_score['type'] == 'prefix':
+                    if rule['rule_name'].startswith(custom_score['name']):
+                        if 'score' in custom_score:
+                            # Return the score reduction
+                            return custom_score['score']
+    return None
+
+
 
 
 def check_syntax_issues(rule):
@@ -296,3 +335,22 @@ def get_yara_qa_commit_hash():
     except Exception as e:
         logging.warning("Couldn't get the commit hash of the YARA QA repository: %s", e)
         return "unknown"
+
+
+def modify_meta_data_value(rule_meta_data, key, value):
+    """
+    Modify a value in the meta data, if it exists, otherwise add it
+    """
+    # We create a copy so that we can delete elements from the original
+    meta_data_copy = rule_meta_data.copy()
+    # Now we loop over the copy
+    for mdata in meta_data_copy:
+        for k, _ in mdata.items():
+            # If the key is in the meta data, then we modify it
+            if k == key:
+                mdata[k] = value
+                return mdata
+    # If the key is not in the meta data, then we add it
+    rule_meta_data.append({key: value})
+    return rule_meta_data
+
