@@ -38,7 +38,7 @@ if __name__ == "__main__":
     print(r'  /_/_/  |_/_/ |_/_/  |_|  /_/    \____/_/   \__, /\___/  ')
     print(r'                                            /____/        ')
     print(r'  YARA Forge                                              ')
-    print(r'  Brining Order to Chaos                                  ')
+    print(r'  Bringing Order to Chaos                                 ')
     print(r'                                                          ')
     print(r'  Version %s                                              ' % __version__)
     print(r'  Florian Roth, January 2024                              ')
