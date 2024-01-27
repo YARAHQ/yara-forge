@@ -44,6 +44,7 @@ noisy-rules:
       quality: -50
     - name: "CAPE_Agentteslaxor"
       quality: -50
+
     # Elastic
     - name: "ELASTIC_Multi_EICAR_Ac8F42D6"
       quality: -50
@@ -94,6 +95,7 @@ noisy-rules:
     - name: "ELASTIC_Linux_Trojan_Tsunami_47F93Be2"
       quality: -70
       score: 60
+
     # FireEye
     - name: "FIREEYE_RT_Hunting_Dotnettojscript_Functions"
       quality: -80
@@ -102,6 +104,7 @@ noisy-rules:
     - name: "FIREEYE_RT_APT_Backdoor_Win_Dshell_2"
       quality: -30
       score: 60
+
     # Tellix / McAfee
     - name: "MCAFEE_ATR_Vbs_Mykins_Botnet"
       quality: -30
@@ -109,6 +112,7 @@ noisy-rules:
     - name: "TRELLIX_ARC_Vbs_Mykins_Botnet"
       quality: -30
       score: 60
+
     # Telekom Security
     - name: "TELEKOM_SECURITY_Allow_Rdp_Session_Without_Password"
       quality: -60
@@ -124,12 +128,14 @@ noisy-rules:
     - name: "TELEKOM_SECURITY_Cn_Utf8_Windows_Terminal"
       quality: -90
       score: 40
+
     # ESET
     - name: "ESET_Skip20_Sqllang_Hook"
       quality: -80
     - name: "ESET_Turla_Outlook_Pdf"
       quality: -60
       score: 60
+
     # Arkbird SOLG
     - name: "ARKBIRD_SOLG_APT_Lazarus_Loader_Dec_2020_1"
       quality: -70
@@ -153,6 +159,7 @@ noisy-rules:
     - name: "ARKBIRD_SOLG_RAN_ELF_Hive_Oct_2021_1"
       quality: -40
       score: 60
+
     # Malpedia
     - name: "MALPEDIA_Win_Xtunnel_Auto"
       quality: -60
@@ -249,6 +256,7 @@ noisy-rules:
     - name: "MALPEDIA_Win_Unidentified_090_Auto"
       quality: -60
       score: 60
+
     # Signature Base
     - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
       quality: -20
@@ -262,17 +270,20 @@ noisy-rules:
     - name: "SIGNATURE_BASE_Hdconfig"
       quality: -30
       score: 60
+
     # DeadBits
     - name: "DEADBITS_APT32_Kerrdown"
       quality: -100
     - name: "DEADBITS_Glupteba"
       quality: -70
+
     # BinaryAlert
     - name: "BINARYALERT_Ransomware_Windows_Wannacry"
       quality: -30
     - name: "BINARYALERT_Eicar_Substring_Test"
       quality: -40
       score: 50
+
     # JPCERT
     - name: "JPCERTCC_Plugx"
       quality: -70
@@ -289,44 +300,16 @@ noisy-rules:
     - name: "JPCERTCC_Datper"
       quality: -50
       score: 60
-    # JPCERT YARA 
-    - name: "JPCERTCC_YARA_Malware_Shellcode_Hash"
-      quality: -100
-      score: 50
-    - name: "JPCERTCC_YARA_Tick_Datper"
-      quality: -50
-      score: 60
-    - name: "JPCERTCC_YARA_Malware_Plugx_Config"
-      quality: -50
-      score: 60
-    - name: "JPCERTCC_YARA_Blacktech_Tscookie_Elf"
-      quality: -50
-      score: 60
-    - name: "JPCERTCC_YARA_Upx_Antiunpack_Elf64"
-      quality: -50
-      score: 60
-    - name: "JPCERTCC_YARA_Webshell_Adminer_4_7"
-      quality: -50
-      score: 60
-    - name: "JPCERTCC_YARA_Blacktech_Hipid_Str"
-      quality: -50
-      score: 60
-    - name: "JPCERTCC_YARA_Malware_BRC4_Code"
-      quality: -50
-      score: 60
-    - name: "JPCERTCC_YARA_Tick_Datper"
-      quality: -50
-      score: 60
-    - name: "JPCERTCC_YARA_Malware_Cobaltstrike_V3V4"
-      quality: -60
-      score: 60
+
     # Binary Alert
     - name: "BINARYALERT_Hacktool_Windows_Mimikatz_Modules"
       quality: -70
       score: 60
+
     # Delivr.to
     - name: "DELIVRTO_SUSP_SVG_Onload_Onerror_Jul23"
       quality: -100
+
     # SecuInfra
     - name: "SECUINFRA_OBFUS_Powershell_Common_Replace"
       quality: -100
@@ -361,13 +344,16 @@ noisy-rules:
     - name: "SECUINFRA_SUS_Unsigned_APPX_MSIX_Installer_Feb23"
       quality: -40
       score: 50
+
     # BlackBerry
     - name: "BLACKBERRY_Mal_Infostealer_Win32_Jupyter_Infostealer_Module"
       quality: -80
+
     # GCTI
     - name: "GCTI_Sliver_Implant_32Bit"
       quality: -50
       score: 60
+
     # EmbeeResearch
     - name: "EMBEERESEARCH_Win_Havoc_Ntdll_Hashes_Oct_2022"
       quality: -80
@@ -381,6 +367,7 @@ noisy-rules:
     - name: "EMBEERESEARCH_Win_Bruteratel_Syscall_Hashes_Oct_2022"
       quality: -50
       score: 60
+
     # SBousseaden
     - name: "SBOUSSEADEN_Truncated_Win10_X64_Nativesyscall"
       quality: -90
@@ -400,14 +387,17 @@ noisy-rules:
     - name: "SBOUSSEADEN_Mem_Webcreds_Regexp_Xor"
       quality: -30
       score: 60
+
     # Dr4k0nia
     - name: "DR4K0NIA_Msil_Suspicious_Use_Of_Strreverse"
       quality: -30
       score: 60
+
     # AvastTI 
     - name: "AVASTTI_Manjusaka_Payload_Mz"
       quality: -40
       score: 60
+
     # Cod3nym
     - name: "COD3NYM_SUSP_OBF_NET_Confuserex_Name_Pattern_Jan24"
       quality: 0
@@ -422,7 +412,7 @@ noisy-rules:
       score: 50
 
     # ditekShen
-    - name: "DITEKSHEN_Indicator"
+    - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_"
       quality: -30
       score: 40
       type: "prefix"

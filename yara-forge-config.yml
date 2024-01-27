@@ -194,11 +194,6 @@ yara_repositories:
      branch: "master"
 
    # Repos added 25.01.2024
-   - name: "JPCERTCC_YARA"
-     url: "https://github.com/JPCERTCC/jpcert-yara"
-     author: "JPCERT/CC Incident Response Group"
-     quality: 75
-     branch: "main"
    - name: "DitekSHen"
      url: "https://github.com/ditekshen/detection"
      author: "ditekshen"
