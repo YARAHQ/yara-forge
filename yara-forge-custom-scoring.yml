@@ -23,15 +23,15 @@ importance-scores:
   - rule:
       repo: "DitekSHen"
       file: "indicator_packed.yar"
-    importance: 50
+    importance: 20
   - rule:
       repo: "DitekSHen"
       file: "indicator_suspicious.yar"
-    importance: 50
+    importance: 20
   - rule:
       repo: "DitekSHen"
       file: "indicator_knownbad_certs.yar"
-    importance: 50
+    importance: 20
 
 # FALSE POSITIVES
 # Rules that are prone to false positives
