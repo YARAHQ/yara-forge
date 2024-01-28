@@ -5,9 +5,9 @@
 # YARA Forge
 # A YARA Rule Concentrator
 # Florian Roth
-# December 2023
+# January 2024
 
-__version__ = '0.7.0'
+__version__ = '0.8.0'
 
 import argparse
 #import pprint
@@ -38,10 +38,10 @@ if __name__ == "__main__":
     print(r'  /_/_/  |_/_/ |_/_/  |_|  /_/    \____/_/   \__, /\___/  ')
     print(r'                                            /____/        ')
     print(r'  YARA Forge                                              ')
-    print(r'  Brining Order to Chaos                                  ')
+    print(r'  Bringing Order to Chaos                                 ')
     print(r'                                                          ')
     print(r'  Version %s                                              ' % __version__)
-    print(r'  Florian Roth, November 2023                             ')
+    print(r'  Florian Roth, January 2024                              ')
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", help="enable debug output", action="store_true")
