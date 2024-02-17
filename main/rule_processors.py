@@ -490,7 +490,7 @@ def modify_meta_data_value(rule_meta_data, key, value):
             # If the key is in the meta data, then we modify it
             if k == key:
                 mdata[k] = value
-                return mdata
+                return meta_data_copy
     # If the key is not in the meta data, then we add it
     rule_meta_data.append({key: value})
     return rule_meta_data
