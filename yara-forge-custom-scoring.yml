@@ -379,6 +379,8 @@ noisy-rules:
     - name: "EMBEERESEARCH_Win_Bruteratel_Syscall_Hashes_Oct_2022"
       quality: -50
       score: 60
+    - name: "EMBEERESEARCH_Win_Asyncrat_Unobfuscated" # Rule requires new YARA feature 4.3+
+      quality: -100
 
     # SBousseaden
     - name: "SBOUSSEADEN_Truncated_Win10_X64_Nativesyscall"
