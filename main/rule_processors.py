@@ -517,7 +517,7 @@ def evaluate_yara_rule_score(rule, YARA_FORGE_CONFIG):
         for key, value in meta_data.items():
             if key == 'score':
                 # If the rule already has a score, we use that
-                return value
+                return int(value)
 
     # Score for the rule meta data
     meta_data_rule_score = evaluate_yara_rule_meta_data(rule)

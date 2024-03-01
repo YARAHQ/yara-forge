@@ -5,7 +5,7 @@
 # YARA Forge
 # A YARA Rule Concentrator
 # Florian Roth
-# February 2024
+# March 2024
 
 __version__ = '0.8.1'
 
