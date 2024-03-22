@@ -107,6 +107,8 @@ noisy-rules:
     - name: "ELASTIC_Linux_Trojan_Tsunami_47F93Be2"
       quality: -70
       score: 60
+    - name: "ELASTIC_Linux_Exploit_Dirtycow_8555F149"
+      quality: -80
 
     # FireEye
     - name: "FIREEYE_RT_Hunting_Dotnettojscript_Functions"
