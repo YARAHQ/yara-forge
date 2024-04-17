@@ -557,3 +557,11 @@ noisy-rules:
       quality: -90
       score: 40
     
+    # WithSecureLabs
+    - name: "ducktail_artifacts"
+      quality: -50
+      score: 60
+    - name: "ducktail_dotnet_core_infostealer"
+      quality: -20
+    - name: "ducktail_exceldna_packed"
+      quality: -80
