@@ -20,6 +20,18 @@ importance-scores:
   - rule:
       repo: "GodModeRules"
     importance: 60
+  - rule:
+      repo: "DitekSHen"
+      file: "indicator_packed.yar"
+    importance: 20
+  - rule:
+      repo: "DitekSHen"
+      file: "indicator_suspicious.yar"
+    importance: 20
+  - rule:
+      repo: "DitekSHen"
+      file: "indicator_knownbad_certs.yar"
+    importance: 20
 
 # FALSE POSITIVES
 # Rules that are prone to false positives
@@ -95,6 +107,8 @@ noisy-rules:
     - name: "ELASTIC_Linux_Trojan_Tsunami_47F93Be2"
       quality: -70
       score: 60
+    - name: "ELASTIC_Linux_Exploit_Dirtycow_8555F149"
+      quality: -80
 
     # FireEye
     - name: "FIREEYE_RT_Hunting_Dotnettojscript_Functions"
@@ -367,6 +381,8 @@ noisy-rules:
     - name: "EMBEERESEARCH_Win_Bruteratel_Syscall_Hashes_Oct_2022"
       quality: -50
       score: 60
+    - name: "EMBEERESEARCH_Win_Asyncrat_Unobfuscated" # Rule requires new YARA feature 4.3+
+      quality: -100
 
     # SBousseaden
     - name: "SBOUSSEADEN_Truncated_Win10_X64_Nativesyscall"
@@ -449,26 +465,35 @@ noisy-rules:
     - name: "DITEKSHEN_INDICATOR_KB_CERT_07F9D80B85Ceff7Ee3F58Dc594Fe66B6"
       quality: -100
       score: 40
+    - name: "DITEKSHEN_INDICATOR_KB_CERT_01803Bc7537A1818C4Ab135469963C10"
+      quality: -70
+      score: 40
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Sqlquery_Confidentialdatastore"
       quality: -40
       score: 60
+    - name: "DITEKSHEN_INDICATOR_KB_CERT_1F3216F428F850Be2C66Caa056F6D821"
+      quality: -70
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_KB_CERT_7C1118Cbbadc95Da3752C46E47A27438"
+      quality: -70
+      score: 40
     - name: "DITEKSHEN_INDICATOR_KB_CERT_"
       quality: -20
       score: 50
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Regkeycomb_Disablewindefender"
-      quality: -70
+      quality: -90
       score: 50
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Nonewindowsua"
-      quality: -70
+      quality: -90
       score: 50
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Reversed"
-      quality: -40
+      quality: -90
       score: 50
     - name: "DITEKSHEN_MALWARE_Win_Dlagent02"
       quality: -40
       score: 60
     - name: "DITEKSHEN_INDICATOR_TOOL_WEDGECUT"
-      quality: -40
+      quality: -80
       score: 50
     - name: "DITEKSHEN_MALWARE_Win_Asyncrat"
       quality: -40
@@ -488,3 +513,47 @@ noisy-rules:
     - name: "DITEKSHEN_MALWARE_Win_Fabookie_02"
       quality: -70
       score: 60
+    - name: "DITEKSHEN_INDICATOR_EXE_Packed_Dotfuscator"
+      quality: -80
+      score: 50
+    - name: "DITEKSHEN_INDICATOR_KB_CERT_0C5396Dcb2949C70Fac48Ab08A07338E"
+      quality: -90
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Rawgithub_URL"
+      quality: -90
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_KB_CERT_20A20Dfce424E6Bbcc162A5Fcc0972Ee"
+      quality: -90
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_KB_CERT_0B1F8Cd59E64746Beae153Ecca21066B"
+      quality: -90
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_EXE_Packed_"
+      quality: -70
+      score: 40
+      type: "prefix"
+    - name: "DITEKSHEN_INDICATOR_TOOL_EXP_Serioussam02"
+      quality: -100
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_EXE_Dotnet_Encrypted"
+      quality: -70
+      score: 50
+    - name: "DITEKSHEN_INDICATOR_KB_CERT_04F131322Cc31D92C849Fca351D2F141"
+      quality: -90
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_KB_CERT_3991D810Fb336E5A7D8C2822"
+      quality: -90
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_Finger_Download_Pattern"
+      quality: -70
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_PWSH_Passwordcredential_Retrievepassword"
+      quality: -70
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_KB_CERT_028Aa6E7B516C0D155F15D6290A430E3"
+      quality: -90
+      score: 40
+    - name: "DITEKSHEN_INDICATOR_TOOL_EXP_Apachestrusts"
+      quality: -90
+      score: 40
+    

@@ -490,7 +490,7 @@ def modify_meta_data_value(rule_meta_data, key, value):
             # If the key is in the meta data, then we modify it
             if k == key:
                 mdata[k] = value
-                return mdata
+                return meta_data_copy
     # If the key is not in the meta data, then we add it
     rule_meta_data.append({key: value})
     return rule_meta_data
@@ -504,7 +504,6 @@ def evaluate_yara_rule_score(rule, YARA_FORGE_CONFIG):
     We fist set the base score from the config
     
     We then take the next best score based on this order:
-    - Custom score from the YAML file
     - Predefined score from the meta data
     - Meta data score based on keywords
 
@@ -513,18 +512,12 @@ def evaluate_yara_rule_score(rule, YARA_FORGE_CONFIG):
     # Score for the rule quality
     rule_score = YARA_FORGE_CONFIG['rule_base_score']
 
-    # If a manual score has been set in the YAML file we use that
-    custom_score = retrieve_custom_score(rule)
-    if custom_score > 0:
-        logging.debug("Rule '%s' has a custom score of %d", rule['rule_name'], custom_score)
-        return custom_score
-
     # Check if the rule already has a score
     for meta_data in rule['metadata']:
         for key, value in meta_data.items():
             if key == 'score':
                 # If the rule already has a score, we use that
-                return value
+                return int(value)
 
     # Score for the rule meta data
     meta_data_rule_score = evaluate_yara_rule_meta_data(rule)
@@ -553,23 +546,6 @@ def evaluate_quality_increase(rule):
             if field in meta_data_keywords:
                 quality_increase = 20
     return quality_increase
-
-
-def retrieve_custom_score(rule):
-    """
-    Retrieves a custom score for a rule.
-    """
-    # Read the scores from the YAML file named yara-forge-custom-scoring.yml
-    with open('yara-forge-custom-scoring.yml', 'r', encoding='utf-8') as f:
-        custom_scoring = yaml.safe_load(f)
-        # Loop over the rules in the YAML file
-        for custom_score in custom_scoring['noisy-rules']:
-            # Check if the rule name matches
-            if custom_score['name'] == rule['rule_name']:
-                if 'score' in custom_score:
-                    # Return the score reduction
-                    return custom_score['score']
-    return 0
 
 
 def evaluate_yara_rule_meta_data(rule):
