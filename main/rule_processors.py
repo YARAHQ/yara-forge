@@ -214,6 +214,12 @@ def add_tags_to_rule(rule):
         "FILE": [' at 0'],
         # "MEMORY": [' or any of them', ' or all of them', ' or 1 of them'],
     }
+    
+    # Check if the rule already has 'tags'
+    if 'tags' in rule:
+        # Add the tags to the list of tags to add
+        tags_to_add.extend(rule['tags'])
+
     # We create a copy so that we can delete elements from the original
     meta_data_copy = rule['metadata'].copy()
     # Now we loop over the copy
@@ -280,7 +286,7 @@ def add_tags_to_rule(rule):
                 tags_to_add.append(tag)
 
     # Clean up the tags ----------------------------------------------------------
-    # Remove all duplicates from the tags list 
+    # Remove all duplicates from the tags list
     tags_to_add = list(dict.fromkeys(tags_to_add))
     # We uppercase all the tags
     tags_to_add = [tag.upper() for tag in tags_to_add]
@@ -289,12 +295,8 @@ def add_tags_to_rule(rule):
     # Remove symbols that are not allowed in tags (only alphanumeric characters and
     # underscores are allowed), replace every other character with an underscore using a regex
     tags_to_add = [re.sub(r'[^a-zA-Z0-9_]', '_', tag) for tag in tags_to_add]
-    # Add the tags to the rule if the field already exist
-    if 'tags' in rule:
-        rule['tags'].extend(tags_to_add)
-    # If the field doesn't exist, we create it
-    else:
-        rule['tags'] = tags_to_add
+    # And now we set the new tags field in the rule
+    rule['tags'] = tags_to_add
     return rule
 
 def retrieve_custom_importance_score(repo_name, file_path, rule_name):
