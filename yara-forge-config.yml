@@ -208,6 +208,13 @@ yara_repositories:
      quality: 75
      branch: "master"
 
+   # Repos added 21.04.2024
+   - name: "HarfangLabs"
+     url: "https://github.com/HarfangLab/iocs"
+     author: "HarfangLabs"
+     quality: 80
+     branch: "main"
+
    # My own YARA rule collection used for our free scanners
    - name: "Signature Base"
      url: "https://github.com/Neo23x0/signature-base"
