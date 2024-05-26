@@ -109,8 +109,8 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
                 modify_meta_data_value(rule['metadata'], 'score', rule_score)
 
                 # Increase the quality score based on certain rule characteristics
-                quality_increase = evaluate_quality_increase(rule)
-                rule['metadata'] = modify_yara_rule_quality(rule['metadata'], quality_increase  )
+                #quality_increase = evaluate_quality_increase(rule)
+                #rule['metadata'] = modify_yara_rule_quality(rule['metadata'], quality_increase  )
 
                 # Get a custom importance score if available
                 custom_importance_score = retrieve_custom_importance_score(repo['name'], rules['file_path'], rule['rule_name'])
@@ -214,6 +214,12 @@ def add_tags_to_rule(rule):
         "FILE": [' at 0'],
         # "MEMORY": [' or any of them', ' or all of them', ' or 1 of them'],
     }
+    
+    # Check if the rule already has 'tags'
+    if 'tags' in rule:
+        # Add the tags to the list of tags to add
+        tags_to_add.extend(rule['tags'])
+
     # We create a copy so that we can delete elements from the original
     meta_data_copy = rule['metadata'].copy()
     # Now we loop over the copy
@@ -280,7 +286,7 @@ def add_tags_to_rule(rule):
                 tags_to_add.append(tag)
 
     # Clean up the tags ----------------------------------------------------------
-    # Remove all duplicates from the tags list 
+    # Remove all duplicates from the tags list
     tags_to_add = list(dict.fromkeys(tags_to_add))
     # We uppercase all the tags
     tags_to_add = [tag.upper() for tag in tags_to_add]
@@ -289,12 +295,8 @@ def add_tags_to_rule(rule):
     # Remove symbols that are not allowed in tags (only alphanumeric characters and
     # underscores are allowed), replace every other character with an underscore using a regex
     tags_to_add = [re.sub(r'[^a-zA-Z0-9_]', '_', tag) for tag in tags_to_add]
-    # Add the tags to the rule if the field already exist
-    if 'tags' in rule:
-        rule['tags'].extend(tags_to_add)
-    # If the field doesn't exist, we create it
-    else:
-        rule['tags'] = tags_to_add
+    # And now we set the new tags field in the rule
+    rule['tags'] = tags_to_add
     return rule
 
 def retrieve_custom_importance_score(repo_name, file_path, rule_name):
@@ -490,7 +492,7 @@ def modify_meta_data_value(rule_meta_data, key, value):
             # If the key is in the meta data, then we modify it
             if k == key:
                 mdata[k] = value
-                return mdata
+                return meta_data_copy
     # If the key is not in the meta data, then we add it
     rule_meta_data.append({key: value})
     return rule_meta_data
@@ -517,7 +519,7 @@ def evaluate_yara_rule_score(rule, YARA_FORGE_CONFIG):
         for key, value in meta_data.items():
             if key == 'score':
                 # If the rule already has a score, we use that
-                return value
+                return int(value)
 
     # Score for the rule meta data
     meta_data_rule_score = evaluate_yara_rule_meta_data(rule)
@@ -529,23 +531,24 @@ def evaluate_yara_rule_score(rule, YARA_FORGE_CONFIG):
     return rule_score
 
 
-def evaluate_quality_increase(rule):
-    """
-    Evaluate the quality increase for a rule
-    """
-    # The pure existence of these meta data values increases the quality score
-    quality_increase = 0
-    # List of possible meta data keywords
-    meta_data_keywords = ['modified', 'last_modified', 'last_modified_at', 'last_modified_date',
-                          'last_change', 'last_change_date', 'last_update', 'last_update_date',
-                          'updated', 'updated_at', 'updated_date', 'updated_timestamp',
-                          'update', 'modification_date', 'modification', 'change', 'change_date']
-    # Check if one of the keywords appears in the meta data values
-    for meta_data in rule['metadata']:
-        for field, _ in meta_data.items():
-            if field in meta_data_keywords:
-                quality_increase = 20
-    return quality_increase
+# deprecated function - caused too many negative side effects (crap rules being included because they had good meta data)
+# def evaluate_quality_increase(rule):
+#     """
+#     Evaluate the quality increase for a rule
+#     """
+#     # The pure existence of these meta data values increases the quality score
+#     quality_increase = 0
+#     # List of possible meta data keywords
+#     meta_data_keywords = ['modified', 'last_modified', 'last_modified_at', 'last_modified_date',
+#                           'last_change', 'last_change_date', 'last_update', 'last_update_date',
+#                           'updated', 'updated_at', 'updated_date', 'updated_timestamp',
+#                           'update', 'modification_date', 'modification', 'change', 'change_date']
+#     # Check if one of the keywords appears in the meta data values
+#     for meta_data in rule['metadata']:
+#         for field, _ in meta_data.items():
+#             if field in meta_data_keywords:
+#                 quality_increase = 20
+#     return quality_increase
 
 
 def evaluate_yara_rule_meta_data(rule):

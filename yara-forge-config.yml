@@ -201,6 +201,19 @@ yara_repositories:
      branch: "master"
      path: "yara"
 
+   # Repos added 17.04.2024
+   - name: "WithSecureLabs"
+     url: "https://github.com/WithSecureLabs/iocs"
+     author: "WithSecureLabs"
+     quality: 75
+     branch: "master"
+
+   # Repos added 21.04.2024
+   - name: "HarfangLab"
+     url: "https://github.com/HarfangLab/iocs"
+     author: "HarfangLab"
+     quality: 80
+     branch: "main"
 
    # My own YARA rule collection used for our free scanners
    - name: "Signature Base"
