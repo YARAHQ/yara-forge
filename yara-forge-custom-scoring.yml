@@ -323,6 +323,8 @@ noisy-rules:
     # Delivr.to
     - name: "DELIVRTO_SUSP_SVG_Onload_Onerror_Jul23"
       quality: -100
+    - name: "DELIVRTO_SUSP_HTML_B64_WASM_Blob"
+      quality: -80
 
     # SecuInfra
     - name: "SECUINFRA_OBFUS_Powershell_Common_Replace"
