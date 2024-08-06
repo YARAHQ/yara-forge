@@ -215,6 +215,15 @@ yara_repositories:
      quality: 80
      branch: "main"
 
+   # Repos added 06.08.2024
+   - name: "LOLDrivers"
+     url: "https://github.com/magicsword-io/LOLDrivers/"
+     author: "LOLDrivers"
+     quality: 80
+     branch: "yara_update_240726"  # TODO: change this to main after PR merged https://github.com/magicsword-io/LOLDrivers/pull/182
+     recursive: false
+     path: 'detections/yara'
+
    # My own YARA rule collection used for our free scanners
    - name: "Signature Base"
      url: "https://github.com/Neo23x0/signature-base"
