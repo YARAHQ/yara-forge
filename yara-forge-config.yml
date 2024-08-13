@@ -220,7 +220,7 @@ yara_repositories:
      url: "https://github.com/magicsword-io/LOLDrivers/"
      author: "LOLDrivers"
      quality: 80
-     branch: "yara_update_240726"  # TODO: change this to main after PR merged https://github.com/magicsword-io/LOLDrivers/pull/182
+     branch: "main"
      recursive: false
      path: 'detections/yara'
 
