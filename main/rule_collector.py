@@ -101,9 +101,12 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
         walk_folder = repo_folder
         if 'path' in repo:
             walk_folder = os.path.join(repo_folder, repo['path'])
+            # Print the processed folder
+            logging.debug("Processing folder: %s", walk_folder)
 
         # Check if the path should be walked 
         recursive = True
+        # Check if the path should be walked
         if 'recursive' in repo:
             recursive = repo['recursive']
 

@@ -33,6 +33,9 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
         # Debug output
         logging.info("Processing YARA rules from repository: %s", repo['name'])
 
+        # Keep a list of all rules to avoid duplicates
+        all_rule_names = []
+
         # Loop over the rule sets in the repository and modify the rules
         num_rules = 0
         for rules in repo['rules_sets']:
@@ -168,8 +171,11 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
                 # Sort the meta data values
                 rule['metadata'] = sort_meta_data_values(rule['metadata'], YARA_FORGE_CONFIG)
 
-                # We keep the rule
-                kept_rules.append(rule)
+                # We keep the rule if the rule name is not already in the list of rule names
+                if rule_name_new not in all_rule_names:
+                    # Add the rule name to the list of rule names
+                    all_rule_names.append(rule_name_new)
+                    kept_rules.append(rule)
 
             # Count the number of rules
             num_rules += len(kept_rules)

@@ -21,7 +21,6 @@ yara_repositories:
      author: "Kevin O'Reilly"
      quality: 70
      branch: "master"
-     path: "data/yara"
    - name: "BinaryAlert"
      url: "https://github.com/airbnb/binaryalert/"
      author: "Airbnb"
