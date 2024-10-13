@@ -270,6 +270,9 @@ noisy-rules:
     - name: "MALPEDIA_Win_Unidentified_090_Auto"
       quality: -60
       score: 60
+    - name: "MALPEDIA_Win_Maze_Auto"  # $sequence_8 = { 41 41 41 41 41 41 41 }
+      quality: -100
+      score: 60
 
     # Signature Base
     - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
