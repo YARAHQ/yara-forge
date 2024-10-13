@@ -10,6 +10,37 @@ import plyara
 from git import Repo
 
 
+def process_yara_file(file_path, repo_folder, yara_rule_sets):
+    # Debug output
+    logging.debug("Found YARA rule file: %s", file_path)
+
+    # Read the YARA file
+    with open(file_path, "r", encoding="utf-8") as f:
+        yara_file_content = f.read()
+        # Parse the rules in the file
+        try:
+            # Get the rule file path in the repository
+            relative_path = os.path.relpath(file_path, start=repo_folder)
+            # Parse the YARA rules in the file
+            yara_parser = plyara.Plyara()
+            yara_rules = yara_parser.parse_string(yara_file_content)
+            # Create a YARA rule set object
+            yara_rule_set = {
+                "rules": yara_rules,
+                "file_path": relative_path,
+            }
+            # Debug output
+            logging.debug("Found %d YARA rules in file: %s",
+                          len(yara_rules), file_path)
+            # Append to list of YARA rule sets
+            yara_rule_sets.append(yara_rule_set)
+
+        except Exception as e:
+            print(e)
+            logging.error("Skipping YARA rule in the following " \
+                          "file because of a syntax error: %s ", file_path)
+
+
 def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
     """
     Retrieves YARA rules from online repositories.
@@ -65,45 +96,33 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
 
         # Walk through the extracted folders and find all YARA files
         yara_rule_sets = []
+
         # Walk a sub folder if one is set in the config
         walk_folder = repo_folder
         if 'path' in repo:
             walk_folder = os.path.join(repo_folder, repo['path'])
-        # Walk the folder and find all YARA files
-        for root, _, files in os.walk(walk_folder):
-            for file in files:
-                if file.endswith(".yar") or file.endswith(".yara"):
-                    file_path = os.path.join(root, file)
+            # Print the processed folder
+            logging.debug("Processing folder: %s", walk_folder)
 
-                    # Debug output
-                    logging.debug("Found YARA rule file: %s", file_path)
+        # Check if the path should be walked 
+        recursive = True
+        # Check if the path should be walked
+        if 'recursive' in repo:
+            recursive = repo['recursive']
 
-                    # Read the YARA file
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        yara_file_content = f.read()
-                        # Parse the rules in the file
-                        try:
-                            # Get the rule file path in the repository
-                            relative_path = os.path.relpath(file_path, start=repo_folder)
-                            # Parse the YARA rules in the file
-                            yara_parser = plyara.Plyara()
-                            yara_rules = yara_parser.parse_string(yara_file_content)
-                            # Create a YARA rule set object
-                            yara_rule_set = {
-                                "rules": yara_rules,
-                                "file_path": relative_path,
-                            }
-                            # Debug output
-                            logging.debug("Found %d YARA rules in file: %s",
-                                          len(yara_rules), file_path)
-                            # Append to list of YARA rule sets
-                            yara_rule_sets.append(yara_rule_set)
-                            #pprint(yara_rule_set)
-
-                        except Exception as e:
-                            print(e)
-                            logging.error("Skipping YARA rule in the following " \
-                                          "file because of a syntax error: %s ", file_path)
+        if recursive:
+            # Walk the folder recursively
+            for root, _, files in os.walk(walk_folder):
+                for file in files:
+                    if file.endswith(".yar") or file.endswith(".yara"):
+                        file_path = os.path.join(root, file)
+                        process_yara_file(file_path, repo_folder, yara_rule_sets)
+        else:
+            # Only walk the top-level directory
+            for file in os.listdir(walk_folder):
+                file_path = os.path.join(walk_folder, file)
+                if os.path.isfile(file_path) and (file.endswith(".yar") or file.endswith(".yara")):
+                    process_yara_file(file_path, repo_folder, yara_rule_sets)
 
         # Append the YARA rule repository
         yara_rule_repo = {
