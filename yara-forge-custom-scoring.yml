@@ -56,6 +56,17 @@ noisy-rules:
       quality: -50
     - name: "CAPE_Agentteslaxor"
       quality: -50
+    - name: "CAPE_UPX"
+      quality: -40
+      score: 30
+    - name: "CAPE_NSIS"
+      quality: -40
+      score: 30
+    - name: "CAPE_Syscall"
+      quality: -40
+      score: 30
+    - name: "CAPE_Sparkrat"
+      quality: -80
 
     # Elastic
     - name: "ELASTIC_Multi_EICAR_Ac8F42D6"
@@ -430,7 +441,7 @@ noisy-rules:
     # RussianPanda
     - name: "RUSSIANPANDA_Check_Installed_Software"
       quality: -50
-      score: 50
+      score: 45
 
     # ditekShen
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_"
