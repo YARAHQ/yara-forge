@@ -224,6 +224,15 @@ yara_repositories:
      recursive: false
      path: 'detections/yara'
 
+   # Repos added 22.12.2024
+   - name: "SEKOIA"
+     url: "https://github.com/SEKOIA-IO/Community"
+     author: "Sekoia.io"
+     quality: 80
+     branch: "main"
+     recursive: false
+     path: 'yara_rules'
+
    # My own YARA rule collection used for our free scanners
    - name: "Signature Base"
      url: "https://github.com/Neo23x0/signature-base"
