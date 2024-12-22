@@ -1,4 +1,4 @@
-plyara
+plyara==2.2.1
 requests
 dateparser
 yara-python
