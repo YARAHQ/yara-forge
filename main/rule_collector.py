@@ -63,7 +63,7 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
         # Extract the owner and the repository name from the URL
         repo_url_parts = repo['url'].split("/")
         repo['owner'] = repo_url_parts[3]
-        repo['repo'] = repo_url_parts[4].split(".")[0]
+        repo['repo'] = '/'.join(repo_url_parts[4:]).split(".")[0]
 
         # If the repository hasn't not been cloned yet, clone it
         if not os.path.exists(os.path.join(repo_staging_dir, repo['owner'], repo['repo'])):
