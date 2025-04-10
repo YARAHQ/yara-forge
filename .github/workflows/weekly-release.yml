@@ -28,6 +28,11 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y g++ python3-dev libre2-dev
   
+    - name: Confirm libre2-dev headers
+      run: |
+        dpkg -L libre2-dev | grep re2.h || echo "re2.h not found"
+        test -f /usr/include/re2/re2.h && echo "Header exists ✅" || (echo "Header missing ❌" && exit 1)
+
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
