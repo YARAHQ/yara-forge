@@ -65,15 +65,15 @@ jobs:
 
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ env.CURRENT_DATE }}
-        release_name: YARA Forge Rule Set Release ${{ env.CURRENT_DATE }}
-        body_path: build_stats.md 
+        name: YARA Forge Rule Set Release ${{ env.CURRENT_DATE }}
+        body_path: build_stats.md
         draft: false
         prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload build log file
       if: always()
