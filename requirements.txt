@@ -4,4 +4,4 @@ dateparser
 yara-python
 PyYAML
 gitpython
-google-re2
+git+https://github.com/facebook/pyre2.git@main#egg=fb-re2
