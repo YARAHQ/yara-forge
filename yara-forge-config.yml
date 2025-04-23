@@ -6,11 +6,17 @@ yara_repositories:
      author: "ReversingLabs"
      quality: 90
      branch: "develop"
-   - name: "Elastic"
-     url: "https://github.com/elastic/protections-artifacts/"
-     author: "Elastic"
-     quality: 75
-     branch: "main"
+   # NOTE: Elastic repository currently disabled due to licensing concerns.
+   # The Elastic License v2 restricts redistribution via hosted services or products,
+   # which conflicts with how YARA Forge packages and delivers rule sets.
+   # To respect the terms of their license, this source is excluded for now.
+   # Hopefully, this can be revisited if the licensing situation changes.
+   # See: https://github.com/elastic/protections-artifacts/issues/4
+   #- name: "Elastic"
+   #  url: "https://github.com/elastic/protections-artifacts/"
+   #  author: "Elastic"
+   #  quality: 75
+   #  branch: "main"
    - name: "R3c0nst"
      url: "https://github.com/fboldewin/YARA-rules/"
      author: "Frank Boldewin"
@@ -215,13 +221,15 @@ yara_repositories:
      branch: "main"
 
    # Repos added 06.08.2024
-   - name: "LOLDrivers"
-     url: "https://github.com/magicsword-io/LOLDrivers/"
-     author: "LOLDrivers"
-     quality: 80
-     branch: "main"
-     recursive: false
-     path: 'detections/yara'
+   # Temporarily disabled due to repo issues with the quota limit
+   # https://github.com/YARAHQ/yara-forge/actions/runs/14444277603/job/40501139031
+  #  - name: "LOLDrivers"
+  #    url: "https://github.com/magicsword-io/LOLDrivers/"
+  #    author: "LOLDrivers"
+  #    quality: 80
+  #    branch: "main"
+  #    recursive: false
+  #    path: 'detections/yara'
 
    # Repos added 22.12.2024
    - name: "SEKOIA"
