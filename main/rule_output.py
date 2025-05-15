@@ -96,17 +96,19 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                         # Check if the rule has a minimum age
                         if "modified" in metadata:
                             rule_date = dateparser.parse(metadata['modified'])
-                            # Check if the rule is old enough
-                            if (datetime.datetime.now() - rule_date).days < rule_package['minimum_age']:
-                                skip_rule = True
-                                skip_rule_reason = "age"
+                            if rule_date is not None: # Check the rule_date is a valid date
+                                # Check if the rule is old enough
+                                if (datetime.datetime.now() - rule_date).days < rule_package['minimum_age']:
+                                    skip_rule = True
+                                    skip_rule_reason = "age"
                         # Check if the rule is younger than the maximum age
                         if "date" in metadata:
                             rule_date = dateparser.parse(metadata['date'])
-                            # Check if the rule is old enough
-                            if (datetime.datetime.now() - rule_date).days > rule_package['max_age']:
-                                skip_rule = True
-                                skip_rule_reason = "age"
+                            if rule_date is not None: # Check the rule_date is a valid date
+                                # Check if the rule is old enough
+                                if (datetime.datetime.now() - rule_date).days > rule_package['max_age']:
+                                    skip_rule = True
+                                    skip_rule_reason = "age"
 
                         # Score check ----------------------------------------------------
                         if "score" in metadata:
