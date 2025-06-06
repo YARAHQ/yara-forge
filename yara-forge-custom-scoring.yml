@@ -67,6 +67,8 @@ noisy-rules:
       score: 30
     - name: "CAPE_Sparkrat"
       quality: -80
+    - name: "CAPE_Nettraveler" # wrong escape sequence in string
+      quality: -100
 
     # Elastic
     - name: "ELASTIC_Multi_EICAR_Ac8F42D6"

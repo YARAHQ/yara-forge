@@ -238,6 +238,13 @@ yara_repositories:
      recursive: false
      path: 'yara_rules'
 
+   # Repos added 15.05.2025
+   - name: "Synacktiv"
+     url: "https://github.com/synacktiv/synacktiv-rules"
+     author: "Synacktiv"
+     quality: 80
+     branch: "main"
+
    # My own YARA rule collection used for our free scanners
    - name: "Signature Base"
      url: "https://github.com/Neo23x0/signature-base"
