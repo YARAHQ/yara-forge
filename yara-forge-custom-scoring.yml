@@ -162,6 +162,16 @@ noisy-rules:
     - name: "ESET_Turla_Outlook_Pdf"
       quality: -60
       score: 60
+    # The following rules are ok, but the use the private rule ESET_Apachemodule_PRIVATE which uses the yara module "elf", which slows down the whole scan significantly
+    # so we assign a score of 1 to these rules.
+    - name: "ESET_Apachemodule_PRIVATE"
+      score: 1
+    - name: "ESET_Helimodsteal"
+      score: 1
+    - name: "ESET_Helimodredirect"
+      score: 1
+    - name: "ESET_Helimodproxy"
+      score: 1
 
     # Arkbird SOLG
     - name: "ARKBIRD_SOLG_APT_Lazarus_Loader_Dec_2020_1"
