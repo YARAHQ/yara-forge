@@ -4,6 +4,7 @@ This module contains functions for writing YARA rules into separate files.
 import os
 import logging
 import datetime
+import re
 from pprint import pprint
 import dateparser
 from plyara.utils import rebuild_yara_rule
@@ -96,17 +97,19 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                         # Check if the rule has a minimum age
                         if "modified" in metadata:
                             rule_date = dateparser.parse(metadata['modified'])
-                            # Check if the rule is old enough
-                            if (datetime.datetime.now() - rule_date).days < rule_package['minimum_age']:
-                                skip_rule = True
-                                skip_rule_reason = "age"
+                            if rule_date is not None: # Check the rule_date is a valid date
+                                # Check if the rule is old enough
+                                if (datetime.datetime.now() - rule_date).days < rule_package['minimum_age']:
+                                    skip_rule = True
+                                    skip_rule_reason = "age"
                         # Check if the rule is younger than the maximum age
                         if "date" in metadata:
                             rule_date = dateparser.parse(metadata['date'])
-                            # Check if the rule is old enough
-                            if (datetime.datetime.now() - rule_date).days > rule_package['max_age']:
-                                skip_rule = True
-                                skip_rule_reason = "age"
+                            if rule_date is not None: # Check the rule_date is a valid date
+                                # Check if the rule is old enough
+                                if (datetime.datetime.now() - rule_date).days > rule_package['max_age']:
+                                    skip_rule = True
+                                    skip_rule_reason = "age"
 
                         # Score check ----------------------------------------------------
                         if "score" in metadata:
@@ -262,6 +265,21 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
 
                 logging.log(logging.INFO, "You can find more information about skipped files " \
                             "in the log file: yara-forge.log when you run it with --debug flag")
+
+                # organize the imports to avoid `duplicate import` errors in yara-x.
+                import_set = set()
+                regex_import = re.compile('import ".*"\n')
+                for r in range(len(output_rule_set_strings)):
+                    rule = output_rule_set_strings[r]
+                    imports = regex_import.findall(rule)
+                    if len(imports) > 0:
+                        import_set.update(imports)
+                        output_rule_set_strings[r] = regex_import.sub('', rule)
+                
+                # collect all the imports used by the rules at the top of the file
+                if len(import_set) > 0:
+                    imports = '\n' + ''.join(import_set) + '\n\n' 
+                    output_rule_set_strings.insert(0, imports)
 
                 # Prepend the header to the output rule set strings
                 output_rule_set_strings.insert(0, rule_set_header)
