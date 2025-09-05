@@ -1,7 +1,8 @@
-plyara
+plyara==2.2.1
 requests
 dateparser
 yara-python
 PyYAML
 gitpython
-google-re2
+git+https://github.com/facebook/pyre2.git@main#egg=fb-re2
+ply
