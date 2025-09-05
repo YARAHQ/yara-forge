@@ -284,6 +284,9 @@ noisy-rules:
     - name: "MALPEDIA_Win_Maze_Auto"  # $sequence_8 = { 41 41 41 41 41 41 41 }
       quality: -100
       score: 60
+    - name: MALPEDIA_Win_Sidetwist_Auto  # FPs with libstdc++-6.dll
+      quality: -60
+      score: 50
 
     # Signature Base
     - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
