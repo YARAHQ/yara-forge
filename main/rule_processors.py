@@ -168,6 +168,19 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
                 # Add license URL
                 modify_meta_data_value(rule['metadata'], 'license_url', repo['license_url'])
 
+                # Make sure that the score, the quality and the importance are positive integers
+                for meta_data in rule['metadata']:
+                    for key, value in meta_data.items():
+                        if key in ['score', 'quality', 'importance']:
+                            # If the value is not an integer, we set it to 0
+                            if not isinstance(value, int):
+                                value = 0
+                            # If the value is negative, we set it to 0
+                            if value < 0:
+                                value = 0
+                            # Set the value back to the meta data
+                            meta_data[key] = value
+
                 # Sort the meta data values
                 rule['metadata'] = sort_meta_data_values(rule['metadata'], YARA_FORGE_CONFIG)
 
