@@ -356,6 +356,8 @@ noisy-rules:
       quality: -100
     - name: "DELIVRTO_SUSP_HTML_B64_WASM_Blob"
       quality: -80
+    - name: "DELIVRTO_SUSP_ZIP_Smuggling_Egg_Jun01"
+      quality: -80
 
     # SecuInfra
     - name: "SECUINFRA_OBFUS_Powershell_Common_Replace"
@@ -434,6 +436,9 @@ noisy-rules:
       quality: -30
       score: 60
     - name: "SBOUSSEADEN_Mem_Webcreds_Regexp_Xor"
+      quality: -30
+      score: 60
+    - name: 'SBOUSSEADEN_Adsync_Creddump_Wide'
       quality: -30
       score: 60
 
@@ -589,7 +594,16 @@ noisy-rules:
     - name: "DITEKSHEN_INDICATOR_TOOL_EXP_Apachestrusts"
       quality: -90
       score: 40
-    
+    - name: 'DITEKSHEN_INDICATOR_OLE_Excel4Macros_DL2'
+      quality: -30
+      score: 50
+    - name: 'DITEKSHEN_INDICATOR_OLE_Suspicious_MITRE_T1117'
+      quality: -30
+      score: 50
+    - name: 'DITEKSHEN_INDICATOR_RTF_EXPLOIT_CVE_2017_8759_2'
+      quality: -50
+      score: 40
+
     # WithSecureLabs
     - name: "ducktail_artifacts"
       quality: -50
