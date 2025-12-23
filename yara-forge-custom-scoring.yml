@@ -67,6 +67,8 @@ noisy-rules:
       score: 30
     - name: "CAPE_Sparkrat"
       quality: -80
+    - name: "CAPE_Formhookb"
+      quality: -90
     - name: "CAPE_Nettraveler" # wrong escape sequence in string
       quality: -100
 
@@ -162,6 +164,16 @@ noisy-rules:
     - name: "ESET_Turla_Outlook_Pdf"
       quality: -60
       score: 60
+    # The following rules are ok, but the use the private rule ESET_Apachemodule_PRIVATE which uses the yara module "elf", which slows down the whole scan significantly
+    # so we assign a score of 1 to these rules.
+    - name: "ESET_Apachemodule_PRIVATE"
+      score: 1
+    - name: "ESET_Helimodsteal"
+      score: 1
+    - name: "ESET_Helimodredirect"
+      score: 1
+    - name: "ESET_Helimodproxy"
+      score: 1
 
     # Arkbird SOLG
     - name: "ARKBIRD_SOLG_APT_Lazarus_Loader_Dec_2020_1"
@@ -286,6 +298,9 @@ noisy-rules:
     - name: "MALPEDIA_Win_Maze_Auto"  # $sequence_8 = { 41 41 41 41 41 41 41 }
       quality: -100
       score: 60
+    - name: MALPEDIA_Win_Sidetwist_Auto  # FPs with libstdc++-6.dll
+      quality: -60
+      score: 50
 
     # Signature Base
     - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
@@ -340,6 +355,8 @@ noisy-rules:
     - name: "DELIVRTO_SUSP_SVG_Onload_Onerror_Jul23"
       quality: -100
     - name: "DELIVRTO_SUSP_HTML_B64_WASM_Blob"
+      quality: -80
+    - name: "DELIVRTO_SUSP_ZIP_Smuggling_Egg_Jun01"
       quality: -80
 
     # SecuInfra
@@ -419,6 +436,9 @@ noisy-rules:
       quality: -30
       score: 60
     - name: "SBOUSSEADEN_Mem_Webcreds_Regexp_Xor"
+      quality: -30
+      score: 60
+    - name: 'SBOUSSEADEN_Adsync_Creddump_Wide'
       quality: -30
       score: 60
 
@@ -574,7 +594,16 @@ noisy-rules:
     - name: "DITEKSHEN_INDICATOR_TOOL_EXP_Apachestrusts"
       quality: -90
       score: 40
-    
+    - name: 'DITEKSHEN_INDICATOR_OLE_Excel4Macros_DL2'
+      quality: -30
+      score: 50
+    - name: 'DITEKSHEN_INDICATOR_OLE_Suspicious_MITRE_T1117'
+      quality: -30
+      score: 50
+    - name: 'DITEKSHEN_INDICATOR_RTF_EXPLOIT_CVE_2017_8759_2'
+      quality: -50
+      score: 40
+
     # WithSecureLabs
     - name: "ducktail_artifacts"
       quality: -50

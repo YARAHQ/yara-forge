@@ -1,6 +1,7 @@
 
 packages/*
 *.pyc
+*.swp
 yara-forge.log
 repos/*
 yara-forge-rule-issues.yml

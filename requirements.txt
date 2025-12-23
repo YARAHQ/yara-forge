@@ -5,3 +5,4 @@ yara-python
 PyYAML
 gitpython
 git+https://github.com/facebook/pyre2.git@main#egg=fb-re2
+ply
