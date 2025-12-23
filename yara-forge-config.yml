@@ -245,6 +245,14 @@ yara_repositories:
      quality: 80
      branch: "main"
 
+   # Repos added 23.12.2025
+   - name: "ArtifactDrop"
+     url: "https://github.com/matthieugras/artifact-drop/"
+     author: "Matthieu Gras"
+     quality: 80
+     branch: "main"
+     path: "yara"
+
    # My own YARA rule collection used for our free scanners
    - name: "Signature Base"
      url: "https://github.com/Neo23x0/signature-base"
