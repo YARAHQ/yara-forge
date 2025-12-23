@@ -53,6 +53,8 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
     if os.path.exists(repo_staging_dir):
         # Remove the existing repo directory and all its contents
         shutil.rmtree(os.path.join(repo_staging_dir), ignore_errors=False)
+    # Ensure the staging directory exists before cloning repositories
+    os.makedirs(repo_staging_dir, exist_ok=True)
 
     # Loop over the repositories
     for repo in yara_repos:
