@@ -1,6 +1,7 @@
 """
 This file contains functions that process the YARA rules.
 """
+import os
 import logging
 import re
 import uuid
@@ -746,18 +747,19 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
     # We retrieve values from the git history that we can use in case we don't
     # find these values in the meta data
 
+    cache_key = os.path.join(repo_path, file_path)
     # Check if the date is in the cache
-    if file_path in date_lookup_cache:
+    if cache_key in date_lookup_cache:
         # Debug info
         logging.debug("Retrieved date info for file %s from cache.", file_path)
-        (git_creation_date, git_modification_date) = date_lookup_cache[file_path]
+        (git_creation_date, git_modification_date) = date_lookup_cache[cache_key]
     else:
         # Getting the last modification date of the rule file from the git log
         # (this is not completely reliable, but better than nothing)
         (git_creation_date, git_modification_date) = get_rule_age_git(repo_path, file_path)
         if git_creation_date:
             # Add the date to the cache
-            date_lookup_cache[file_path] = (git_creation_date, git_modification_date)
+            date_lookup_cache[cache_key] = (git_creation_date, git_modification_date)
 
     # CREATION DATE -----------------------------------------------------------
     # We create a copy so that we can delete elements from the original
@@ -835,12 +837,12 @@ def get_rule_age_git(repo_path, file_path):
     logging.debug("Retrieving date info for file '%s' from git log.", file_path)
 
     # Iterate over the commits that modified the file, and take the first one
-    commits = list(repo.iter_commits(paths=file_path, max_count=1))
+    commits = list(repo.iter_commits(paths=file_path))
     if commits:
-        first_commit = commits[-1]
         last_commit = commits[0]
+        creation_commit = commits[-1]
         # Extract the datetime of the first commit that added the file
-        creation_date = first_commit.committed_datetime
+        creation_date = creation_commit.committed_datetime
         # Extract the datetime of the last commit that modified the file
         modification_date = last_commit.committed_datetime
         logging.debug("Retrieved date info for file %s from git log. "
