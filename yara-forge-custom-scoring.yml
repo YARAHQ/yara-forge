@@ -71,6 +71,8 @@ noisy-rules:
       quality: -90
     - name: "CAPE_Nettraveler" # wrong escape sequence in string
       quality: -100
+    - name: "CAPE_Winosstager"
+      quality: -100
 
     # Elastic
     - name: "ELASTIC_Multi_EICAR_Ac8F42D6"
