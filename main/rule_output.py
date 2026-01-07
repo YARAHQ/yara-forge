@@ -15,6 +15,14 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
     Writes YARA rules into separate files.
     """
 
+    def _normalize_datetime(dt_value):
+        """Convert parsed datetimes to timezone-aware (UTC) for safe arithmetic."""
+        if dt_value is None:
+            return None
+        if dt_value.tzinfo is None:
+            return dt_value.replace(tzinfo=datetime.timezone.utc)
+        return dt_value
+
     # List of files that were written
     package_files = []
 
@@ -51,6 +59,8 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
         logging.info("Minimum Quality: %d", rule_package['minimum_quality'])
         logging.info("Minimum Age: %d", rule_package['minimum_age'])
         logging.info("Output File: %s", rule_file_path)
+
+        now_utc = datetime.datetime.now(datetime.timezone.utc)
 
         # List of strings composed of the rules from each repository
         output_rule_set_strings = []
@@ -96,18 +106,18 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                         # Age check ------------------------------------------------------
                         # Check if the rule has a minimum age
                         if "modified" in metadata:
-                            rule_date = dateparser.parse(metadata['modified'])
+                            rule_date = _normalize_datetime(dateparser.parse(metadata['modified']))
                             if rule_date is not None: # Check the rule_date is a valid date
                                 # Check if the rule is old enough
-                                if (datetime.datetime.now() - rule_date).days < rule_package['minimum_age']:
+                                if (now_utc - rule_date).days < rule_package['minimum_age']:
                                     skip_rule = True
                                     skip_rule_reason = "age"
                         # Check if the rule is younger than the maximum age
                         if "date" in metadata:
-                            rule_date = dateparser.parse(metadata['date'])
+                            rule_date = _normalize_datetime(dateparser.parse(metadata['date']))
                             if rule_date is not None: # Check the rule_date is a valid date
                                 # Check if the rule is old enough
-                                if (datetime.datetime.now() - rule_date).days > rule_package['max_age']:
+                                if (now_utc - rule_date).days > rule_package['max_age']:
                                     skip_rule = True
                                     skip_rule_reason = "age"
 
@@ -278,7 +288,7 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                 
                 # collect all the imports used by the rules at the top of the file
                 if len(import_set) > 0:
-                    imports = '\n' + ''.join(import_set) + '\n\n' 
+                    imports = '\n' + ''.join(sorted(import_set)) + '\n\n' 
                     output_rule_set_strings.insert(0, imports)
 
                 # Prepend the header to the output rule set strings
@@ -342,4 +352,3 @@ def write_build_stats(rule_package_statistics_sets):
             for repo_statistics in sorted_repo_statistics:
                 f.write(f"| {repo_statistics['name']} | {repo_statistics['total_rules']} | {repo_statistics['total_rules_skipped_age']} | {repo_statistics['total_rules_skipped_quality']} | {repo_statistics['total_rules_skipped_importance']} | {repo_statistics['total_rules_skipped_score']} |\n")
             f.write("\n")
-
