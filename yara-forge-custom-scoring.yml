@@ -303,6 +303,9 @@ noisy-rules:
     - name: MALPEDIA_Win_Sidetwist_Auto  # FPs with libstdc++-6.dll
       quality: -60
       score: 50
+    - name: "MALPEDIA_Win_Brute_Ratel_C4_Auto"  # FPs with Microsoft OneDrive
+      quality: -90
+      score: 45
 
     # Signature Base
     - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
