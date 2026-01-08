@@ -53,6 +53,8 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
     if os.path.exists(repo_staging_dir):
         # Remove the existing repo directory and all its contents
         shutil.rmtree(os.path.join(repo_staging_dir), ignore_errors=False)
+    # Ensure the staging directory exists before cloning repositories
+    os.makedirs(repo_staging_dir, exist_ok=True)
 
     # Loop over the repositories
     for repo in yara_repos:
@@ -69,7 +71,23 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
         if not os.path.exists(os.path.join(repo_staging_dir, repo['owner'], repo['repo'])):
             # Clone the repository
             repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'])
-            repo['commit_hash'] = Repo.clone_from(repo['url'], repo_folder, branch=repo['branch']).head.commit.hexsha
+            clone_env = os.environ.copy()
+            # Skip LFS smudge to avoid downloading large binaries we do not need
+            clone_env.setdefault("GIT_LFS_SKIP_SMUDGE", "1")
+            # Partial clone keeps the checkout lean; sparse checkout will narrow paths further
+            clone_options = ["--filter=blob:none", "--sparse"]
+            repo_obj = Repo.clone_from(
+                repo['url'],
+                repo_folder,
+                branch=repo['branch'],
+                env=clone_env,
+                multi_options=clone_options
+            )
+            # If a sub-path is configured, restrict checkout to that path to skip large folders
+            if 'path' in repo:
+                repo_obj.git.sparse_checkout('init', '--cone')
+                repo_obj.git.sparse_checkout('set', repo['path'])
+            repo['commit_hash'] = repo_obj.head.commit.hexsha
         else:
             # Get the latest commit hash
             repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'])
