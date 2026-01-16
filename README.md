@@ -11,3 +11,7 @@ Perfect for analysts and security teams seeking consistent, reliable, and effect
 This [web page](https://yarahq.github.io/) contains all information on the YARA Forge project.
 
 Note: the repositories used for YARA Forge have been carefully selected. If you want to add other sets that random people publish on the Internet, you're on your own. 
+
+## Documentation
+
+Detailed technical documentation on code structure, modules, classes, and functions: [code-structure.md](./docs/code-structure.md)
