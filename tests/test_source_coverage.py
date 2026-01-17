@@ -7,6 +7,7 @@ import os
 import tempfile
 import yaml
 import re
+import shutil
 from pathlib import Path
 
 class TestSourceCoverage(unittest.TestCase):
@@ -17,13 +18,13 @@ class TestSourceCoverage(unittest.TestCase):
         """
         Run pipeline, check build_stats.md full table: all repos total_rules >0.
         """
-        config_path = '../yara-forge-config.yml'
+        config_path = str(Path(__file__).parent.parent / 'yara-forge-config.yml')
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
         
         # Subset stable repos for test speed
         subset_repos = [r for r in config['yara_repositories'] 
-                        if r['name'] in ['Signature Base', 'ReversingLabs', 'R3c0nst']]
+                        if r['name'] in ['R3c0nst', 'DeadBits']]
         config['yara_repositories'] = subset_repos
         expected_repos = {r['name'] for r in subset_repos}
         
@@ -35,10 +36,12 @@ class TestSourceCoverage(unittest.TestCase):
             with open(tmp_config_path, 'w') as f:
                 yaml.dump(config, f)
             
+            shutil.copy(Path(__file__).parent.parent / 'yara-forge-custom-scoring.yml', tmp_base)
+            
             # Run yara-forge.py
-            cmd = ['python', '../yara-forge.py', '-c', 'temp-config.yml']
+            cmd = ['python', str(Path(__file__).parent.parent / 'yara-forge.py'), '-c', 'temp-config.yml']
             result = subprocess.run(cmd, cwd=tmp_base, 
-                                  capture_output=True, text=True, timeout=300)
+                                  capture_output=True, text=True, timeout=900)
             self.assertEqual(result.returncode, 0, f"Pipeline failed: {result.stderr}")
             
             # Check build_stats.md

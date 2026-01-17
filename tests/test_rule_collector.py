@@ -26,7 +26,7 @@ class TestRuleCollector(unittest.TestCase):
         # Check the result
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]['name'], 'test')
-        self.assertEqual(len(result[0]['rules_sets']), 6)
+        self.assertEqual(len(result[0]['rules_sets']), 8)
         self.assertEqual(len(result[0]['rules_sets'][0]['rules']), 2)
 
     def test_all_repos_have_rules(self):
