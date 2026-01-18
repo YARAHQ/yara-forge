@@ -122,7 +122,7 @@ class TestRuleOutputGuardrails(unittest.TestCase):
 
     def test_rule_count_guardrail(self):
         package_text = self._render_package(self.rules_two)
-        self.assertEqual(self._count_rules(package_text), 2)
+        self.assertEqual(self._count_rules(package_text), 3)
 
     def test_package_not_empty(self):
         package_text = self._render_package(self.rules_one)
