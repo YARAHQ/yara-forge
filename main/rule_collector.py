@@ -74,8 +74,11 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
             clone_env = os.environ.copy()
             # Skip LFS smudge to avoid downloading large binaries we do not need
             clone_env.setdefault("GIT_LFS_SKIP_SMUDGE", "1")
-            # Partial clone keeps the checkout lean; sparse checkout will narrow paths further
-            clone_options = ["--filter=blob:none", "--sparse"]
+            # Partial clone keeps the checkout lean
+            clone_options = ["--filter=blob:none"]
+            # Sparse checkout will narrow paths further only if a given repository has a path configured (e.g., Malpedia)
+            if 'path' in repo:
+              clone_options.append("--sparse")
             repo_obj = Repo.clone_from(
                 repo['url'],
                 repo_folder,
