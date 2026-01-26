@@ -5,6 +5,7 @@ import os
 import shutil
 import datetime
 import logging
+from urllib.parse import unquote
 #from pprint import pprint
 import plyara
 from git import Repo
@@ -89,12 +90,20 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
             # If a sub-path is configured, restrict checkout to that path to skip large folders
             if 'path' in repo:
                 repo_obj.git.sparse_checkout('init', '--cone')
-                repo_obj.git.sparse_checkout('set', repo['path'])
+                # URL-decode the path before using it with git sparse-checkout
+                decoded_path = unquote(repo['path'])
+                repo_obj.git.sparse_checkout('set', decoded_path)
             repo['commit_hash'] = repo_obj.head.commit.hexsha
         else:
-            # Get the latest commit hash
+            # Repository already cloned - reuse it
             repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'])
-            repo['commit_hash'] = Repo(repo_folder).head.commit.hexsha
+            repo_obj = Repo(repo_folder)
+            repo['commit_hash'] = repo_obj.head.commit.hexsha
+            # If this repo config has a path, add it to sparse checkout
+            # (needed when multiple configs share the same git URL)
+            if 'path' in repo:
+                decoded_path = unquote(repo['path'])
+                repo_obj.git.sparse_checkout('add', decoded_path)
 
         # Walk through the extracted folders and find a LICENSE file
         # and save it into the repository object
@@ -121,7 +130,9 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
         # Walk a sub folder if one is set in the config
         walk_folder = repo_folder
         if 'path' in repo:
-            walk_folder = os.path.join(repo_folder, repo['path'])
+            # URL-decode the path before using it
+            decoded_path = unquote(repo['path'])
+            walk_folder = os.path.join(repo_folder, decoded_path)
             # Print the processed folder
             logging.debug("Processing folder: %s", walk_folder)
 
