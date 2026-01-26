@@ -43,6 +43,30 @@ jobs:
       run: |
         python yara-forge.py
 
+    - name: Upload build statistics
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-statistics
+        path: build_stats.md
+        retention-days: 90
+
+    - name: Upload build log
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-log
+        path: yara-forge.log
+        retention-days: 90
+
+    - name: Upload rule issues
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: rule-issues
+        path: yara-forge-rule-issues.yml
+        retention-days: 90
+
     - name: Get current date
       run: echo "CURRENT_DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
       shell: bash
