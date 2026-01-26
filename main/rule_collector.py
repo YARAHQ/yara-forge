@@ -95,9 +95,15 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
                 repo_obj.git.sparse_checkout('set', decoded_path)
             repo['commit_hash'] = repo_obj.head.commit.hexsha
         else:
-            # Get the latest commit hash
+            # Repository already cloned - reuse it
             repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'])
-            repo['commit_hash'] = Repo(repo_folder).head.commit.hexsha
+            repo_obj = Repo(repo_folder)
+            repo['commit_hash'] = repo_obj.head.commit.hexsha
+            # If this repo config has a path, add it to sparse checkout
+            # (needed when multiple configs share the same git URL)
+            if 'path' in repo:
+                decoded_path = unquote(repo['path'])
+                repo_obj.git.sparse_checkout('add', decoded_path)
 
         # Walk through the extracted folders and find a LICENSE file
         # and save it into the repository object
