@@ -124,7 +124,7 @@ yara_repositories:
      author: "BlackBerry Threat Research Team"
      quality: 85
      branch: "master"
-     path: "BlackBerry"
+     path: "Blackberry"
    - name: "Cluster25"
      url: "https://github.com/mikesxrs/Open-Source-YARA-rules"
      author: "Cluster25"
