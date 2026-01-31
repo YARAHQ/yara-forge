@@ -535,6 +535,9 @@ noisy-rules:
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Reversed"
       quality: -90
       score: 50
+    - name: "DITEKSHEN_MALWARE_Win_Quantum"  # FPs with Steam (steamwebhelper.exe) - matches on generic "ERROR" string
+      quality: -40
+      score: 50
     - name: "DITEKSHEN_MALWARE_Win_Dlagent02"
       quality: -40
       score: 60
