@@ -135,6 +135,9 @@ noisy-rules:
     - name: "FIREEYE_RT_APT_Backdoor_Win_Dshell_2"
       quality: -30
       score: 60
+    - name: "FIREEYE_RT_APT_Trojan_Win_REDFLARE_1"
+      quality: -80
+      score: 50
 
     # Tellix / McAfee
     - name: "MCAFEE_ATR_Vbs_Mykins_Botnet"
