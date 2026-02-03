@@ -309,6 +309,9 @@ noisy-rules:
     - name: "MALPEDIA_Win_Brute_Ratel_C4_Auto"  # FPs with Microsoft OneDrive
       quality: -90
       score: 45
+    - name: "MALPEDIA_Win_Squidloader_Auto"
+      quality: -20
+      score: 60
 
     # Signature Base
     - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
@@ -399,8 +402,8 @@ noisy-rules:
       quality: -60
       score: 45
     - name: "SECUINFRA_SUS_Unsigned_APPX_MSIX_Installer_Feb23"
-      quality: -40
-      score: 50
+      quality: -20
+      score: 60
 
     # BlackBerry
     - name: "BLACKBERRY_Mal_Infostealer_Win32_Jupyter_Infostealer_Module"
@@ -527,13 +530,13 @@ noisy-rules:
       quality: -20
       score: 50
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Regkeycomb_Disablewindefender"
-      quality: -90
+      quality: -100
       score: 50
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Nonewindowsua"
-      quality: -90
+      quality: -100
       score: 50
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Reversed"
-      quality: -90
+      quality: -100
       score: 50
     - name: "DITEKSHEN_MALWARE_Win_Quantum"  # FPs with Steam (steamwebhelper.exe) - matches on generic "ERROR" string
       quality: -40
@@ -614,6 +617,14 @@ noisy-rules:
     - name: 'DITEKSHEN_INDICATOR_RTF_EXPLOIT_CVE_2017_8759_2'
       quality: -50
       score: 40
+    - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_References_Confidential_Data_Store"
+      quality: -20
+      score: 60
+
+    # GodModeRules
+    - name: "GODMODERULES_IDDQD_God_Mode_Rule"
+      quality: -20
+      score: 60
 
     # WithSecureLabs
     - name: "ducktail_artifacts"
