@@ -73,6 +73,9 @@ noisy-rules:
       quality: -100
     - name: "CAPE_Winosstager"
       quality: -100
+    - name: "CAPE_Blackdropper"
+      quality: -60
+      score: 40
 
     # Elastic
     - name: "ELASTIC_Multi_EICAR_Ac8F42D6"
