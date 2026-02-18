@@ -527,13 +527,16 @@ noisy-rules:
       quality: -20
       score: 50
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Regkeycomb_Disablewindefender"
-      quality: -90
-      score: 50
+      quality: -100
+      score: 40
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Nonewindowsua"
-      quality: -90
-      score: 50
+      quality: -100
+      score: 40
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_Reversed"
-      quality: -90
+      quality: -100
+      score: 40
+    - name: "DITEKSHEN_MALWARE_Win_Quantum"  # FPs with Steam (steamwebhelper.exe) - matches on generic "ERROR" string
+      quality: -40
       score: 50
     - name: "DITEKSHEN_MALWARE_Win_Dlagent02"
       quality: -40
@@ -611,6 +614,20 @@ noisy-rules:
     - name: 'DITEKSHEN_INDICATOR_RTF_EXPLOIT_CVE_2017_8759_2'
       quality: -50
       score: 40
+
+    # Additional FP-prone rules from daily testing (2026-02-02)
+    - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_References_Confidential_Data_Store"
+      quality: -20
+      score: 60
+    - name: "DITEKSHEN_MALWARE_Win_EXEPWSH_Dlagent"
+      quality: -20
+      score: 60
+    - name: "MALPEDIA_Win_Squidloader_Auto"
+      quality: -20
+      score: 60
+    - name: "GODMODERULES_IDDQD_God_Mode_Rule"
+      quality: -20
+      score: 60
 
     # WithSecureLabs
     - name: "ducktail_artifacts"
