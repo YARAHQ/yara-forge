@@ -130,6 +130,12 @@ noisy-rules:
     - name: "ELASTIC_Linux_Exploit_Dirtycow_8555F149"
       quality: -80
 
+    # Elceef
+    # False positive on Windows system files with malformed ZIP structures (SenseIR.exe, msedge.dll etc.)
+    - name: "ELCEEF_Zombie_Malformed_ZIP"
+      quality: -40
+      score: 50
+
     # FireEye
     - name: "FIREEYE_RT_Hunting_Dotnettojscript_Functions"
       quality: -80
