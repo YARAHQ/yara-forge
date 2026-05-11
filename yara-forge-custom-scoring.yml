@@ -375,6 +375,9 @@ noisy-rules:
       quality: -80
     - name: "DELIVRTO_SUSP_ZIP_Smuggling_Egg_Jun01"
       quality: -80
+    - name: "DELIVRTO_SUSP_SVG_Foreignobject_Nov24"
+      quality: -20
+      score: 60
 
     # SecuInfra
     - name: "SECUINFRA_OBFUS_Powershell_Common_Replace"
