@@ -617,6 +617,9 @@ noisy-rules:
     - name: 'DITEKSHEN_INDICATOR_RTF_EXPLOIT_CVE_2017_8759_2'
       quality: -50
       score: 40
+    - name: 'DITEKSHEN_INDICATOR_OLE_Remotetemplate'
+      quality: -30
+      score: 50
 
     # Additional FP-prone rules from daily testing (2026-02-02)
     - name: "DITEKSHEN_INDICATOR_SUSPICIOUS_EXE_References_Confidential_Data_Store"
