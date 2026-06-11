@@ -332,6 +332,10 @@ noisy-rules:
     - name: "SIGNATURE_BASE_Hdconfig"
       quality: -30
       score: 60
+    - name: "SIGNATURE_BASE_Certutil_Decode_OR_Download"
+      quality: -40
+      score: 60
+      reason: "Matches AWS CLI documentation examples with certutil/encode/decode references (8 FPs on goodware)"
 
     # DeadBits
     - name: "DEADBITS_APT32_Kerrdown"
