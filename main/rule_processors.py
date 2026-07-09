@@ -411,7 +411,7 @@ def align_yara_rule_description(rule_meta_data, repo_description):
     for meta_data in meta_data_copy:
         for key, value in meta_data.items():
             # If the key is in the list of possible description names, then we found the description
-            if key in description_names:
+            if key.lower() in description_names:
                 description_found = True
                 description_value = value
                 # Remove the description from the original meta data
@@ -625,7 +625,7 @@ def align_yara_rule_author(rule_meta_data, repo_author):
     for meta_data in meta_data_copy:
         for key, value in meta_data.items():
             # If the key is in the list of possible author names, then we found the author
-            if key in author_names:
+            if key.lower() in author_names:
                 author_found = True
                 author_value = value
                 # Remove the author from the original meta data
@@ -729,7 +729,7 @@ def align_yara_rule_reference(rule_meta_data, rule_set_url):
     for meta_data in meta_data_copy:
         for key, value in meta_data.items():
             # If the key is in the list of possible reference names, then we found the reference
-            if key in other_ref_names:
+            if key.lower() in other_ref_names:
                 reference_found = True
                 reference_value = value
                 # Remove the reference from the original meta data
