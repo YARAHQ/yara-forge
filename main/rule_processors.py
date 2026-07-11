@@ -654,7 +654,7 @@ def align_yara_rule_uuid(rule_meta_data, uuid):
     for meta_data in meta_data_copy:
         for key, value in meta_data.items():
             # If the key is in the list of possible author names, then we found the author
-            if key in uuid_names:
+            if key.lower() in uuid_names:
                 # If the values is not a string but a integer value, convert it to string
                 if isinstance(value, int):
                     value = str(value)
@@ -787,7 +787,7 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
     for meta_data in meta_data_copy:
         for key, value in meta_data.items():
             # If the key is in the list of possible date names, then we found the date
-            if key in date_names:                
+            if key.lower() in date_names:
                 date_created = dateparser.parse(value)
                 if date_created:
                     date_found = True
@@ -826,7 +826,7 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
     for meta_data in meta_data_copy:
         for key, value in meta_data.items():
             # If the key is in the list of possible date names, then we found the date
-            if key in modified_names:
+            if key.lower() in modified_names:
                 modified_value = dateparser.parse(value)
                 if modified_value:
                     modified_found = True
