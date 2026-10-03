@@ -200,7 +200,7 @@ def add_tags_to_rule(rule):
                  'malware', 'threat', 'threats', 'threat_type', 'actor', 'threat_actor', 'threat_actors',
                  'threat_types', 'threat_category', 'threat_categories', 'threat_family',
                  'threat_families', 'threat_group', 'threat_groups', 'scan_context',
-                 'malware_type', 'mitre_attack', 'mitre_attack_technique', 'mitre_attack_techniques'
+                 'malware_type', 'mitre_attack', 'mitre_attack_technique', 'mitre_attack_techniques',
                  'attack_technique', 'attack_techniques', 'attack', 'attacks', 'attack_type']
     # Regular expressions to extract other tags from the description
     tag_regexes = [
