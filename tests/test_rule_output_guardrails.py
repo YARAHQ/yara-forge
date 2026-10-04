@@ -23,8 +23,8 @@ TEST_CONFIG = {
             "max_age": 10000,
         }
     ],
-    "repo_header": "# Repo {repo_name} total {total_rules}\n",
-    "rule_set_header": "# Package {rule_package_name} total {total_rules}\n",
+    "repo_header": "// Repo {repo_name} total {total_rules}\n",
+    "rule_set_header": "// Package {rule_package_name} total {total_rules}\n",
     "rule_base_score": 75,
 }
 
@@ -94,9 +94,8 @@ def build_repo_payload(rules):
 
 class TestRuleOutputGuardrails(unittest.TestCase):
     def setUp(self):
-        parser = Plyara()
-        self.rules_two = parser.parse_string(RULE_TEXT_TWO)
-        self.rules_one = parser.parse_string(RULE_TEXT_ONE)
+        self.rules_two = Plyara().parse_string(RULE_TEXT_TWO)
+        self.rules_one = Plyara().parse_string(RULE_TEXT_ONE)
 
     def _render_package(self, rules):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -122,7 +121,7 @@ class TestRuleOutputGuardrails(unittest.TestCase):
 
     def test_rule_count_guardrail(self):
         package_text = self._render_package(self.rules_two)
-        self.assertEqual(self._count_rules(package_text), 3)
+        self.assertEqual(self._count_rules(package_text), 2)
 
     def test_package_not_empty(self):
         package_text = self._render_package(self.rules_one)

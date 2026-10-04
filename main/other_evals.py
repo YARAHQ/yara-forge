@@ -5,6 +5,7 @@ import re
 import logging
 import time
 import zipfile
+from pathlib import Path
 
 class PerformanceTimer:
     """
@@ -17,7 +18,7 @@ class PerformanceTimer:
     # strings -el * >> react-os-strings.txt
     # strings ./system32/ * >> react-os-strings.txt
     # strings -el ./system32/ * >> react-os-strings.txt
-    sample_data_file = "./tests/data/react-os-strings.txt.zip"
+    sample_data_file = Path(__file__).resolve().parent.parent / 'qa/yaraQA/test/data/react-os-strings.txt.zip'
 
     def __init__(self):
         # Load the sample data file, decompress the ZIP archive and load into memory
@@ -61,14 +62,14 @@ class PerformanceTimer:
             return 0
 
         # Record the start time
-        start_time = time.time()
+        start_time = time.perf_counter()
 
         # Apply the regex to the test string for the given number of iterations
         for _ in range(iterations):
-            re.findall(pattern, self.test_string)
+            pattern.findall(self.test_string)
 
         # Record the end time
-        end_time = time.time()
+        end_time = time.perf_counter()
 
         # Calculate the total duration
         duration = end_time - start_time
