@@ -17,6 +17,60 @@ date_lookup_cache = {}
 # Private YARA rules
 private_rule_mapping = []
 
+
+def prepare_rule_names(yara_rule_repo_sets):
+    """Allocate unique names, then resolve references in their source context."""
+    allocated_names = set()
+    mappings = {}
+    referenced_rules = set()
+    private_rule_mapping.clear()
+
+    for repo in yara_rule_repo_sets:
+        rule_set_id = repo['name'].replace(' ', '_').replace('-', '_').upper()
+        repo_symbols = {}
+        file_symbols = {}
+        for rule_set in repo['rules_sets']:
+            symbols = file_symbols.setdefault(rule_set['file_path'], {})
+            for rule in rule_set['rules']:
+                old_name = rule['rule_name']
+                base_name = align_yara_rule_name(old_name, rule_set_id)
+                is_private = 'private' in rule.get('scopes', [])
+                if is_private:
+                    base_name += '_PRIVATE'
+                new_name = base_name
+                suffix = 1
+                while new_name in allocated_names:
+                    new_name = f'{base_name}_{suffix}'
+                    suffix += 1
+                allocated_names.add(new_name)
+                mapping = {'repo': rule_set_id, 'old_name': old_name,
+                           'new_name': new_name, 'rule': rule}
+                mappings[id(rule)] = mapping
+                symbols.setdefault(old_name, mapping)
+                repo_symbols.setdefault(old_name, []).append(mapping)
+                if is_private:
+                    private_rule_mapping.append(mapping)
+
+        for rule_set in repo['rules_sets']:
+            symbols = file_symbols[rule_set['file_path']]
+            for rule in rule_set['rules']:
+                dependencies = {}
+                for i, term in enumerate(rule['condition_terms']):
+                    mapping = symbols.get(term)
+                    if mapping is None:
+                        candidates = repo_symbols.get(term, [])
+                        if len(candidates) == 1:
+                            mapping = candidates[0]
+                    if mapping is not None:
+                        rule['condition_terms'][i] = mapping['new_name']
+                        dependencies[mapping['new_name']] = mapping
+                        referenced_rules.add(id(mapping['rule']))
+                rule['rule_dependencies'] = list(dependencies.values())
+                rule['private_rules_used'] = [mapping for mapping in dependencies.values()
+                                             if 'private' in mapping['rule'].get('scopes', [])]
+    return mappings, referenced_rules
+
+
 def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
     """
     Processes the YARA rules
@@ -24,18 +78,13 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
 
     # Logic hash list to avoid duplicates
     logic_hash_list = {}
+    rule_mappings, referenced_rules = prepare_rule_names(yara_rule_repo_sets)
 
     # Loop over the repositories
     for repo in yara_rule_repo_sets:
 
-        # Rule set identifier
-        rule_set_id = repo['name'].replace(" ", "_").replace("-", "_").upper()
-
         # Debug output
         logging.info("Processing YARA rules from repository: %s", repo['name'])
-
-        # Keep a list of all rules to avoid duplicates
-        all_rule_names = []
 
         # Loop over the rule sets in the repository and modify the rules
         num_rules = 0
@@ -64,17 +113,11 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
                 # Calculate the logic hash
                 logic_hash = generate_hash(rule)
 
-                # Duplicate Name Check
-                # If the rule name already exists in the list, append a number to it
-                if rule['rule_name'] in logic_hash_list.values():
-                    # Get the number of times the rule name already exists in the list
-                    num_rule_name = list(logic_hash_list.values()).count(rule['rule_name'])
-                    # Append the number to the rule name
-                    rule['rule_name'] = f"{rule['rule_name']}_{num_rule_name}"
-
                 # Duplicate Content Check
-                # Check if the rule is a duplicate  (based on the logic hash)
-                if logic_hash in logic_hash_list and not is_private_rule:
+                # Keep referenced rules even when their logic is duplicated;
+                # removing their definitions would leave unresolved identifiers.
+                if (logic_hash in logic_hash_list and not is_private_rule
+                        and id(rule) not in referenced_rules):
                     logging.info("Skipping rule '%s > %s' because it has the same logic hash as '%s'", 
                                  repo['name'], rule['rule_name'], logic_hash_list[logic_hash])
                     continue
@@ -128,34 +171,7 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
                 # for that calculation
                 modify_meta_data_value(rule['metadata'], 'quality', repo['quality'])
 
-                # Modify the rule name
-                rule_name_old = rule['rule_name']
-                rule_name_new = align_yara_rule_name(rule['rule_name'], rule_set_id)
-                # If the rule is private, add the _PRIVATE suffix and
-                if is_private_rule:
-                    rule_name_new = f"{rule_name_new}_PRIVATE"
-                    # Add the rule to the private rule mapping
-                    private_rule_mapping.append({
-                        "repo": rule_set_id,
-                        "old_name": rule_name_old,
-                        "new_name": rule_name_new,
-                        "rule": rule
-                    })
-                # Set the new rule name
-                rule['rule_name'] = rule_name_new
-
-                # Check if the rule uses private rules
-                private_rules_used = check_rule_uses_private_rules(rule_set_id, rule, private_rule_mapping)
-                if private_rules_used:
-                    # Change the condition terms of the rule to align them with
-                    # the new private rule names
-                    rule['condition_terms'] = adjust_identifier_names(
-                        rule_set_id,
-                        rule['condition_terms'],
-                        private_rules_used)
-                # Add the private rules used to the rule
-                rule['private_rules_used'] = private_rules_used
-                logging.debug("Private rules used: %s", private_rules_used)
+                rule['rule_name'] = rule_mappings[id(rule)]['new_name']
 
                 # Add a rule source URL to the original file
                 modify_meta_data_value(
@@ -172,11 +188,7 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
                 # Sort the meta data values
                 rule['metadata'] = sort_meta_data_values(rule['metadata'], YARA_FORGE_CONFIG)
 
-                # We keep the rule if the rule name is not already in the list of rule names
-                if rule_name_new not in all_rule_names:
-                    # Add the rule name to the list of rule names
-                    all_rule_names.append(rule_name_new)
-                    kept_rules.append(rule)
+                kept_rules.append(rule)
 
             # Count the number of rules
             num_rules += len(kept_rules)
@@ -200,7 +212,7 @@ def add_tags_to_rule(rule):
                  'malware', 'threat', 'threats', 'threat_type', 'actor', 'threat_actor', 'threat_actors',
                  'threat_types', 'threat_category', 'threat_categories', 'threat_family',
                  'threat_families', 'threat_group', 'threat_groups', 'scan_context',
-                 'malware_type', 'mitre_attack', 'mitre_attack_technique', 'mitre_attack_techniques'
+                 'malware_type', 'mitre_attack', 'mitre_attack_technique', 'mitre_attack_techniques',
                  'attack_technique', 'attack_techniques', 'attack', 'attacks', 'attack_type']
     # Regular expressions to extract other tags from the description
     tag_regexes = [
@@ -234,25 +246,10 @@ def add_tags_to_rule(rule):
         for key, value in meta_data.items():
             # If the key is in the list of possible tag names, then we found the tag
             if key.lower() in tag_names:
-                # Check if the value is a list
-                if isinstance(value, list):
-                    # Loop over the list
-                    for tag in value:
-                        # Add the tag to the list of tags to add
-                        tags_to_add.append(tag)
-                # If the value is not a list, we just add it
-                else:
-                    # If the value contains a comma, we split it
-                    if "," in value:
-                        # Split the value
-                        value = value.split(",")
-                        # Loop over the values
-                        for tag in value:
-                            # Add the tag to the list of tags to add
-                            tags_to_add.append(tag.strip())
-                    # Add the tag to the list of tags to add
-                    else:
-                        tags_to_add.append(value)
+                values = value if isinstance(value, list) else [value]
+                for item in values:
+                    if item is not None:
+                        tags_to_add.extend(tag.strip() for tag in str(item).split(','))
 
     # Remove tags that are in the ignore list
     tags_to_add = [tag for tag in tags_to_add if tag not in ignore_values]
@@ -264,7 +261,7 @@ def add_tags_to_rule(rule):
             # If the key is in the list of possible tag names, then we found the tag
             if key.lower() == "description":
                 # Extract the tags from the description
-                tags_from_description = tag_regex.findall(value)
+                tags_from_description = tag_regex.findall(str(value))
                 # Add the tags to the list of tags to add
                 tags_to_add.extend(tags_from_description)
 
@@ -302,6 +299,8 @@ def add_tags_to_rule(rule):
     # Remove symbols that are not allowed in tags (only alphanumeric characters and
     # underscores are allowed), replace every other character with an underscore using a regex
     tags_to_add = [re.sub(r'[^a-zA-Z0-9_]', '_', tag) for tag in tags_to_add]
+    tags_to_add = [f'_{tag}' if tag[0].isdigit() else tag for tag in tags_to_add]
+    tags_to_add = list(dict.fromkeys(tags_to_add))
     # And now we set the new tags field in the rule
     rule['tags'] = tags_to_add
     return rule
