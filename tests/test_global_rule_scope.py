@@ -57,6 +57,11 @@ class TestGlobalRuleScope(unittest.TestCase):
                 expected = {'SAMPLEREPO_' + m.rule for m in original.match(data=data)}
                 self.assertEqual({m.rule for m in compiled.match(data=data)}, expected)
 
+        payload = next(m for m in compiled.match(data=b'yes') if m.rule == 'SAMPLEREPO_PAYLOAD')
+        self.assertEqual(payload.strings[0].identifier, '$a')
+        self.assertEqual(payload.strings[0].instances[0].offset, 0)
+        self.assertEqual(payload.strings[0].instances[0].matched_data, b'yes')
+
     def test_filtered_global_rule_still_gates_remaining_rules(self):
         compiled = self.render({'gated.yar': '''
             global rule GATE { meta: importance = -10 condition: filesize < 2 }

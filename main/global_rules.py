@@ -40,14 +40,11 @@ def isolate_global_rules(rule_set):
 
         wrapper = deepcopy(rule)
         wrapper['scopes'] = []
-        wrapper.pop('strings', None)
-        wrapper.pop('raw_strings', None)
-        required = list(dict.fromkeys([predicate['rule_name']] + gates))
-        wrapper['condition_terms'] = []
-        for name in required:
-            if wrapper['condition_terms']:
-                wrapper['condition_terms'].append('and')
-            wrapper['condition_terms'].append(name)
+        # Keep the original strings on the public rule so match consumers
+        # retain their identifiers, offsets, and matched data.
+        wrapper['condition_terms'] = ['('] + predicate['condition_terms'] + [')']
+        for name in gates:
+            wrapper['condition_terms'].extend(['and', name])
         wrapper['raw_condition'] = 'condition: ' + ' '.join(wrapper['condition_terms'])
         # Efficiency checks must still inspect the original strings and logic.
         wrapper['qa_rule'] = predicate
