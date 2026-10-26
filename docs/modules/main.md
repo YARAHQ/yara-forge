@@ -98,6 +98,11 @@ def process_yara_rules(yara_rule_repo_sets: list, YARA_FORGE_CONFIG: dict) -> li
 | `modify_meta_data_value()` | Add/update metadata entry |
 | `modify_yara_rule_quality()` | Adjust quality score |
 
+Date normalization uses recognized creation/modification aliases and falls back
+to Git history for missing or invalid dates. Other metadata is preserved, even
+when its value could be parsed as a date. Non-numeric source scores fall back to
+the metadata-derived score or configured base score.
+
 ### Deduplication
 
 Uses plyara's `generate_hash()` to create a logic hash of rule conditions. Rules with identical logic hashes are deduplicated (first occurrence wins). Private rules are excluded from deduplication.
