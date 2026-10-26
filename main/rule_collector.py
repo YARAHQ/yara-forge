@@ -71,7 +71,7 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
         # Branches and hosts can share owner/repo names but have different
         # contents. Never reuse a checkout for a different configured ref.
         checkout_key = hashlib.sha256(
-            f"{canonical_url}\0{repo['branch']}".encode('utf-8')
+            f"{repo['url'].rstrip('/')}\0{repo['branch']}".encode('utf-8')
         ).hexdigest()[:16]
         repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'], checkout_key)
 
