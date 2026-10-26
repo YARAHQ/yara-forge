@@ -15,7 +15,8 @@ permissions:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    # Match the release environment: fb-re2 needs Ubuntu 24.04's RE2 headers.
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Check out repository with submodules
