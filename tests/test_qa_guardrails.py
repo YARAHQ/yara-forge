@@ -31,12 +31,11 @@ class TestQaGuardrails(unittest.TestCase):
         rule = plyara.Plyara().parse_string('rule Example { condition: true }')[0]
         rule['metadata'] = [{'quality': 80}, {'score': 75}]
         repos = [{'name': 'Example', 'rules_sets': [{'file_path': 'rule.yar', 'rules': [rule]}]}]
-        with patch('qa.rule_qa.YaraQA') as qa, \
+        with patch('qa.rule_qa.YaraQA.analyze_rule', return_value=[]), \
+                patch('qa.rule_qa.YaraQA.analyze_live_rule_performance', return_value=[]), \
                 patch('qa.rule_qa.retrieve_custom_score', return_value=0), \
                 patch('qa.rule_qa.retrieve_custom_quality_reduction', return_value=0), \
                 patch('qa.rule_qa.write_issues_to_file'):
-            qa.return_value.analyze_rule.return_value = []
-            qa.return_value.analyze_live_rule_performance.return_value = []
             evaluate_rules_quality(repos, {'issue_levels': {1: 0, 2: -10, 3: -20, 4: -100}})
         self.assertIn({'score': 0}, rule['metadata'])
 
