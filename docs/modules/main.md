@@ -39,9 +39,11 @@ def retrieve_yara_rule_sets(repo_staging_dir: str, yara_repos: list) -> list
 - Uses GitPython for repository operations
 - Supports sparse checkout for repositories with `path` config
 - Skips Git LFS smudge (avoids large binary downloads)
-- Extracts license from repository root
+- Prefers a root license, falling back to a nested license
+- Keeps separate checkouts for distinct source URLs and branches
 - Stores commit hash for reproducibility
-- Handles UTF-8 encoding and parse errors gracefully
+- Handles UTF-8 BOMs, read failures, and parse errors per file
+- Fails explicitly when a configured source directory is missing
 
 ### Configuration Surface
 
