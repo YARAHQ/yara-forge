@@ -10,7 +10,8 @@ on:
 
 jobs:
   create-release:
-    runs-on: ubuntu-latest
+    # fb-re2 requires the pre-Abseil RE2 headers shipped by Ubuntu 24.04.
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Check out repository with submodules
@@ -100,7 +101,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload build log file
-      if: always()
+      if: ${{ !cancelled() && steps.create_release.outcome == 'success' }}
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -111,7 +112,7 @@ jobs:
         asset_content_type: text/plain
 
     - name: Upload rule issues log file
-      if: always()
+      if: ${{ !cancelled() && steps.create_release.outcome == 'success' }}
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -122,7 +123,7 @@ jobs:
         asset_content_type: text/plain
 
     - name: Upload core asset
-      if: always()
+      if: ${{ !cancelled() && steps.create_release.outcome == 'success' }}
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -133,7 +134,7 @@ jobs:
         asset_content_type: application/zip
 
     - name: Upload extended asset
-      if: always()
+      if: ${{ !cancelled() && steps.create_release.outcome == 'success' }}
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -144,7 +145,7 @@ jobs:
         asset_content_type: application/zip
 
     - name: Upload full asset
-      if: always()
+      if: ${{ !cancelled() && steps.create_release.outcome == 'success' }}
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
