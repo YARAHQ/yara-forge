@@ -86,7 +86,8 @@ def evaluate_rules_quality(processed_yara_repos, config):
                 # - Performance impact issues (based on experience)
                 # - Resource usage issues (based on experience)
                 # - Logic flaws (based on experience)
-                analyzed_issues = yara_qa.analyze_rule(rule)
+                analysis_rule = dict(rule.get('qa_rule', rule), rule_name=rule['rule_name'])
+                analyzed_issues = yara_qa.analyze_rule(analysis_rule)
                 issues_efficiency = [issue for issue in analyzed_issues
                                      if issue['type'] != 'performance']
                 # Print the issues if debug is enabled

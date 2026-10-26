@@ -28,6 +28,16 @@ yara-forge/
 
 ## main/
 
+### Global rules
+
+`global_rules.isolate_global_rules()` keeps global constraints local to their
+source file when independent files are merged into a single YARA namespace.
+Files containing globals use private rules for the original conditions, plus
+public wrappers requiring their own condition and every global condition from
+that file. This also preserves globals referencing public rules without cycles.
+QA analyzes the original strings and logic for each public wrapper. Internal
+private rules are included in package rule counts.
+
 ### other_evals.py
 - `class PerformanceTimer`:
   - `__init__()`: Initializes timer.
