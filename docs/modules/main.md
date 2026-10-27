@@ -39,9 +39,11 @@ def retrieve_yara_rule_sets(repo_staging_dir: str, yara_repos: list) -> list
 - Uses GitPython for repository operations
 - Supports sparse checkout for repositories with `path` config
 - Skips Git LFS smudge (avoids large binary downloads)
-- Extracts license from repository root
+- Prefers a root license, falling back to a nested license
+- Keeps separate checkouts for distinct source URLs and branches
 - Stores commit hash for reproducibility
-- Handles UTF-8 encoding and parse errors gracefully
+- Handles UTF-8 BOMs, read failures, and parse errors per file
+- Fails explicitly when a configured source directory is missing
 
 ### Configuration Surface
 
@@ -97,6 +99,11 @@ def process_yara_rules(yara_rule_repo_sets: list, YARA_FORGE_CONFIG: dict) -> li
 | `sort_meta_data_values()` | Order metadata per config |
 | `modify_meta_data_value()` | Add/update metadata entry |
 | `modify_yara_rule_quality()` | Adjust quality score |
+
+Date normalization uses recognized creation/modification aliases and falls back
+to Git history for missing or invalid dates. Other metadata is preserved, even
+when its value could be parsed as a date. Non-numeric source scores fall back to
+the metadata-derived score or configured base score.
 
 ### Deduplication
 

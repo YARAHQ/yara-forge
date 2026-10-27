@@ -165,7 +165,7 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
 
                 # Get a custom importance score if available
                 custom_importance_score = retrieve_custom_importance_score(repo['name'], rules['file_path'], rule['rule_name'])
-                if custom_importance_score:
+                if custom_importance_score is not None:
                     modify_meta_data_value(rule['metadata'], 'importance', custom_importance_score)
                     logging.debug("Custom importance score for rule %s is %d", rule['rule_name'], custom_importance_score)
 
@@ -188,6 +188,22 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
 
                 # Add license URL
                 modify_meta_data_value(rule['metadata'], 'license_url', repo['license_url'])
+
+                # Normalize source control metadata before package comparisons.
+                # Negative importance is meaningful: it explicitly excludes a
+                # rule even from packages whose exclusion threshold is zero.
+                for meta_data in rule['metadata']:
+                    for key, value in meta_data.items():
+                        if key in ['score', 'quality', 'importance']:
+                            # If the value is not an integer, we set it to 0
+                            if not isinstance(value, int) or isinstance(value, bool):
+                                value = 0
+                            # Source scores/quality are nonnegative; importance
+                            # and later QA penalties retain their signed meaning.
+                            if key != 'importance' and value < 0:
+                                value = 0
+                            # Set the value back to the meta data
+                            meta_data[key] = value
 
                 # Sort the meta data values
                 rule['metadata'] = sort_meta_data_values(rule['metadata'], YARA_FORGE_CONFIG)
@@ -416,7 +432,7 @@ def align_yara_rule_description(rule_meta_data, repo_description):
             # If the key is in the list of possible description names, then we found the description
             if key.lower() in description_names:
                 description_found = True
-                description_value = value
+                description_value = str(value)
                 # Remove the description from the original meta data
                 rule_meta_data.remove(meta_data)
             # If the value starts with one of the prefixes, then we found the description
@@ -433,7 +449,7 @@ def align_yara_rule_description(rule_meta_data, repo_description):
                     description_found = True
                     # If the threat name contains a period or dash we replace it and
                     # put the original name in brackets
-                    description_value = f"Detects {value.replace('.', ' ').replace('-', ' ').title()} ({value})"
+                    description_value = f"Detects {str(value).replace('.', ' ').replace('-', ' ').title()} ({value})"
                     # Remove the description from the original meta data
                     rule_meta_data.remove(meta_data)
     # Lower the quality score if the descriptions hasn't been set
@@ -547,8 +563,13 @@ def evaluate_yara_rule_score(rule, YARA_FORGE_CONFIG):
     for meta_data in rule['metadata']:
         for key, value in meta_data.items():
             if key == 'score':
-                # If the rule already has a score, we use that
-                return int(value)
+                # YARA also permits strings and booleans in score metadata.
+                if not isinstance(value, bool):
+                    try:
+                        return int(value)
+                    except (TypeError, ValueError):
+                        pass
+                logging.warning("Ignoring invalid score %r in rule %s", value, rule['rule_name'])
 
     # Score for the rule meta data
     meta_data_rule_score = evaluate_yara_rule_meta_data(rule)
@@ -762,9 +783,6 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
     modified_names = ['modified', 'last_modified', 'last_modified_at', 'last_modified_date',
                       'last_change', 'last_change_date', 'last_update', 'last_update_date',
                       'updated', 'updated_at', 'updated_date', 'updated_timestamp']
-    # Look for the date in the rule meta data
-    date_found = False
-
     # GIT HISTORY -----------------------------------------------------------
     # We retrieve values from the git history that we can use in case we don't
     # find these values in the meta data
@@ -783,66 +801,25 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
             # Add the date to the cache
             date_lookup_cache[cache_key] = (git_creation_date, git_modification_date)
 
-    # CREATION DATE -----------------------------------------------------------
-    # We create a copy so that we can delete elements from the original
-    meta_data_copy = rule_meta_data.copy()
-    # Now we loop over the copy
-    for meta_data in meta_data_copy:
-        for key, value in meta_data.items():
-            # If the key is in the list of possible date names, then we found the date
-            if key.lower() in date_names:
-                date_created = dateparser.parse(value)
-                if date_created:
-                    date_found = True
-                    # Remove the date from the original meta data
-                    rule_meta_data.remove(meta_data)
-                    rule_meta_data.append({'date': date_created.strftime("%Y-%m-%d")})
-                # If the date cannot be parsed, we removed the field, because it could cause confusion
+    # Only recognized fields supply dates. An author named "June" must not be
+    # consumed as a creation date, nor should a modification replace creation.
+    for canonical_name, aliases, fallback in (
+        ('date', date_names, git_creation_date),
+        ('modified', modified_names, git_modification_date),
+    ):
+        normalized_date = None
+        for metadata in rule_meta_data.copy():
+            for key, value in metadata.items():
+                if key.lower() not in aliases:
+                    continue
+                parsed_date = dateparser.parse(value) if isinstance(value, str) else None
+                if parsed_date is not None:
+                    normalized_date = parsed_date
                 else:
-                    logging.debug("The date '%s' could not be parsed. Removing the field.", value)
-                    rule_meta_data.remove(meta_data)
-
-    # If the date is not found, try to get it from any of the meta data fields
-    if not date_found:
-        # Check if we find the date in a different value by looking for fields that contain a date
-        for meta_data in meta_data_copy:
-            for key, value in meta_data.items():
-                # If the value contains a date, then we found the date
-                if isinstance(value, str) and dateparser.parse(value):
-                    date_created = dateparser.parse(value)
-                    if date_created:
-                        date_found = True
-                        # Remove the date from the original meta data
-                        rule_meta_data.remove(meta_data)
-                        rule_meta_data.append({'date': date_created.strftime("%Y-%m-%d")})
-
-    # If the date was still not found, we try to get the date from the git log
-    if not date_found:
-        # Add the date to the rule meta data
-        rule_meta_data.append({'date': git_creation_date.strftime("%Y-%m-%d")})
-
-    # MODIFICATION DATE -----------------------------------------------------------
-    # We create a copy so that we can delete elements from the original
-    meta_data_copy = rule_meta_data.copy()
-    # Now we check for a modification date
-    modified_found = False
-    for meta_data in meta_data_copy:
-        for key, value in meta_data.items():
-            # If the key is in the list of possible date names, then we found the date
-            if key.lower() in modified_names:
-                modified_value = dateparser.parse(value)
-                if modified_value:
-                    modified_found = True
-                    # Remove the date from the original meta data
-                    rule_meta_data.remove(meta_data)
-    # If the modified date was found and removed, add the new streamlined date value
-    if modified_found:
-        rule_meta_data.append({'modified': modified_value.strftime("%Y-%m-%d")})
-
-    # If the modified date was still not found, we try to get the date from the git log
-    if not modified_found:
-        # Add the modified ate to the rule meta data
-        rule_meta_data.append({'modified': git_modification_date.strftime("%Y-%m-%d")})
+                    logging.debug("Ignoring invalid %s date: %r", canonical_name, value)
+                rule_meta_data.remove(metadata)
+        normalized_date = normalized_date or fallback
+        rule_meta_data.append({canonical_name: normalized_date.strftime("%Y-%m-%d")})
 
     return rule_meta_data
 

@@ -375,6 +375,8 @@ noisy-rules:
       quality: -80
     - name: "DELIVRTO_SUSP_ZIP_Smuggling_Egg_Jun01"
       quality: -80
+    - name: "DELIVRTO_SUSP_ZIP_Smuggling_Jun01"
+      quality: -80      
     - name: "DELIVRTO_SUSP_SVG_Foreignobject_Nov24"
       quality: -20
       score: 60

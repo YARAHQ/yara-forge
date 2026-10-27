@@ -4,8 +4,9 @@ This module contains functions for retrieving YARA rules from online repositorie
 import os
 import shutil
 import datetime
+import hashlib
 import logging
-from urllib.parse import unquote
+from urllib.parse import unquote, urlsplit
 #from pprint import pprint
 import plyara
 from git import Repo
@@ -15,11 +16,10 @@ def process_yara_file(file_path, repo_folder, yara_rule_sets):
     # Debug output
     logging.debug("Found YARA rule file: %s", file_path)
 
-    # Read the YARA file
-    with open(file_path, "r", encoding="utf-8") as f:
-        yara_file_content = f.read()
-        # Parse the rules in the file
-        try:
+    # A broken source file must not prevent collection of the remaining repos.
+    try:
+        with open(file_path, "r", encoding="utf-8-sig") as f:
+            yara_file_content = f.read()
             # Get the rule file path in the repository
             relative_path = os.path.relpath(file_path, start=repo_folder)
             # Parse the YARA rules in the file
@@ -36,10 +36,8 @@ def process_yara_file(file_path, repo_folder, yara_rule_sets):
             # Append to list of YARA rule sets
             yara_rule_sets.append(yara_rule_set)
 
-        except Exception as e:
-            print(e)
-            logging.error("Skipping YARA rule in the following " \
-                          "file because of a syntax error: %s ", file_path)
+    except Exception as error:
+        logging.error("Skipping unreadable or invalid YARA file %s: %s", file_path, error)
 
 
 def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
@@ -64,14 +62,22 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
         logging.info("Retrieving YARA rules from repository: %s", repo['name'])
 
         # Extract the owner and the repository name from the URL
-        repo_url_parts = repo['url'].split("/")
-        repo['owner'] = repo_url_parts[3]
-        repo['repo'] = '/'.join(repo_url_parts[4:]).split(".")[0]
+        canonical_url = repo['url'].rstrip('/')
+        if canonical_url.endswith('.git'):
+            canonical_url = canonical_url[:-4]
+        repo_url_parts = urlsplit(canonical_url).path.strip('/').split('/')
+        repo['owner'] = repo_url_parts[0]
+        repo['repo'] = '/'.join(repo_url_parts[1:])
+        # Branches and hosts can share owner/repo names but have different
+        # contents. Never reuse a checkout for a different configured ref.
+        checkout_key = hashlib.sha256(
+            f"{repo['url'].rstrip('/')}\0{repo['branch']}".encode('utf-8')
+        ).hexdigest()[:16]
+        repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'], checkout_key)
 
         # If the repository hasn't not been cloned yet, clone it
-        if not os.path.exists(os.path.join(repo_staging_dir, repo['owner'], repo['repo'])):
+        if not os.path.exists(repo_folder):
             # Clone the repository
-            repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'])
             clone_env = os.environ.copy()
             # Skip LFS smudge to avoid downloading large binaries we do not need
             clone_env.setdefault("GIT_LFS_SKIP_SMUDGE", "1")
@@ -101,7 +107,6 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
             repo['commit_hash'] = repo_obj.head.commit.hexsha
         else:
             # Repository already cloned - reuse it
-            repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'])
             repo_obj = Repo(repo_folder)
             repo['commit_hash'] = repo_obj.head.commit.hexsha
 
@@ -119,7 +124,7 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
                         with open(file_path, "r", encoding="utf-8") as f:
                             repo['license'] = f.read()
                         break # if we found the license in the root directory, we don't need to look further
-                    elif 'license_url' not in repo:  # If the file is not in the root directory and no license has been found yet
+                    elif repo['license_url'] == "N/A":
                         repo['license_url'] = f'{repo["url"]}/blob/{repo["commit_hash"]}/{url_path}'
                         with open(file_path, "r", encoding="utf-8") as f:
                             repo['license'] = f.read()
@@ -135,6 +140,11 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
             walk_folder = os.path.join(repo_folder, decoded_path)
             # Print the processed folder
             logging.debug("Processing folder: %s", walk_folder)
+
+        if not os.path.isdir(walk_folder):
+            raise FileNotFoundError(
+                f"Configured rule directory does not exist for {repo['name']}: {walk_folder}"
+            )
 
         # Check if the path should be walked 
         recursive = True
