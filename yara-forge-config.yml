@@ -124,7 +124,7 @@ yara_repositories:
      author: "BlackBerry Threat Research Team"
      quality: 85
      branch: "master"
-     path: "BlackBerry"
+     path: "Blackberry"
    - name: "Cluster25"
      url: "https://github.com/mikesxrs/Open-Source-YARA-rules"
      author: "Cluster25"
@@ -244,6 +244,14 @@ yara_repositories:
      author: "Synacktiv"
      quality: 80
      branch: "main"
+
+   # Repos added 23.12.2025
+   - name: "ArtifactDrop"
+     url: "https://github.com/matthieugras/artifact-drop/"
+     author: "Matthieu Gras"
+     quality: 80
+     branch: "main"
+     path: "yara"
 
    # My own YARA rule collection used for our free scanners
    - name: "Signature Base"

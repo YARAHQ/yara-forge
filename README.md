@@ -1,17 +1,27 @@
-# yara-forge
+# YARA Forge
 
 Automated YARA Rule Standardization and Quality Assurance Tool
 
-YARA Forge is a robust tool designed to streamline the process of sourcing, standardizing, and optimizing YARA rules. It automates the collection of rules from various online repositories, ensures they adhere to a unified standard, conducts thorough quality checks, and eliminates any broken or non-compliant rules.
+YARA Forge collects YARA rules from 45+ vetted security repositories, standardizes their metadata, performs multi-level quality checks, and generates tiered rule packages (core/extended/full) ready for integration into security products. It handles deduplication, private rule dependencies, and custom scoring to produce consistent, reliable rule sets for malware detection and threat hunting.
 
-The tool generates curated rule packages, ready for integration into various security products, with an emphasis on performance and stability.
+The tool is used by security teams and analysts who need curated YARA rules without manually managing multiple sources. Weekly releases are published automatically via GitHub Actions.
 
-Perfect for analysts and security teams seeking consistent, reliable, and effective YARA rules.
+## Components
 
-This [web page](https://yarahq.github.io/) contains all information on the YARA Forge project.
-
-Note: the repositories used for YARA Forge have been carefully selected. If you want to add other sets that random people publish on the Internet, you're on your own. 
+- `yara-forge.py` — CLI entry point and pipeline orchestrator
+- `main/` — Rule collection, processing, and output generation
+- `qa/` — Quality assurance checks and validation
+- `packages/` — Generated rule packages (core, extended, full)
 
 ## Documentation
 
-Detailed technical documentation on code structure, modules, classes, and functions: [code-structure.md](./docs/code-structure.md)
+- **[Project Map / IKL](./docs/index.md)** — Navigation guide for the codebase
+- [Architecture](./docs/architecture.md) — System design and data flows
+- [Code Structure](./docs/code-structure.md) — API reference for modules and functions
+
+## Quick Links
+
+- [YARA Forge Website](https://yarahq.github.io/) — Official project page
+- [GitHub Releases](https://github.com/YARAHQ/yara-forge/releases) — Weekly rule packages
+
+> **Note:** The repositories used for YARA Forge have been carefully selected. Adding unvetted sources is not supported.
