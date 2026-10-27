@@ -204,7 +204,7 @@ Generates:
 | GitPython | Repository cloning and history |
 | PyYAML | Configuration loading |
 | dateparser | Flexible date parsing |
-| pyre2 (fb-re2) | Regex performance analysis |
+| google-re2 | RE2 bindings used by the QA submodule |
 
 ### External Services
 
