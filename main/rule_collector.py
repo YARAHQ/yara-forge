@@ -83,9 +83,16 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
             clone_env.setdefault("GIT_LFS_SKIP_SMUDGE", "1")
             # Partial clone keeps the checkout lean
             clone_options = ["--filter=blob:none"]
-            # Sparse checkout will narrow paths further only if a given repository has a path configured (e.g., Malpedia)
-            if 'path' in repo:
-              clone_options.append("--sparse")
+            # A single checkout can serve several configured sources. Include all
+            # their paths, or use a full checkout if any source needs the root.
+            shared_sources = [source for source in yara_repos
+                              if source['url'].rstrip('/') == repo['url'].rstrip('/')
+                              and source['branch'] == repo['branch']]
+            sparse_paths = sorted({unquote(source['path']) for source in shared_sources
+                                   if 'path' in source})
+            use_sparse = all('path' in source for source in shared_sources)
+            if use_sparse:
+                clone_options.append("--sparse")
             repo_obj = Repo.clone_from(
                 repo['url'],
                 repo_folder,
@@ -94,21 +101,14 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
                 multi_options=clone_options
             )
             # If a sub-path is configured, restrict checkout to that path to skip large folders
-            if 'path' in repo:
+            if use_sparse:
                 repo_obj.git.sparse_checkout('init', '--cone')
-                # URL-decode the path before using it with git sparse-checkout
-                decoded_path = unquote(repo['path'])
-                repo_obj.git.sparse_checkout('set', decoded_path)
+                repo_obj.git.sparse_checkout('set', '--', *sparse_paths)
             repo['commit_hash'] = repo_obj.head.commit.hexsha
         else:
             # Repository already cloned - reuse it
             repo_obj = Repo(repo_folder)
             repo['commit_hash'] = repo_obj.head.commit.hexsha
-            # If this repo config has a path, add it to sparse checkout
-            # (needed when multiple configs share the same git URL)
-            if 'path' in repo:
-                decoded_path = unquote(repo['path'])
-                repo_obj.git.sparse_checkout('add', decoded_path)
 
         # Walk through the extracted folders and find a LICENSE file
         # and save it into the repository object

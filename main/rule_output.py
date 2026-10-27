@@ -8,6 +8,7 @@ import re
 from pprint import pprint
 import dateparser
 from plyara.utils import rebuild_yara_rule
+from main.rule_dependencies import get_rule_dependencies
 
 
 def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YARA_FORGE_CONFIG):
@@ -72,7 +73,7 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
 
             # Repo rule set string
             repo_rules_strings = []
-            already_added_priv_rules = []
+            already_added_rules = set()
 
             # Statistics for the rule package
             rule_repo_statistics = {
@@ -87,8 +88,6 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
             for rule_sets in repo['rules_sets']:
                 # Debug output
                 logging.debug("Writing YARA rules from rule set: %s", rule_sets['file_path'])
-                # List of required private rules
-                required_private_rules = []
                 # Loop over the rules in the rule set
                 for rule in rule_sets['rules']:
 
@@ -168,29 +167,14 @@ def write_yara_packages(processed_yara_repos, program_version, yaraqa_commit, YA
                         elif skip_rule_reason == "score":
                             rule_repo_statistics['total_rules_skipped_score'] += 1
                         continue
-                    else:
-                        # Collect all private rules used in the accepted rules
-                        if 'private_rules_used' in rule:
-                            for priv_rule in rule['private_rules_used']:
-                                if priv_rule not in required_private_rules:
-                                    required_private_rules.append(priv_rule)
 
-                    # Write the rule into the output file
-                    repo_rules_strings.append(rebuild_yara_rule(rule))
-                    rule_repo_statistics['total_rules'] += 1
-                
-                # Now we prepare the private rules
-                # Loop over the required private rules
-                for priv_rule in required_private_rules:
-                    # Get the rule from the plyara object
-                    priv_rule_string = rebuild_yara_rule(priv_rule["rule"])
-                    # Append rule if it hasn't been added yet
-                    if priv_rule["rule"]["rule_name"] not in already_added_priv_rules:
-                        # Prepend the rule to the output string
-                        repo_rules_strings.insert(0, priv_rule_string)
-                        # Add the rule to the list of already added rules
-                        already_added_priv_rules.append(priv_rule["rule"]["rule_name"])
-                        rule_repo_statistics['total_rules'] += 1
+                    # Dependencies may be private or public and may themselves
+                    # require other rules. Emit them once, in compiler order.
+                    for required_rule in get_rule_dependencies(rule) + [rule]:
+                        if required_rule['rule_name'] not in already_added_rules:
+                            repo_rules_strings.append(rebuild_yara_rule(required_rule))
+                            already_added_rules.add(required_rule['rule_name'])
+                            rule_repo_statistics['total_rules'] += 1
 
             # Only write the rule set if there's at least one rule in the set
             if len(repo_rules_strings) > 0:
