@@ -10,6 +10,7 @@ import yaml
 import dateparser
 from plyara.utils import generate_hash
 from git import Repo
+from main.global_rules import isolate_global_rules
 
 # Date Lookup Cache
 date_lookup_cache = {}
@@ -78,6 +79,9 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
 
     # Logic hash list to avoid duplicates
     logic_hash_list = {}
+    for repo in yara_rule_repo_sets:
+        for rule_set in repo['rules_sets']:
+            isolate_global_rules(rule_set)
     rule_mappings, referenced_rules = prepare_rule_names(yara_rule_repo_sets)
 
     # Loop over the repositories
