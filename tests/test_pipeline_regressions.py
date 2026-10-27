@@ -171,7 +171,7 @@ class TestPipelineRegressions(unittest.TestCase):
 
 
 class TestSharedRepositoryCollection(unittest.TestCase):
-    def collect(self, root_source=False):
+    def collect(self, root_source=False, encoded_path=False):
         with tempfile.TemporaryDirectory() as tmp:
             remote = Path(tmp) / 'source'
             remote.mkdir()
@@ -189,6 +189,8 @@ class TestSharedRepositoryCollection(unittest.TestCase):
                         'path': directory} for directory in ('Source One', 'SourceTwo')]
             if root_source:
                 sources[1].pop('path')
+            if encoded_path:
+                sources[0]['path'] = 'Source%20One'
             clone = Repo.clone_from
             with patch('main.rule_collector.Repo.clone_from',
                        side_effect=lambda url, destination, **kw: clone(str(remote), destination, **kw)) as mock:
@@ -204,3 +206,6 @@ class TestSharedRepositoryCollection(unittest.TestCase):
 
     def test_root_source_disables_sparse_checkout(self):
         self.collect(root_source=True)
+
+    def test_url_encoded_shared_path_is_decoded(self):
+        self.collect(encoded_path=True)

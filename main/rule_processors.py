@@ -414,7 +414,7 @@ def align_yara_rule_description(rule_meta_data, repo_description):
     for meta_data in meta_data_copy:
         for key, value in meta_data.items():
             # If the key is in the list of possible description names, then we found the description
-            if key in description_names:
+            if key.lower() in description_names:
                 description_found = True
                 description_value = value
                 # Remove the description from the original meta data
@@ -452,7 +452,18 @@ def align_yara_rule_hashes(rule_meta_data):
     hash_names = ['hash', 'hashes', 'md5', 'sha1', 'sha256', 'sha512', 'sha-1',
                   'sha-256', 'sha-512', 'sha_256', 'sha_1', 'sha_512', 'md5sum',
                   'sha1sum', 'sha256sum', 'sha512sum', 'md5sums', 'sha1sums', 'sha256sums',
-                  'sha512sums', 'reference_sample', 'sample', 'original_sample_sha1']
+                  'sha512sums', 'reference_sample', 'sample', 'original_sample_sha1',
+                  'sample_md5', 'sample_sha1', 'sample_sha256', 'parent_hash']
+    # Regex for indexed/patterned hash names that show up across rule sets, e.g.
+    # hash1, hash_1, md5_1, sha256_1, hash1_sha256, hash_exe1, thumbprint1, hasha
+    hash_name_pattern = re.compile(
+        r'^(hash|md5|sha1|sha256|sha512)(es)?[-_]?[a-z0-9_]*$|'
+        r'^thumbprint\d*$'
+    )
+    # Keys that would otherwise match the pattern/list above but are not a raw sample
+    # hash value (a pipeline-internal identifier or a third-party provenance reference)
+    hash_name_exclusions = {'logic_hash', 'malpedia_hash', 'yarahub_reference_md5',
+                            'exemplar_hashes'}
     # Look for the hashes in the rule meta data
     hashes_found = False
     hashes_values = []
@@ -461,8 +472,16 @@ def align_yara_rule_hashes(rule_meta_data):
     # Now we loop over the copy
     for mdata in meta_data_copy:
         for key, value in mdata.items():
-            # If the key is in the list of possible hash names, then we found the hashes
-            if key.lower() in hash_names:
+            # Only align values that actually look like a hash string - guards against
+            # unrelated fields (e.g. free-form comments) accidentally matching the pattern
+            if not isinstance(value, str):
+                continue
+            key_lower = key.lower()
+            if key_lower in hash_name_exclusions:
+                continue
+            # If the key is in the list of possible hash names, or matches the indexed/
+            # patterned hash key shape, then we found a hash
+            if key_lower in hash_names or hash_name_pattern.match(key_lower):
                 hashes_found = True
                 hashes_values.append(value.lower())
                 # Remove the hashes from the original meta data
@@ -609,7 +628,7 @@ def align_yara_rule_author(rule_meta_data, repo_author):
     for meta_data in meta_data_copy:
         for key, value in meta_data.items():
             # If the key is in the list of possible author names, then we found the author
-            if key in author_names:
+            if key.lower() in author_names:
                 author_found = True
                 author_value = value
                 # Remove the author from the original meta data
@@ -638,7 +657,7 @@ def align_yara_rule_uuid(rule_meta_data, uuid):
     for meta_data in meta_data_copy:
         for key, value in meta_data.items():
             # If the key is in the list of possible author names, then we found the author
-            if key in uuid_names:
+            if key.lower() in uuid_names:
                 # If the values is not a string but a integer value, convert it to string
                 if isinstance(value, int):
                     value = str(value)
@@ -713,7 +732,7 @@ def align_yara_rule_reference(rule_meta_data, rule_set_url):
     for meta_data in meta_data_copy:
         for key, value in meta_data.items():
             # If the key is in the list of possible reference names, then we found the reference
-            if key in other_ref_names:
+            if key.lower() in other_ref_names:
                 reference_found = True
                 reference_value = value
                 # Remove the reference from the original meta data
@@ -771,7 +790,7 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
     for meta_data in meta_data_copy:
         for key, value in meta_data.items():
             # If the key is in the list of possible date names, then we found the date
-            if key in date_names:                
+            if key.lower() in date_names:
                 date_created = dateparser.parse(value)
                 if date_created:
                     date_found = True
@@ -810,7 +829,7 @@ def align_yara_rule_date(rule_meta_data, repo_path, file_path):
     for meta_data in meta_data_copy:
         for key, value in meta_data.items():
             # If the key is in the list of possible date names, then we found the date
-            if key in modified_names:
+            if key.lower() in modified_names:
                 modified_value = dateparser.parse(value)
                 if modified_value:
                     modified_found = True

@@ -5,6 +5,7 @@ import os
 import shutil
 import datetime
 import logging
+from urllib.parse import unquote
 #from pprint import pprint
 import plyara
 from git import Repo
@@ -81,7 +82,7 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
             shared_sources = [source for source in yara_repos
                               if source['url'].rstrip('/') == repo['url'].rstrip('/')
                               and source['branch'] == repo['branch']]
-            sparse_paths = sorted({source['path'] for source in shared_sources
+            sparse_paths = sorted({unquote(source['path']) for source in shared_sources
                                    if 'path' in source})
             use_sparse = all('path' in source for source in shared_sources)
             if use_sparse:
@@ -99,9 +100,10 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
                 repo_obj.git.sparse_checkout('set', '--', *sparse_paths)
             repo['commit_hash'] = repo_obj.head.commit.hexsha
         else:
-            # Get the latest commit hash
+            # Repository already cloned - reuse it
             repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'])
-            repo['commit_hash'] = Repo(repo_folder).head.commit.hexsha
+            repo_obj = Repo(repo_folder)
+            repo['commit_hash'] = repo_obj.head.commit.hexsha
 
         # Walk through the extracted folders and find a LICENSE file
         # and save it into the repository object
@@ -128,7 +130,9 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
         # Walk a sub folder if one is set in the config
         walk_folder = repo_folder
         if 'path' in repo:
-            walk_folder = os.path.join(repo_folder, repo['path'])
+            # URL-decode the path before using it
+            decoded_path = unquote(repo['path'])
+            walk_folder = os.path.join(repo_folder, decoded_path)
             # Print the processed folder
             logging.debug("Processing folder: %s", walk_folder)
 
