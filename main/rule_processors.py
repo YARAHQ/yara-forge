@@ -169,6 +169,22 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
                 # Add license URL
                 modify_meta_data_value(rule['metadata'], 'license_url', repo['license_url'])
 
+                # Normalize source control metadata before package comparisons.
+                # Negative importance is meaningful: it explicitly excludes a
+                # rule even from packages whose exclusion threshold is zero.
+                for meta_data in rule['metadata']:
+                    for key, value in meta_data.items():
+                        if key in ['score', 'quality', 'importance']:
+                            # If the value is not an integer, we set it to 0
+                            if not isinstance(value, int) or isinstance(value, bool):
+                                value = 0
+                            # Source scores/quality are nonnegative; importance
+                            # and later QA penalties retain their signed meaning.
+                            if key != 'importance' and value < 0:
+                                value = 0
+                            # Set the value back to the meta data
+                            meta_data[key] = value
+
                 # Sort the meta data values
                 rule['metadata'] = sort_meta_data_values(rule['metadata'], YARA_FORGE_CONFIG)
 
