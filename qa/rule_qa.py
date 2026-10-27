@@ -100,6 +100,12 @@ def evaluate_rules_quality(processed_yara_repos, config):
                 # Calculate the total score
                 total_quality_score = sum(issue['score'] for issue in issues)
 
+                # Reduce score to 40 if it uses the yara elf module, because that slows down the whole scanning
+                # (will probably change with yara-x)
+                # This way, rules which use the "elf" module only appear in the full package
+                if 'imports' in rule and 'elf' in rule['imports']:
+                    modify_meta_data_value(rule['metadata'], 'score', 40)
+
                 # Apply a custom quality reduction if the rule has shown to be
                 # prone to false positives
                 custom_quality_reduction = retrieve_custom_quality_reduction(rule)
@@ -227,11 +233,17 @@ def check_syntax_issues(rule):
     # Check if the rule requires some private rules
     prepended_private_rules_string = ""
     if 'private_rules_used' in rule:
-        for priv_rule in rule['private_rules_used']:
-            # Get the rule from the plyara object
-            priv_rule_string = rebuild_yara_rule(priv_rule["rule"])
-            # Add the rule to the string
-            prepended_private_rules_string += priv_rule_string + "\n"
+        with open('yara-forge-custom-scoring.yml', 'r', encoding='utf-8') as f:
+            custom_scoring = yaml.safe_load(f)
+            for priv_rule in rule['private_rules_used']:
+                # Check if the name of this private rule appears in noisy-rules and don't include the rule then.
+                # This means, that the 3 ESET rules, which use a private rule with elf module won't even make it in the full package
+                # but I don't see an easy fix and the effort isn't worth it for 3 rules I suppose.
+                if not any(d['name'] == priv_rule['new_name'] for d in custom_scoring['noisy-rules']):
+                    # Get the rule from the plyara object
+                    priv_rule_string = rebuild_yara_rule(priv_rule["rule"])
+                    # Add the rule to the string
+                    prepended_private_rules_string += priv_rule_string + "\n"
 
     # Get the serialized rule from the plyara object
     yara_rule_string = prepended_private_rules_string + rebuild_yara_rule(rule)

@@ -5,7 +5,7 @@
 # YARA Forge
 # A YARA Rule Concentrator
 # Florian Roth
-# June 2025
+# July 2025
 
 __version__ = '0.9.1'
 
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     print(r'  Bringing Order to Chaos                                 ')
     print(r'                                                          ')
     print(r'  Version %s                                              ' % __version__)
-    print(r'  Florian Roth, June 2025                                 ')
+    print(r'  Florian Roth, July 2025                                 ')
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", help="enable debug output", action="store_true")

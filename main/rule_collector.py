@@ -5,6 +5,7 @@ import os
 import shutil
 import datetime
 import logging
+from urllib.parse import unquote
 #from pprint import pprint
 import plyara
 from git import Repo
@@ -53,6 +54,8 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
     if os.path.exists(repo_staging_dir):
         # Remove the existing repo directory and all its contents
         shutil.rmtree(os.path.join(repo_staging_dir), ignore_errors=False)
+    # Ensure the staging directory exists before cloning repositories
+    os.makedirs(repo_staging_dir, exist_ok=True)
 
     # Loop over the repositories
     for repo in yara_repos:
@@ -69,11 +72,38 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
         if not os.path.exists(os.path.join(repo_staging_dir, repo['owner'], repo['repo'])):
             # Clone the repository
             repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'])
-            repo['commit_hash'] = Repo.clone_from(repo['url'], repo_folder, branch=repo['branch']).head.commit.hexsha
+            clone_env = os.environ.copy()
+            # Skip LFS smudge to avoid downloading large binaries we do not need
+            clone_env.setdefault("GIT_LFS_SKIP_SMUDGE", "1")
+            # Partial clone keeps the checkout lean
+            clone_options = ["--filter=blob:none"]
+            # Sparse checkout will narrow paths further only if a given repository has a path configured (e.g., Malpedia)
+            if 'path' in repo:
+              clone_options.append("--sparse")
+            repo_obj = Repo.clone_from(
+                repo['url'],
+                repo_folder,
+                branch=repo['branch'],
+                env=clone_env,
+                multi_options=clone_options
+            )
+            # If a sub-path is configured, restrict checkout to that path to skip large folders
+            if 'path' in repo:
+                repo_obj.git.sparse_checkout('init', '--cone')
+                # URL-decode the path before using it with git sparse-checkout
+                decoded_path = unquote(repo['path'])
+                repo_obj.git.sparse_checkout('set', decoded_path)
+            repo['commit_hash'] = repo_obj.head.commit.hexsha
         else:
-            # Get the latest commit hash
+            # Repository already cloned - reuse it
             repo_folder = os.path.join(repo_staging_dir, repo['owner'], repo['repo'])
-            repo['commit_hash'] = Repo(repo_folder).head.commit.hexsha
+            repo_obj = Repo(repo_folder)
+            repo['commit_hash'] = repo_obj.head.commit.hexsha
+            # If this repo config has a path, add it to sparse checkout
+            # (needed when multiple configs share the same git URL)
+            if 'path' in repo:
+                decoded_path = unquote(repo['path'])
+                repo_obj.git.sparse_checkout('add', decoded_path)
 
         # Walk through the extracted folders and find a LICENSE file
         # and save it into the repository object
@@ -100,7 +130,9 @@ def retrieve_yara_rule_sets(repo_staging_dir, yara_repos):
         # Walk a sub folder if one is set in the config
         walk_folder = repo_folder
         if 'path' in repo:
-            walk_folder = os.path.join(repo_folder, repo['path'])
+            # URL-decode the path before using it
+            decoded_path = unquote(repo['path'])
+            walk_folder = os.path.join(repo_folder, decoded_path)
             # Print the processed folder
             logging.debug("Processing folder: %s", walk_folder)
 

@@ -1,8 +1,10 @@
 
 packages/*
 *.pyc
+*.swp
 yara-forge.log
 repos/*
 yara-forge-rule-issues.yml
 build_stats.md
 yara-forge-config-testing.yml
+.claude/settings.local.json
