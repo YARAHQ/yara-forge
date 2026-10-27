@@ -7,8 +7,10 @@ and for reducing the quality score of a rule based on the issues found.
 
 import logging
 import datetime
+from pathlib import Path
 import yaml
 import yara
+from git import Repo
 from plyara.utils import rebuild_yara_rule
 from qa.yaraQA.main.core import YaraQA
 from pprint import pprint
@@ -114,7 +116,7 @@ def evaluate_rules_quality(processed_yara_repos, config):
                 # Apply a custom score if the rule has shown to be
                 # prone to false positives
                 custom_score = retrieve_custom_score(rule)
-                if custom_score:
+                if custom_score is not None:
                     modify_meta_data_value(rule['metadata'], 'score', custom_score)
 
                 # Debug output report the total score of a rule
@@ -322,6 +324,10 @@ def check_yara_packages(repo_files):
     """
     Checks the YARA packages for errors.
     """
+    if not repo_files:
+        logging.error("No YARA packages were generated")
+        return False
+
     # Loop over the list and print the file names
     for repo_file in repo_files:
         logging.info("Checking YARA package '%s' in file: %s", 
@@ -329,7 +335,10 @@ def check_yara_packages(repo_files):
         # Compile the rule set
         try:
             # Check for errors
-            yara.compile(filepath=repo_file['file_path'])
+            compiled_rules = yara.compile(filepath=repo_file['file_path'])
+            if next(iter(compiled_rules), None) is None:
+                logging.error("The YARA package contains no rules: %s", repo_file['file_path'])
+                return False
         except Exception as e:
             logging.error("The rule set didn't compile without errors: %s", e)
             return False
@@ -342,8 +351,8 @@ def get_yara_qa_commit_hash():
     """
     # Get the current commit hash of the YARA QA sub repository
     try:
-        with open(".git/modules/qa/yaraQA/refs/heads/main", "r", encoding="utf-8") as f:
-            return f.read().strip()
+        submodule_path = Path(__file__).resolve().parent / 'yaraQA'
+        return Repo(submodule_path).head.commit.hexsha
     except Exception as e:
         logging.warning("Couldn't get the commit hash of the YARA QA repository: %s", e)
         return "unknown"

@@ -118,7 +118,7 @@ def process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG):
 
                 # Get a custom importance score if available
                 custom_importance_score = retrieve_custom_importance_score(repo['name'], rules['file_path'], rule['rule_name'])
-                if custom_importance_score:
+                if custom_importance_score is not None:
                     modify_meta_data_value(rule['metadata'], 'importance', custom_importance_score)
                     logging.debug("Custom importance score for rule %s is %d", rule['rule_name'], custom_importance_score)
 
