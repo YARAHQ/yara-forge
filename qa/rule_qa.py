@@ -11,7 +11,17 @@ import yaml
 import yara
 from plyara.utils import rebuild_yara_rule
 from qa.yaraQA.main.core import YaraQA
+from main.other_evals import PerformanceTimer
+from main.rule_dependencies import get_rule_dependencies
 from pprint import pprint
+
+
+class ForgeYaraQA(YaraQA):
+    """Use Forge's full-sample regex timer with the submodule's rule checks."""
+
+    def __init__(self):
+        self.initialize_regular_expressions()
+        self.performance_timer = PerformanceTimer()
 
 
 def evaluate_rules_quality(processed_yara_repos, config):
@@ -20,7 +30,7 @@ def evaluate_rules_quality(processed_yara_repos, config):
     """
 
     # Create a yaraQA object
-    yara_qa = YaraQA()
+    yara_qa = ForgeYaraQA()
 
     # Rule issues list
     repo_issues = {}
@@ -76,7 +86,9 @@ def evaluate_rules_quality(processed_yara_repos, config):
                 # - Performance impact issues (based on experience)
                 # - Resource usage issues (based on experience)
                 # - Logic flaws (based on experience)
-                issues_efficiency = yara_qa.analyze_rule(rule)
+                analyzed_issues = yara_qa.analyze_rule(rule)
+                issues_efficiency = [issue for issue in analyzed_issues
+                                     if issue['type'] != 'performance']
                 # Print the issues if debug is enabled
                 logging.debug("Evaluated rule %s efficiency issues: %s",
                               rule['rule_name'], issues_efficiency)
@@ -84,7 +96,9 @@ def evaluate_rules_quality(processed_yara_repos, config):
                 # Analyze the rule performance
                 # Checks for 
                 # - Performance issues with live tests
-                issues_performance = yara_qa.analyze_live_rule_performance(rule)
+                # analyze_rule already includes the live performance checks.
+                issues_performance = [issue for issue in analyzed_issues
+                                      if issue['type'] == 'performance']
                 # Add the values to the statistics
                 issue_statistics['issues_performance'] += len(issues_performance)
 
@@ -230,26 +244,16 @@ def check_syntax_issues(rule):
     # Syntax issues list
     issues = []
 
-    # Check if the rule requires some private rules
-    prepended_private_rules_string = ""
-    if 'private_rules_used' in rule:
-        with open('yara-forge-custom-scoring.yml', 'r', encoding='utf-8') as f:
-            custom_scoring = yaml.safe_load(f)
-            for priv_rule in rule['private_rules_used']:
-                # Check if the name of this private rule appears in noisy-rules and don't include the rule then.
-                # This means, that the 3 ESET rules, which use a private rule with elf module won't even make it in the full package
-                # but I don't see an easy fix and the effort isn't worth it for 3 rules I suppose.
-                if not any(d['name'] == priv_rule['new_name'] for d in custom_scoring['noisy-rules']):
-                    # Get the rule from the plyara object
-                    priv_rule_string = rebuild_yara_rule(priv_rule["rule"])
-                    # Add the rule to the string
-                    prepended_private_rules_string += priv_rule_string + "\n"
-
-    # Get the serialized rule from the plyara object
-    yara_rule_string = prepended_private_rules_string + rebuild_yara_rule(rule)
-
     # Compile the rule
     try:
+        dependencies = get_rule_dependencies(rule)
+        with open('yara-forge-custom-scoring.yml', 'r', encoding='utf-8') as f:
+            noisy_names = {entry['name'] for entry in yaml.safe_load(f)['noisy-rules']}
+        dependencies = [dependency for dependency in dependencies
+                        if 'private' not in dependency.get('scopes', [])
+                        or dependency['rule_name'] not in noisy_names]
+        yara_rule_string = '\n'.join(rebuild_yara_rule(dependency)
+                                     for dependency in dependencies + [rule])
         # Check for warnings
         yara.compile(source=yara_rule_string, error_on_warning=True)
     except Exception as e:
@@ -272,20 +276,12 @@ def check_issues_critical(rule):
     # Syntax issues list
     issues = []
 
-    # Check if the rule requires some private rules
-    prepended_private_rules_string = ""
-    if 'private_rules_used' in rule:
-        for priv_rule in rule['private_rules_used']:
-            # Get the rule from the plyara object
-            priv_rule_string = rebuild_yara_rule(priv_rule["rule"])
-            # Add the rule to the string
-            prepended_private_rules_string += priv_rule_string + "\n"
-
-    # Get the serialized rule from the plyara object
-    yara_rule_string = prepended_private_rules_string + rebuild_yara_rule(rule)
-
     # Compile the rule
+    yara_rule_string = ''
     try:
+        dependencies = get_rule_dependencies(rule)
+        yara_rule_string = '\n'.join(rebuild_yara_rule(dependency)
+                                     for dependency in dependencies + [rule])
         # Check for errors
         yara.compile(source=yara_rule_string)
     except Exception as e:
@@ -365,4 +361,3 @@ def modify_meta_data_value(rule_meta_data, key, value):
     # If the key is not in the meta data, then we add it
     rule_meta_data.append({key: value})
     return rule_meta_data
-

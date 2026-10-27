@@ -9,6 +9,7 @@ yara-forge/
 │   ├── __init__.py
 │   ├── other_evals.py         # Performance testing
 │   ├── rule_collector.py      # Repo fetching/extraction
+│   ├── rule_dependencies.py   # Transitive dependency ordering
 │   ├── rule_output.py         # Package generation
 │   └── rule_processors.py     # Rule standardization/evaluation
 ├── qa/
@@ -45,6 +46,7 @@ yara-forge/
 ### rule_processors.py
 Core standardization:
 - `process_yara_rules(yara_rule_repo_sets, YARA_FORGE_CONFIG)`: Main processor.
+- `prepare_rule_names(yara_rule_repo_sets)`: Allocates unique names before resolving public and private references, preferring definitions in the same source file. Referenced definitions survive logic deduplication.
 - `add_tags_to_rule(rule)`: Adds tags.
 - `retrieve_custom_importance_score(repo_name, file_path, rule_name)`: Custom scores.
 - `sort_meta_data_values(rule_meta_data, YARA_FORGE_CONFIG)`: Sorts meta.
@@ -63,8 +65,11 @@ Core standardization:
 
 ## qa/
 
+`main.rule_dependencies.get_rule_dependencies(rule)` supplies transitive dependencies once in compiler order for both individual QA compilation and package generation. Packaging includes required definitions even when they would not be selected independently.
+
 ### rule_qa.py
 - `evaluate_rules_quality(processed_yara_repos, config)`: Quality eval.
+- `ForgeYaraQA`: Uses the submodule's rule checks with Forge's `main.other_evals.PerformanceTimer`. The timer searches the full bundled sample and uses a monotonic clock. Performance checks run once per rule.
 - `write_issues_to_file(rule_issues)`: Logs issues.
 - `retrieve_custom_quality_reduction/score(rule)`: Custom QA.
 - `check_syntax_issues/rule)` / `check_issues_critical(rule)`: Syntax/critical checks.
