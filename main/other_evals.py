@@ -1,7 +1,8 @@
 """
 This file contains the code for the performance tests.
 """
-import re
+# Source rules are untrusted; use RE2's non-backtracking engine for benchmarks.
+import re2 as re
 import logging
 import time
 import zipfile

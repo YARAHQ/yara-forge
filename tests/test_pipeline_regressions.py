@@ -3,6 +3,8 @@ import datetime
 import os
 from pathlib import Path
 import re
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
@@ -168,6 +170,22 @@ class TestPipelineRegressions(unittest.TestCase):
         self.assertEqual(spy.findall.call_count, 2)
         spy.findall.assert_called_with(timer.test_string)
         self.assertEqual(pattern.findall(timer.test_string), ['needle', 'needle'])
+
+    def test_regex_benchmark_avoids_catastrophic_backtracking(self):
+        # This valid YARA regex makes a backtracking engine hang on a nonmatch.
+        # Isolate it so a regression fails the test instead of hanging CI.
+        code = (
+            "from main.other_evals import PerformanceTimer\n"
+            "timer = PerformanceTimer.__new__(PerformanceTimer)\n"
+            "timer.test_string = 'a' * 100_000 + '!'\n"
+            "timer.test_regex_performance('/(a+)+$/', iterations=1)\n"
+        )
+        subprocess.run(
+            [sys.executable, '-c', code],
+            cwd=Path(__file__).resolve().parents[1],
+            check=True,
+            timeout=10,
+        )
 
 
 class TestSharedRepositoryCollection(unittest.TestCase):
