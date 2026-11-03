@@ -318,6 +318,9 @@ noisy-rules:
     - name: "MALPEDIA_Win_Brute_Ratel_C4_Auto"  # FPs with Microsoft OneDrive
       quality: -90
       score: 45
+    - name: "MALPEDIA_Win_Triback_Loader_Auto"  # Reported FPs with Steam's libpng16-16.dll, libavif-16.dll, and SDL3_image.dll
+      quality: -60
+      score: 50
 
     # Signature Base
     - name: "SIGNATURE_BASE_Cobaltstrike_C2_Host_Indicator"
